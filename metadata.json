@@ -1,0 +1,6 @@
+{
+  "name": "Biblioteca Virtual",
+  "description": "Una aplicación web estilo biblioteca con arquitectura escalable usando Supabase. Soporta roles (Visualizador, Publicador, Administrador) para el catálogo y la gestión de contenido.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
