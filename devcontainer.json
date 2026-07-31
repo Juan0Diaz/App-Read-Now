@@ -1,0 +1,41 @@
+{
+  "name": "App-Read-Now (React + ASP.NET Core + Supabase)",
+  "image": "mcr.microsoft.com/devcontainers/base:bookworm",
+
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "20"
+    },
+    "ghcr.io/devcontainers/features/dotnet:2": {
+      "version": "8.0"
+    }
+  },
+
+  "forwardPorts": [3000, 5080],
+  "portsAttributes": {
+    "3000": {
+      "label": "Frontend (Vite)",
+      "onAutoForward": "openPreview"
+    },
+    "5080": {
+      "label": "Backend API (ASP.NET Core)",
+      "onAutoForward": "notify"
+    }
+  },
+
+  "postCreateCommand": "npm install && dotnet restore backend/Backend.Api.csproj",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-dotnettools.csharp",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode"
+      ]
+    }
+  },
+
+  "remoteEnv": {
+    "ASPNETCORE_ENVIRONMENT": "Development"
+  }
+}
