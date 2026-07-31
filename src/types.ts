@@ -18,13 +18,13 @@ export interface Rol {
 }
 
 export interface Genero {
-  id_genero: number;
+  id_genero: string;
   nombre_genero: string;
   descripcion: string;
 }
 
 export interface Libro {
-  id_libro: number;
+  id_libro: string;
   titulo: string;
   autor: string;
   disponible: boolean;
