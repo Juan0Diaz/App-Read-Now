@@ -19,7 +19,8 @@
     },
     "5080": {
       "label": "Backend API (ASP.NET Core)",
-      "onAutoForward": "notify"
+      "onAutoForward": "notify",
+      "visibility": "public"
     }
   },
 
