@@ -1,7 +1,7 @@
 export type Role = 'Visualizador' | 'Publicador' | 'Administrador';
 
 export interface User {
-  id_usuario: string; // matches Supabase UUID
+  id_usuario: string; 
   correo: string;
   fecha_date?: string;
   nombre?: string;
@@ -29,18 +29,18 @@ export interface Libro {
   autor: string;
   disponible: boolean;
   editorial: string;
-  estado: string; // e.g. 'Nuevo', 'Usado', 'Digital'
+  estado: string; 
   fecha_publicacion: string;
-  id_genero: number;
-  id_genero_1?: number;
-  id_genero_2?: number;
+  id_genero: string;
+  id_genero_1?: string;
+  id_genero_2?: string;
   portada_url?: string;
 }
 
 export interface Publicacion {
-  id_publicacion: number;
+  id_publicacion: string;
   id_usuario: string;
-  id_libro: number;
+  id_libro: string;
   precio: number;
   descripcion: string;
   fecha_publicacion: string;
@@ -48,17 +48,17 @@ export interface Publicacion {
 }
 
 export interface Favorito {
-  id_favoritos: number;
-  id_libro: number;
+  id_favoritos: string;
+  id_libro: string;
   nombre_libro: string;
 }
 
 export interface UsuarioFavorito {
   id_usuario: string;
-  id_favoritos: number;
+  id_favoritos: string;
 }
 
-// Extended types for UI convenience
+
 export interface LibroWithDetails extends Libro {
   genero?: Genero;
   publicacion?: Publicacion;

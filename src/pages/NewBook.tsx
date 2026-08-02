@@ -114,7 +114,7 @@ export const NewBook = () => {
         portada_url = publicUrlData.publicUrl;
       }
 
-      // 1. Insert book first
+      // Insertar un libro
       const primaryGenero = selectedGeneros[0] || null;
       const secondaryGenero = selectedGeneros[1] || null;
       const tertiaryGenero = selectedGeneros[2] || null;
@@ -136,7 +136,7 @@ export const NewBook = () => {
 
       if (libroError) throw libroError;
 
-      // 2. Insert publicacion
+      // Insertar publicación
       const { error: pubError } = await supabase.from('Publicacion').insert([{
         id_usuario: user.id_usuario,
         id_libro: libroData.id_libro,

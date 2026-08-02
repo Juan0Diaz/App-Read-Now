@@ -19,7 +19,7 @@ export const Favorites = () => {
     if (!user) return;
     try {
       setLoading(true);
-      // Asume that Supabase table "Favoritos" has an "id_usuario" column linked to "Usuario" and "id_libro" linked to "Libro".
+      
       const { data, error } = await supabase
         .from('Favoritos')
         .select(`

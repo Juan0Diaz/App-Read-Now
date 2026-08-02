@@ -15,7 +15,7 @@ export const Home = () => {
   const [loading, setLoading] = useState(true);
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const { user, role } = useAuth();
-  const [favorites, setFavorites] = useState<string[]>([]); // Array of id_libro that are favorited
+  const [favorites, setFavorites] = useState<string[]>([]); 
 
   useEffect(() => {
     const fetchData = async () => {

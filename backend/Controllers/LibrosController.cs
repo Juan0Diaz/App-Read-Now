@@ -14,7 +14,7 @@ public class LibrosController : ControllerBase
     private readonly AppDbContext _db;
     public LibrosController(AppDbContext db) => _db = db;
 
-    // Catálogo público: cualquiera puede ver los libros (visualizador incluido).
+    // Catálogo público: cualquiera puede ver los libros.
     [HttpGet]
     [AllowAnonymous]
     public async Task<ActionResult<IEnumerable<Libro>>> GetAll()
@@ -69,8 +69,6 @@ public class LibrosController : ControllerBase
     }
 
     // Editar libro: Publicador o Administrador.
-    // (Si más adelante quieres que un Publicador solo edite SUS libros, se restringe
-    // aquí comparando el id_usuario del token contra el dueño de la Publicacion asociada.)
     [HttpPut("{id:guid}")]
     [Authorize(Policy = "Publicador")]
     public async Task<IActionResult> Update(Guid id, LibroUpdateDto dto)
@@ -94,7 +92,7 @@ public class LibrosController : ControllerBase
         return NoContent();
     }
 
-    // Eliminar libro: solo Administrador.
+    // Eliminar libro
     [HttpDelete("{id:guid}")]
     [Authorize(Policy = "Administrador")]
     public async Task<IActionResult> Delete(Guid id)

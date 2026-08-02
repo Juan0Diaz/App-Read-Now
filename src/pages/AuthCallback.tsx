@@ -7,7 +7,7 @@ export const AuthCallback = () => {
 
   useEffect(() => {
     const handleAuth = async () => {
-      // Check for errors in URL
+      // Revisar errores en la URL
       const hashParams = new URLSearchParams(window.location.hash.substring(1));
       const queryParams = new URLSearchParams(window.location.search);
       const urlError = hashParams.get('error') || queryParams.get('error');
@@ -23,7 +23,7 @@ export const AuthCallback = () => {
          return;
       }
 
-      // Supabase parses URL hash automatically and updates local storage.
+      // Supabase analiza el hash de la URL y actualiza el almacenamiento local.
       const { data, error } = await supabase.auth.getSession();
       
       if (data.session) {

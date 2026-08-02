@@ -60,7 +60,7 @@ export const Profile = () => {
     if (!user) return;
     setLoading(true);
     try {
-      // Manual cascade delete
+      // Cascada para borrar cada cosa que hace el usuario
       await supabase.from('Favoritos').delete().eq('id_usuario', user.id_usuario);
       await supabase.from('Publicacion').delete().eq('id_usuario', user.id_usuario);
       await supabase.from('Usuario-Rol').delete().eq('id_usuario', user.id_usuario);
@@ -179,8 +179,8 @@ export const Profile = () => {
     if (!user) return;
     setLoading(true);
     try {
-      // Role table update logic
-      // First check if role exists for user
+      // Actualización de la tabla de roles
+      // Primero, verificar si el rol existe para el usuario
       const { data: existing } = await supabase.from('Usuario-Rol').select('*').eq('id_usuario', user.id_usuario).maybeSingle();
       
       if (existing) {

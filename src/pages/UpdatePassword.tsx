@@ -16,7 +16,7 @@ export const UpdatePassword = () => {
   const [recoverySent, setRecoverySent] = useState(false);
   
   const navigate = useNavigate();
-  const { user } = useAuth(); // AuthContext will automatically pick up the recovery session
+  const { user } = useAuth(); // Permite mantener la sesión del usuario que quiere cambiar la contraseña
 
   useEffect(() => {
     // Supabase passes error in hash fragment if token is invalid or expired
@@ -61,11 +61,11 @@ export const UpdatePassword = () => {
         return;
       }
 
-      // Update password in Supabase Auth
+      // Actualizar contraseña en Supabase Auth
       const { error: updateError } = await supabase.auth.updateUser({ password });
       if (updateError) throw updateError;
 
-      // Update password in custom Usuario table if user context is available
+      // Actualizar la contraseña en tabla de usuario si el contexto del usuario está disponible.
       if (user?.id_usuario) {
         const { error: dbError } = await supabase
           .from('Usuario')
@@ -74,7 +74,7 @@ export const UpdatePassword = () => {
         
         if (dbError) {
           console.error("No se pudo actualizar la contraseña en la tabla Usuario:", dbError);
-          // Optional: throw new Error("Error en la DB local");
+          
         }
       }
 

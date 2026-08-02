@@ -56,7 +56,7 @@ export const BookDetail = () => {
           
           setGenerosList(fetchedGens);
           
-          // Fetch publisher safely
+          // Obtener al publicador de forma segura
           const { data: pubDataList } = await supabase
             .from('Publicacion')
             .select('id_usuario')
@@ -131,18 +131,18 @@ export const BookDetail = () => {
 
     setRequestingLoan(true);
     try {
-      // 1. Insert into Usuario_Prestamo
+      // Insertar en Usuario_Prestamo
       const { error: loanError } = await supabase.from('Usuario_Prestamo').insert([
         {
           id_usuario: user.id_usuario,
           id_libro: id,
-          Disponible: true // Assuming true means requested/active
+          Disponible: true 
         }
       ]);
       
       if (loanError) throw loanError;
 
-      // 2. Update Libro to set disponible = false
+      
       const { error: bookError } = await supabase
         .from('Libro')
         .update({ disponible: false })

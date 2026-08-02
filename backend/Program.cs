@@ -50,8 +50,7 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("Visualizador", p => p.RequireAuthenticatedUser());
 });
 
-// CORS: en Codespaces, el frontend se sirve desde una URL dinámica tipo
-// https://<nombre>-3000.app.github.dev, así que además de localhost permitimos ese patrón.
+// https://<nombre>-3000.app.github.dev
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>

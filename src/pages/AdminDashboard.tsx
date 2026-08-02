@@ -36,7 +36,7 @@ export const AdminDashboard = () => {
     if (currentRole === 'Desactivado') {
       try {
         setActionLoading(true);
-        // Activate it by setting to Visualizador
+        
         const { data: visRole, error: roleErr } = await supabase.from('Rol').select('*').eq('nombre_Rol', 'Visualizador').single();
         if (roleErr) throw roleErr;
         if (visRole) {
@@ -51,7 +51,7 @@ export const AdminDashboard = () => {
         setActionLoading(false);
       }
     } else {
-      // Show confirmation modal
+      
       setDeactivateConfirm(userId);
     }
   };
@@ -61,16 +61,16 @@ export const AdminDashboard = () => {
     const userId = deactivateConfirm;
     try {
       setActionLoading(true);
-      // Remove their favorites
+      // Remover favoritos de otros usuarios
       const { error: favErr } = await supabase.from('Favoritos').delete().eq('id_usuario', userId);
       if (favErr) throw favErr;
       
-      // Update role to Desactivado
+      // Activar un usuario bloqueado
       const { data: desRole, error: desErr } = await supabase.from('Rol').select('*').eq('nombre_Rol', 'Desactivado').single();
       if (desErr) throw desErr;
       
       if (desRole) {
-        // If they didn't have a role before (unlikely), upsert, but we use match
+        
         const { data: exitingRole } = await supabase.from('Usuario-Rol').select('*').eq('id_usuario', userId).maybeSingle();
         if (exitingRole) {
           const { error } = await supabase.from('Usuario-Rol').update({ id_Rol: desRole.id_Rol }).eq('id_usuario', userId);

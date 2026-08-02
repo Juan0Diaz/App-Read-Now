@@ -200,17 +200,19 @@ export const Login = () => {
           return;
         }
         
-        // Listen for success message from popup
+        // Espera del mensaje de éxito de la ventana emergente.
         const handleMessage = (event: MessageEvent) => {
-          // Verify origin safely via startsWith or exactly equals
+          
           if (event.origin !== window.location.origin) return;
           
           if (event.data?.type === 'OAUTH_AUTH_SUCCESS') {
             window.removeEventListener('message', handleMessage);
             clearInterval(popupTimer);
-            // Wait for AuthContext to pick up the session changes, then redirect
-            // If the user navigates too soon it might not reflect, but auth context listens to storage
-            // Let's just navigate to home and page will pick it up
+            
+            // Esperar a que AuthContext detecte los cambios en la sesión y luego redirigir
+            // Si el usuario navega demasiado pronto, es posible que el cambio no se refleje, pero AuthContext escucha el almacenamiento
+            // Simplemente navegaremos a la página de inicio y la página detectará el cambio
+
             navigate('/');
           } else if (event.data?.type === 'OAUTH_AUTH_ERROR') {
             window.removeEventListener('message', handleMessage);

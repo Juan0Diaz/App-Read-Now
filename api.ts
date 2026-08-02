@@ -1,7 +1,5 @@
 import { supabase } from './supabase';
 
-// En Codespaces, define esta variable en tu .env como la URL forwarded del puerto 5080
-// (Codespaces te la genera automáticamente, algo como https://<nombre>-5080.app.github.dev)
 // En local (fuera de Codespaces) sería http://localhost:5080
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5080';
 

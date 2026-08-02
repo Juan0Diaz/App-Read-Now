@@ -55,7 +55,7 @@ export const PublisherDashboard = () => {
       // Borrar de Libro
       const { error: libroError } = await supabase.from('Libro').delete().eq('id_libro', id_libro);
       
-      // Si falla por llaves foráneas u otra restricción, lo marcamos como eliminado en su lugar
+      // Si falla por llaves foráneas u otra restricción, se marca como eliminado en su lugar
       if (libroError) {
         await supabase.from('Libro').update({ disponible: false, estado: 'Eliminado' }).eq('id_libro', id_libro);
       }

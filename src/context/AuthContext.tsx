@@ -29,16 +29,16 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
 
   useEffect(() => {
     if (isDemoMode) {
-      // In demo mode, simulate being logged out initially
+      
       setLoading(false);
       return;
     }
 
-    // Real Supabase Auth Flow
+    // Flujo de autenticación real de Supabase
     const getSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
-        // Fetch custom user data and role from the 'usuario' and 'usuario_rol' tables
+        // Obtener datos personalizados del usuario y su rol
         fetchUserData(session.user.id, session.user.email || '');
       } else {
         setLoading(false);
@@ -72,7 +72,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
     try {
       if (isDemoMode) return;
       
-      // Get user record
+      // Obtener el registro del usuario
       let { data: userData, error: userError } = await supabase
         .from('Usuario')
         .select('*')
@@ -118,11 +118,11 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
       if (userData) {
         setUser(userData);
       } else {
-        // Fallback if not found in custom table but in auth
+        
         setUser({ id_usuario: uid, correo: email });
       }
 
-      // Get user role
+      // Obtener el rol del usuario
       const { data: roleData } = await supabase
         .from('Usuario-Rol')
         .select('id_Rol, Rol(nombre_Rol)')
@@ -130,7 +130,7 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
         .maybeSingle();
       
       if (roleData && roleData.Rol) {
-        // @ts-ignore
+        
         setRole(roleData.Rol.nombre_Rol as Role);
       } else {
         setRole('Visualizador'); // Default
