@@ -5,13 +5,12 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 export const isDemoMode = !supabaseUrl || !supabaseAnonKey;
 
-// In a real app we'd just export the client, but here we provide a graceful fallback 
-// so the UI can still be previewed in AI Studio.
+
 export const supabase = isDemoMode 
   ? null as any
   : createClient(supabaseUrl, supabaseAnonKey);
 
-// --- Dummy Data Backup for Demo Mode ---
+
 export const MOCK_GENEROS = [
   { id_genero: 1, nombre_genero: 'Ficción', descripcion: 'Obras literarias basadas en la imaginación.' },
   { id_genero: 2, nombre_genero: 'Ciencia', descripcion: 'Textos académicos y divulgación científica.' },
