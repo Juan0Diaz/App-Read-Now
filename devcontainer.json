@@ -24,7 +24,8 @@
     }
   },
 
-  "postCreateCommand": "npm install && dotnet restore backend/Backend.Api.csproj",
+  "postCreateCommand": "chmod +x .devcontainer/scripts/generate-env.sh && npm install && dotnet restore backend/Backend.Api.csproj && bash .devcontainer/scripts/generate-env.sh",
+  "postStartCommand": "bash .devcontainer/scripts/generate-env.sh",
 
   "customizations": {
     "vscode": {
