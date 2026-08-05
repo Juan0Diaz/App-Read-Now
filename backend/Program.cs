@@ -32,7 +32,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
             ValidateIssuer = true,
-            ValidIssuer = builder.Configuration["SUPABASE_URL"] is { } url
+            ValidIssuer = (builder.Configuration["SUPABASE_URL"] ?? builder.Configuration["VITE_SUPABASE_URL"]) is { } url
                 ? $"{url.TrimEnd('/')}/auth/v1"
                 : null,
             ValidateAudience = true,
@@ -50,7 +50,8 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("Visualizador", p => p.RequireAuthenticatedUser());
 });
 
-// https://<nombre>-3000.app.github.dev
+// CORS: en Codespaces, el frontend se sirve desde una URL dinámica tipo
+// https://<nombre>-3000.app.github.dev, así que además de localhost permitimos ese patrón.
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>
