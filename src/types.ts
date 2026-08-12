@@ -1,4 +1,4 @@
-export type Role = 'Visualizador' | 'Publicador' | 'Administrador';
+export type Role = 'Visualizador' | 'Publicador' | 'Administrador' | 'Desactivado';
 
 export interface User {
   id_usuario: string; 

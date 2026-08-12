@@ -108,3 +108,8 @@ Los endpoints ya están listos y probados en su diseño (`/api/libros`, `/api/pu
 página (`Home.tsx`, `PublisherDashboard.tsx`, `AdminDashboard.tsx`, etc.), las llamadas
 directas a `supabase.from(...)` por las funciones de `src/lib/api.ts`. Si quieres, en el
 siguiente paso puedo ayudarte a migrar esas páginas una por una.
+
+Instalar los tipos de React (La causa más común)
+Abre tu terminal en la raíz del proyecto y ejecuta:
+
+npm install -D @types/react @types/react-dom
