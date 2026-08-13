@@ -20,23 +20,28 @@ export const BookDetail = () => {
 
   useEffect(() => {
     const fetchBook = async () => {
-      if (!id) return;
+      const bookId = id?.trim();
+      if (!bookId) {
+        setLibro(null);
+        setLoading(false);
+        return;
+      }
       setLoading(true);
 
       if (isDemoMode) {
-        const found = MOCK_LIBROS.find((l: any) => String(l.id_libro) === id);
+        const found = MOCK_LIBROS.find((l: any) => String(l.id_libro) === bookId);
         setLibro((found as unknown as Libro) ?? null);
         setLoading(false);
         return;
       }
 
       try {
-        const bookData = await getLibro(id);
+        const bookData = await getLibro(bookId);
         setLibro(bookData);
 
         // Buscar quién publicó este libro (el backend ya incluye el Usuario anidado).
         const publicaciones = await getPublicaciones();
-        const propia = publicaciones.find(p => p.id_libro === id);
+        const propia = publicaciones.find(p => p.id_libro === bookId);
         if (propia?.usuario) setPublisher(propia.usuario);
       } catch (err) {
         console.error('Error al cargar el detalle del libro', err);

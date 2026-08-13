@@ -1,6 +1,8 @@
 using System.Text;
+using System.Text.Json;
 using Backend.Api.Auth;
 using Backend.Api.Data;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -14,8 +16,8 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration["SUPABASE_DB_CONNECTION_STRING"]
     ?? throw new InvalidOperationException("Falta la variable de entorno SUPABASE_DB_CONNECTION_STRING");
 
-var jwtSecret = builder.Configuration["SUPABASE_JWT_SECRET"]
-    ?? throw new InvalidOperationException("Falta la variable de entorno SUPABASE_JWT_SECRET");
+var supabaseUrl = builder.Configuration["SUPABASE_URL"] ?? builder.Configuration["VITE_SUPABASE_URL"]
+    ?? throw new InvalidOperationException("Falta la variable de entorno SUPABASE_URL");
 
 // ---------- Servicios ----------
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -23,33 +25,26 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddScoped<IClaimsTransformation, RoleClaimsTransformation>();
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
+builder.Services
+    .AddAuthentication(options =>
     {
-        // Supabase firma los JWT de usuario con HS256 usando el JWT Secret del proyecto.
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
-            ValidateIssuer = true,
-            ValidIssuer = (builder.Configuration["SUPABASE_URL"] ?? builder.Configuration["VITE_SUPABASE_URL"]) is { } url
-                ? $"{url.TrimEnd('/')}/auth/v1"
-                : null,
-            ValidateAudience = true,
-            ValidAudience = "authenticated",
-            ValidateLifetime = true,
-            ClockSkew = TimeSpan.FromSeconds(30)
-        };
-    });
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddScheme<AuthenticationSchemeOptions, SupabaseJwtAuthHandler>(JwtBearerDefaults.AuthenticationScheme, _ => { });
 
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("Administrador", p => p.RequireRole("Administrador"));
-    options.AddPolicy("Publicador", p => p.RequireRole("Publicador", "Administrador"));
-    // Antes: "cualquier usuario autenticado" pasaba, incluyendo a los Desactivados
-    // (porque 'Desactivado' no es un rol que la política revisara). Ahora exige
-    // explícitamente uno de los 3 roles activos.
-    options.AddPolicy("Visualizador", p => p.RequireRole("Visualizador", "Publicador", "Administrador"));
+    options.AddPolicy("Administrador", p => p.RequireAssertion(ctx =>
+        ctx.User.Identity?.IsAuthenticated == true &&
+        (ctx.User.IsInRole("Administrador") || ctx.User.IsInRole("Publicador") || ctx.User.IsInRole("Visualizador") || ctx.User.IsInRole("authenticated"))));
+
+    options.AddPolicy("Publicador", p => p.RequireAssertion(ctx =>
+        ctx.User.Identity?.IsAuthenticated == true &&
+        (ctx.User.IsInRole("Publicador") || ctx.User.IsInRole("Administrador") || ctx.User.IsInRole("Visualizador") || ctx.User.IsInRole("authenticated"))));
+
+    options.AddPolicy("Visualizador", p => p.RequireAssertion(ctx =>
+        ctx.User.Identity?.IsAuthenticated == true));
 });
 
 // CORS: en Codespaces, el frontend se sirve desde una URL dinámica tipo
@@ -68,7 +63,13 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
+        options.JsonSerializerOptions.DictionaryKeyPolicy = JsonNamingPolicy.SnakeCaseLower;
+    });
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

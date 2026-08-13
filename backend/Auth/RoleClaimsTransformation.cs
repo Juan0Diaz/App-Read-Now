@@ -41,7 +41,9 @@ public class RoleClaimsTransformation : IClaimsTransformation
             .Select(ur => ur.Rol!.NombreRol)
             .FirstOrDefaultAsync();
 
-        // Si el usuario todavía no tiene fila en Usuario-Rol, se asume el rol más bajo.
+        // Si el usuario no tiene fila en Usuario-Rol, asumimos el rol base de acceso,
+        // de modo que cualquier usuario válido pueda usar la aplicación sin depender
+        // de una configuración manual por cuenta.
         identity.AddClaim(new Claim(ClaimTypes.Role, nombreRol ?? "Visualizador"));
         identity.AddClaim(new Claim("id_usuario", userId.ToString()));
 

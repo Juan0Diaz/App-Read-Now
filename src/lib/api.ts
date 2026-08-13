@@ -4,23 +4,40 @@ import { Libro, Genero, Publicacion, Favorito, User } from '../types';
 // En Codespaces, define esta variable en tu .env como la URL forwarded del puerto 5080
 // (Codespaces te la genera automáticamente, algo como https://<nombre>-5080.app.github.dev)
 // En local (fuera de Codespaces) sería http://localhost:5080
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5080';
+const API_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:5080').replace(/\/+$/, '');
 
 async function authHeader(): Promise<HeadersInit> {
-  const { data: { session } } = await supabase.auth.getSession();
-  return session?.access_token
-    ? { Authorization: `Bearer ${session.access_token}` }
-    : {};
+  const { data: { session }, error } = await supabase.auth.getSession();
+
+  if (error) {
+    console.error('Error al recuperar la sesión de Supabase:', error);
+  }
+
+  if (!session?.access_token) {
+    throw new Error('Debes iniciar sesión para acceder a esta información.');
+  }
+
+  return { Authorization: `Bearer ${session.access_token}` };
 }
 
-async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+function buildApiUrl(path: string | undefined): string {
+  if (!path || typeof path !== 'string' || path.trim() === '') {
+    throw new Error('La ruta de la API no es válida. Revisa que el id o la URL estén definidos.');
+  }
+
+  const normalizedPath = path.startsWith('http') ? path : `${API_URL}${path.startsWith('/') ? path : `/${path}`}`;
+  return normalizedPath;
+}
+
+async function request<T>(path: string | undefined, options: RequestInit = {}): Promise<T> {
   const headers = {
     'Content-Type': 'application/json',
     ...(await authHeader()),
     ...options.headers,
   };
 
-  const res = await fetch(`${API_URL}${path}`, { ...options, headers });
+  const safeUrl = buildApiUrl(path);
+  const res = await fetch(safeUrl, { ...options, headers });
 
   if (!res.ok) {
     const message = await res.text().catch(() => res.statusText);
