@@ -1,122 +1,65 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { supabase, isDemoMode, MOCK_LIBROS, MOCK_GENEROS } from '../lib/supabase';
-import { Libro, Genero } from '../types';
+import { useLibros } from '../hooks/useLibros';
+import { useGeneros } from '../hooks/useGeneros';
+import { useFavoritos } from '../hooks/useFavoritos';
 import { useAuth } from '../context/AuthContext';
 import { Search, Book, Heart, SlidersHorizontal, Plus } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 
 export const Home = () => {
-  const [libros, setLibros] = useState<Libro[]>([]);
-  const [generos, setGeneros] = useState<Genero[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedGenero, setSelectedGenero] = useState<number | null>(null);
-  const [filterDisponibilidad, setFilterDisponibilidad] = useState<string>('todos');
-  const [loading, setLoading] = useState(true);
-  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const { user, role } = useAuth();
-  const [favorites, setFavorites] = useState<string[]>([]); 
+  const { libros, loading } = useLibros();
+  const { generos } = useGeneros();
+  const { favoritos, toggleFavorito, isFavorito } = useFavoritos(user);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      if (isDemoMode) {
-        setLibros(MOCK_LIBROS);
-        setGeneros(MOCK_GENEROS);
-        setLoading(false);
-        return;
-      }
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedGenero, setSelectedGenero] = useState<string | null>(null);
+  const [filterDisponibilidad, setFilterDisponibilidad] = useState<string>('todos');
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
+  const [selectedAutor, setSelectedAutor] = useState<string | null>(null);
 
-      try {
-        const { data: gData } = await supabase.from('Genero').select('*');
-        if (gData) setGeneros(gData);
-
-        const { data: lData } = await supabase.from('Libro').select('*');
-        if (lData) setLibros(lData);
-        
-        if (user) {
-          // Obtener favoritos del usuario
-          const { data: fData } = await supabase.from('Favoritos').select('id_libro, id_favorito').eq('id_usuario', user.id_usuario);
-          if (fData) {
-            setFavorites(fData.map(f => f.id_libro));
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching data', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [user]);
-
-  const toggleFavorite = async (e: React.MouseEvent, id_libro: string) => {
+  const handleToggleFavorito = (e: React.MouseEvent, idLibro: string) => {
     e.preventDefault();
-    if (!user) {
-      alert("Debes iniciar sesión para agregar a favoritos.");
-      return;
-    }
-    
-    try {
-      const isFav = favorites.includes(id_libro);
-      if (isFav) {
-        setFavorites(favorites.filter(id => id !== id_libro));
-        await supabase.from('Favoritos').delete().match({ id_usuario: user.id_usuario, id_libro: id_libro });
-      } else {
-        setFavorites([...favorites, id_libro]);
-        const { error } = await supabase.from('Favoritos').insert([{ id_usuario: user.id_usuario, id_libro: id_libro }]);
-        if (error) {
-          if (error.code === '42703') {
-             alert('Nota Técnica: Debes agregar la columna "id_usuario" en tu tabla "Favoritos" en Supabase para que funcione correctamente.');
-          } else {
-             throw error;
-          }
-        }
-      }
-    } catch (err: any) {
-      console.error(err);
-      alert("Error al actualizar favoritos: " + err.message);
-    }
+    toggleFavorito(idLibro);
   };
 
   const autores = Array.from(new Set(libros.map(l => l.autor))).filter(Boolean);
-  const [selectedAutor, setSelectedAutor] = useState<string | null>(null);
-  
+
   const filteredLibros = libros.filter(libro => {
-    const matchesSearch = libro.titulo.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    const matchesSearch = libro.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           libro.autor.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesGenero = selectedGenero 
-      ? (libro.id_genero === selectedGenero || libro.id_genero_1 === selectedGenero || libro.id_genero_2 === selectedGenero) 
+    const matchesGenero = selectedGenero
+      ? (libro.id_genero === selectedGenero || libro.id_genero_1 === selectedGenero || libro.id_genero_2 === selectedGenero)
       : true;
     const matchesAutor = selectedAutor ? libro.autor === selectedAutor : true;
     let matchesDisp = true;
     if (filterDisponibilidad === 'disponible') matchesDisp = libro.disponible === true;
     if (filterDisponibilidad === 'reservado') matchesDisp = libro.disponible === false;
-    
+
     return matchesSearch && matchesGenero && matchesAutor && matchesDisp;
   });
 
   return (
     <div className="flex flex-col h-full animate-in fade-in duration-500">
-      
+
       {/* Header / Toolbar */}
       <header className="bg-white border-b border-slate-200 px-4 md:px-8 py-4 flex flex-col sm:flex-row items-center justify-between shrink-0 sticky top-0 z-20 w-full gap-4">
         <div className="relative w-full max-w-md">
           <span className="absolute inset-y-0 left-3 flex items-center text-slate-400">
             <Search className="w-5 h-5" />
           </span>
-          <input 
-            type="text" 
-            placeholder="Buscar por título, autor o género..." 
+          <input
+            type="text"
+            placeholder="Buscar por título, autor o género..."
             className="w-full pl-10 pr-4 py-2.5 bg-slate-100 border-transparent rounded-xl text-sm focus:bg-white focus:ring-2 focus:ring-indigo-500 transition-all outline-none"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
         <div className="flex items-center gap-2 w-full sm:w-auto">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             className="sm:hidden w-full bg-white text-slate-600 border-slate-200"
             onClick={() => setIsFiltersOpen(!isFiltersOpen)}
           >
@@ -140,23 +83,23 @@ export const Home = () => {
           <div>
             <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Géneros</h3>
             <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-              <button 
+              <button
                 onClick={() => setSelectedGenero(null)}
                 className={`px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
-                  selectedGenero === null 
-                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200' 
+                  selectedGenero === null
+                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200'
                     : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
                 }`}
               >
                 Todos
               </button>
               {generos.map(g => (
-                <button 
+                <button
                   key={g.id_genero}
                   onClick={() => setSelectedGenero(g.id_genero)}
                   className={`px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
-                    selectedGenero === g.id_genero 
-                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200' 
+                    selectedGenero === g.id_genero
+                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200'
                       : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
                   }`}
                 >
@@ -165,27 +108,27 @@ export const Home = () => {
               ))}
             </div>
           </div>
-          
+
           <div>
              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Autores</h3>
              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-              <button 
+              <button
                 onClick={() => setSelectedAutor(null)}
                 className={`px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
-                  selectedAutor === null 
-                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200' 
+                  selectedAutor === null
+                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200'
                     : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
                 }`}
               >
                 Todos
               </button>
               {autores.map(autor => (
-                <button 
+                <button
                   key={autor}
                   onClick={() => setSelectedAutor(autor)}
                   className={`px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
-                    selectedAutor === autor 
-                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200' 
+                    selectedAutor === autor
+                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200'
                       : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
                   }`}
                 >
@@ -203,12 +146,12 @@ export const Home = () => {
                 { value: 'disponible', label: 'Disponibles' },
                 { value: 'reservado', label: 'Reservados' }
               ].map(opt => (
-                <button 
+                <button
                   key={opt.value}
                   onClick={() => setFilterDisponibilidad(opt.value)}
                   className={`px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
-                    filterDisponibilidad === opt.value 
-                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200' 
+                    filterDisponibilidad === opt.value
+                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200'
                       : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
                   }`}
                 >
@@ -242,21 +185,20 @@ export const Home = () => {
               <Link to={`/libro/${libro.id_libro}`} key={libro.id_libro} className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow group flex flex-col">
                 <div className="relative aspect-[3/4] bg-slate-200 rounded-xl mb-4 overflow-hidden">
                   <div className="absolute top-2 right-2 z-10">
-                    <button 
-                      className={`p-2 backdrop-blur rounded-full shadow-sm transition-colors ${favorites.includes(libro.id_libro) ? 'bg-rose-500 text-white' : 'bg-white/90 text-slate-400 hover:text-rose-500'}`} 
-                      aria-label="Add to favorites" 
-                      onClick={(e) => toggleFavorite(e, libro.id_libro)}
+                    <button
+                      className={`p-2 backdrop-blur rounded-full shadow-sm transition-colors ${isFavorito(libro.id_libro) ? 'bg-rose-500 text-white' : 'bg-white/90 text-slate-400 hover:text-rose-500'}`}
+                      aria-label="Add to favorites"
+                      onClick={(e) => handleToggleFavorito(e, libro.id_libro)}
                     >
-                      <Heart className={`w-4 h-4 ${favorites.includes(libro.id_libro) ? 'fill-current' : ''}`} />
+                      <Heart className={`w-4 h-4 ${isFavorito(libro.id_libro) ? 'fill-current' : ''}`} />
                     </button>
                   </div>
-                  
+
                   {libro.portada_url ? (
                     <div className="w-full h-full relative">
                       <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent z-0"></div>
                       <img src={libro.portada_url} alt={libro.titulo} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                       <div className="absolute inset-0 flex items-center justify-center p-6 z-10">
-                          {/* If we have a cover we can just let it show, but to keep the aesthetic we can overlay some text if we wanted, let's keep it simple */}
                       </div>
                     </div>
                   ) : (
@@ -269,9 +211,9 @@ export const Home = () => {
                        </div>
                     </div>
                   )}
-                  
+
                 </div>
-                
+
                 <h3 className="font-bold text-slate-900 truncate mb-1">{libro.titulo}</h3>
                 <p className="text-sm text-slate-500 truncate">{libro.autor}</p>
                 <div className="mt-3 mt-auto pt-2 flex items-center justify-between">

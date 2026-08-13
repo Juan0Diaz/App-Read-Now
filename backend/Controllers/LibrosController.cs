@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Backend.Api.Data;
 using Backend.Api.Dtos;
 using Backend.Api.Models;
@@ -14,7 +15,7 @@ public class LibrosController : ControllerBase
     private readonly AppDbContext _db;
     public LibrosController(AppDbContext db) => _db = db;
 
-    // Catálogo público: cualquiera puede ver los libros.
+    // Catálogo público: cualquiera puede ver los libros (visualizador incluido).
     [HttpGet]
     [AllowAnonymous]
     public async Task<ActionResult<IEnumerable<Libro>>> GetAll()
@@ -68,7 +69,59 @@ public class LibrosController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = libro.IdLibro }, libro);
     }
 
+    // Crea el Libro y su Publicacion en una sola transacción — reemplaza el patrón
+    // anterior del frontend de hacer dos inserts sueltos (si el segundo fallaba,
+    // quedaba un libro "huérfano" sin publicación).
+    [HttpPost("publicar")]
+    [Authorize(Policy = "Publicador")]
+    public async Task<ActionResult<Libro>> CrearConPublicacion(LibroConPublicacionCreateDto dto)
+    {
+        var userId = Guid.Parse(User.FindFirstValue("id_usuario")!);
+
+        await using var transaction = await _db.Database.BeginTransactionAsync();
+        try
+        {
+            var libro = new Libro
+            {
+                IdLibro = Guid.NewGuid(),
+                Titulo = dto.Titulo,
+                Autor = dto.Autor,
+                Disponible = true,
+                Editorial = dto.Editorial,
+                Estado = "Nuevo",
+                FechaPublicacion = dto.FechaPublicacion,
+                IdGenero = dto.IdGenero,
+                IdGenero1 = dto.IdGenero1,
+                IdGenero2 = dto.IdGenero2,
+                Descripcion = dto.Descripcion,
+                PortadaUrl = dto.PortadaUrl
+            };
+            _db.Libros.Add(libro);
+
+            _db.Publicaciones.Add(new Publicacion
+            {
+                IdPublicacion = Guid.NewGuid(),
+                IdUsuario = userId,
+                IdLibro = libro.IdLibro,
+                Precio = 0,
+                Descripcion = "Agregado al catálogo",
+                FechaPublicacion = DateOnly.FromDateTime(DateTime.UtcNow)
+            });
+
+            await _db.SaveChangesAsync();
+            await transaction.CommitAsync();
+            return CreatedAtAction(nameof(GetById), new { id = libro.IdLibro }, libro);
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
+
     // Editar libro: Publicador o Administrador.
+    // (Si más adelante quieres que un Publicador solo edite SUS libros, se restringe
+    // aquí comparando el id_usuario del token contra el dueño de la Publicacion asociada.)
     [HttpPut("{id:guid}")]
     [Authorize(Policy = "Publicador")]
     public async Task<IActionResult> Update(Guid id, LibroUpdateDto dto)
@@ -92,7 +145,7 @@ public class LibrosController : ControllerBase
         return NoContent();
     }
 
-    // Eliminar libro
+    // Eliminar libro: solo Administrador.
     [HttpDelete("{id:guid}")]
     [Authorize(Policy = "Administrador")]
     public async Task<IActionResult> Delete(Guid id)

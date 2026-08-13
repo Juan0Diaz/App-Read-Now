@@ -46,8 +46,10 @@ builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("Administrador", p => p.RequireRole("Administrador"));
     options.AddPolicy("Publicador", p => p.RequireRole("Publicador", "Administrador"));
-    // Cualquier usuario autenticado cuenta como Visualizador o superior.
-    options.AddPolicy("Visualizador", p => p.RequireAuthenticatedUser());
+    // Antes: "cualquier usuario autenticado" pasaba, incluyendo a los Desactivados
+    // (porque 'Desactivado' no es un rol que la política revisara). Ahora exige
+    // explícitamente uno de los 3 roles activos.
+    options.AddPolicy("Visualizador", p => p.RequireRole("Visualizador", "Publicador", "Administrador"));
 });
 
 // CORS: en Codespaces, el frontend se sirve desde una URL dinámica tipo

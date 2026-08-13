@@ -2,12 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Navigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
-import { supabase } from '../lib/supabase';
-import { ShieldAlert, AlertTriangle } from 'lucide-react';
+import { getUsuarios, asignarRol } from '../lib/api';
+import { User } from '../types';
+import { AlertTriangle } from 'lucide-react';
 
 export const AdminDashboard = () => {
   const { user, role } = useAuth();
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [deactivateConfirm, setDeactivateConfirm] = useState<string | null>(null);
@@ -19,30 +20,27 @@ export const AdminDashboard = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('Usuario')
-        .select('*, Usuario-Rol(id_Rol, Rol(nombre_Rol))');
-      
-      if (error) throw error;
-      setUsers(data || []);
-    } catch (err: any) {
+      const data = await getUsuarios();
+      setUsers(data);
+    } catch (err) {
       console.error('Error fetching users', err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handeRoleChange = async (userId: string, currentRole: string) => {
+  const getRoleName = (u: User) => u.roles?.[0]?.rol?.nombre_Rol || 'Sin Rol';
+
+  // Antes, esta función hacía todo el trabajo desde el frontend: buscar el id
+  // del rol "Visualizador"/"Desactivado", decidir si insertar o actualizar en
+  // Usuario-Rol, y (al desactivar) borrar los favoritos por separado. Ahora
+  // solo le dice al backend qué rol asignar; el resto vive en un solo lugar
+  // (UsuariosController.AssignRole), dentro de una transacción.
+  const handleRoleChange = async (userId: string, currentRole: string) => {
     if (currentRole === 'Desactivado') {
       try {
         setActionLoading(true);
-        
-        const { data: visRole, error: roleErr } = await supabase.from('Rol').select('*').eq('nombre_Rol', 'Visualizador').single();
-        if (roleErr) throw roleErr;
-        if (visRole) {
-          const { error } = await supabase.from('Usuario-Rol').update({ id_Rol: visRole.id_Rol }).eq('id_usuario', userId);
-          if (error) throw error;
-        }
+        await asignarRol(userId, 'Visualizador');
         await fetchUsers();
       } catch (err: any) {
         console.error(err);
@@ -51,35 +49,15 @@ export const AdminDashboard = () => {
         setActionLoading(false);
       }
     } else {
-      
       setDeactivateConfirm(userId);
     }
   };
 
   const confirmDeactivate = async () => {
     if (!deactivateConfirm) return;
-    const userId = deactivateConfirm;
     try {
       setActionLoading(true);
-      // Remover favoritos de otros usuarios
-      const { error: favErr } = await supabase.from('Favoritos').delete().eq('id_usuario', userId);
-      if (favErr) throw favErr;
-      
-      // Activar un usuario bloqueado
-      const { data: desRole, error: desErr } = await supabase.from('Rol').select('*').eq('nombre_Rol', 'Desactivado').single();
-      if (desErr) throw desErr;
-      
-      if (desRole) {
-        
-        const { data: exitingRole } = await supabase.from('Usuario-Rol').select('*').eq('id_usuario', userId).maybeSingle();
-        if (exitingRole) {
-          const { error } = await supabase.from('Usuario-Rol').update({ id_Rol: desRole.id_Rol }).eq('id_usuario', userId);
-          if (error) throw error;
-        } else {
-          const { error } = await supabase.from('Usuario-Rol').insert({ id_usuario: userId, id_Rol: desRole.id_Rol });
-          if (error) throw error;
-        }
-      }
+      await asignarRol(deactivateConfirm, 'Desactivado');
       setDeactivateConfirm(null);
       await fetchUsers();
     } catch (err: any) {
@@ -111,10 +89,10 @@ export const AdminDashboard = () => {
             <div className="text-center py-10 text-slate-500 font-semibold">Cargando usuarios...</div>
           ) : (
             <div className="space-y-4">
-              {users.map((u, i) => {
-                const userRole = u['Usuario-Rol']?.[0]?.Rol?.nombre_Rol || 'Sin Rol';
+              {users.map((u) => {
+                const userRole = getRoleName(u);
                 return (
-                  <div key={i} className={`flex flex-col sm:flex-row sm:items-center justify-between p-4 border border-slate-100/50 hover:bg-slate-50 rounded-xl transition-colors ${userRole === 'Desactivado' ? 'opacity-60 grayscale' : ''}`}>
+                  <div key={u.id_usuario} className={`flex flex-col sm:flex-row sm:items-center justify-between p-4 border border-slate-100/50 hover:bg-slate-50 rounded-xl transition-colors ${userRole === 'Desactivado' ? 'opacity-60 grayscale' : ''}`}>
                     <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                       <div className={`h-10 w-10 ${userRole === 'Desactivado' ? 'bg-slate-200 text-slate-500' : 'bg-indigo-100 text-indigo-700'} rounded-full flex items-center justify-center font-bold shrink-0`}>
                         {(u.nombre || u.correo || '?').charAt(0).toUpperCase()}
@@ -134,11 +112,12 @@ export const AdminDashboard = () => {
                         {userRole.toUpperCase()}
                       </span>
                       {u.id_usuario !== user.id_usuario && u.correo !== 'admin@gmail.com' && u.correo !== 'admin1@gmail.com' && (
-                        <Button 
-                          onClick={() => handeRoleChange(u.id_usuario, userRole)} 
+                        <Button
+                          onClick={() => handleRoleChange(u.id_usuario, userRole)}
                           variant={userRole === 'Desactivado' ? 'outline' : 'default'}
                           className={userRole === 'Desactivado' ? '' : 'bg-rose-600 hover:bg-rose-700 text-white'}
-                          size="sm" 
+                          size="sm"
+                          disabled={actionLoading}
                         >
                           {userRole === 'Desactivado' ? 'Activar' : 'Desactivar'}
                         </Button>
@@ -163,16 +142,16 @@ export const AdminDashboard = () => {
               El usuario perderá el acceso a funcionalidades y sus favoritos serán eliminados.
             </p>
             <div className="flex flex-col gap-3">
-              <Button 
-                className="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold" 
+              <Button
+                className="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold"
                 onClick={confirmDeactivate}
                 disabled={actionLoading}
               >
                 {actionLoading ? 'Procesando...' : 'Sí, desactivar usuario'}
               </Button>
-              <Button 
-                variant="outline" 
-                className="w-full" 
+              <Button
+                variant="outline"
+                className="w-full"
                 onClick={() => setDeactivateConfirm(null)}
                 disabled={actionLoading}
               >

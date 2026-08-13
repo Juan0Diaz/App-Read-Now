@@ -4,6 +4,7 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { LogOut, User as UserIcon, Shield, Mail, Edit2, Save, X, AlertTriangle, Moon, Sun } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { actualizarMiPerfil, cambiarMiRol, eliminarMiCuenta, getMisPublicaciones } from '../lib/api';
 import { Role } from '../types';
 import { useNavigate } from 'react-router-dom';
 import { useDarkMode } from '../hooks/useDarkMode';
@@ -38,17 +39,21 @@ export const Profile = () => {
   const [countryCode, setCountryCode] = useState(initialPhone.code);
   const [phoneNumber, setPhoneNumber] = useState(initialPhone.num);
   
-  const roles = [
-    { id: 'cb815a38-b6a4-4197-970a-0c0e572767d7', nombre: 'Publicador' },
-    { id: 'ca2b6f7f-a5f6-4beb-9e35-afce235956a7', nombre: 'Visualizador' }
+  // Antes esto tenía los UUID de los roles hardcodeados (frágil: si alguien
+  // recrea la tabla Rol en Supabase, esos IDs cambian y esto se rompe en
+  // silencio). Ahora se trabaja directo con el nombre del rol.
+  const roles: { nombre: 'Publicador' | 'Visualizador' }[] = [
+    { nombre: 'Publicador' },
+    { nombre: 'Visualizador' }
   ];
-  
-  const initialRoleId = roles.find(r => r.nombre === role)?.id || roles[1].id;
-  const [selectedRole, setSelectedRole] = useState<string>(initialRoleId);
+
+  const [selectedRole, setSelectedRole] = useState<'Publicador' | 'Visualizador'>(
+    role === 'Publicador' ? 'Publicador' : 'Visualizador'
+  );
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setSelectedRole(roles.find(r => r.nombre === role)?.id || roles[1].id);
+    setSelectedRole(role === 'Publicador' ? 'Publicador' : 'Visualizador');
   }, [role]);
 
   const handleLogout = async () => {
@@ -60,14 +65,9 @@ export const Profile = () => {
     if (!user) return;
     setLoading(true);
     try {
-      // Cascada para borrar cada cosa que hace el usuario
-      await supabase.from('Favoritos').delete().eq('id_usuario', user.id_usuario);
-      await supabase.from('Publicacion').delete().eq('id_usuario', user.id_usuario);
-      await supabase.from('Usuario-Rol').delete().eq('id_usuario', user.id_usuario);
-      const { error } = await supabase.from('Usuario').delete().eq('id_usuario', user.id_usuario);
-      
-      if (error) throw error;
-      
+      // Antes esto eran 4 borrados sueltos hechos desde aquí; ahora el backend
+      // lo hace como una sola transacción (ver UsuariosController.DeleteMe).
+      await eliminarMiCuenta();
       await signOut();
       navigate('/login');
     } catch (err: any) {
@@ -108,13 +108,11 @@ export const Profile = () => {
 
     setLoading(true);
     try {
-      const { error } = await supabase.from('Usuario').update({
-        nombre: nombre,
-        fecha_date: fechaDate || null,
-        numero_tel: phoneNumber ? `${countryCode}${phoneNumber}` : null
-      }).eq('id_usuario', user.id_usuario);
-      
-      if (error) throw error;
+      await actualizarMiPerfil({
+        nombre: nombre || undefined,
+        fecha_date: fechaDate || undefined,
+        numero_tel: phoneNumber ? `${countryCode}${phoneNumber}` : undefined
+      });
       await fetchUserData(user.id_usuario, user.correo);
       setIsEditingProfile(false);
     } catch(err: any) {
@@ -138,9 +136,11 @@ export const Profile = () => {
 
       const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
       if (updateError) throw updateError;
-      
-      await supabase.from('Usuario').update({ contrasena: newPassword }).eq('id_usuario', user.id_usuario);
-      
+
+      // Nota: ya no se guarda la contraseña en texto plano en la tabla "Usuario".
+      // Supabase Auth es la única fuente de verdad para credenciales; esa columna
+      // era redundante y un riesgo de seguridad innecesario.
+
       alert("Contraseña actualizada con éxito.");
       setIsEditingPassword(false);
       setCurrentPassword("");
@@ -156,12 +156,10 @@ export const Profile = () => {
     if (!user) return;
     setLoading(true);
     try {
-      const newRoleObj = roles.find(r => r.id === selectedRole);
-      
-      if (newRoleObj?.nombre === 'Visualizador' && role === 'Publicador') {
-        const { count } = await supabase.from('Publicacion').select('*', { count: 'exact', head: true }).eq('id_usuario', user.id_usuario);
-        if (count && count > 0) {
-          setRoleChangeBookCount(count);
+      if (selectedRole === 'Visualizador' && role === 'Publicador') {
+        const misPublicaciones = await getMisPublicaciones();
+        if (misPublicaciones.length > 0) {
+          setRoleChangeBookCount(misPublicaciones.length);
           setShowRoleChangeConfirm(true);
           setLoading(false);
           return;
@@ -179,23 +177,12 @@ export const Profile = () => {
     if (!user) return;
     setLoading(true);
     try {
-      // Actualización de la tabla de roles
-      // Primero, verificar si el rol existe para el usuario
-      const { data: existing } = await supabase.from('Usuario-Rol').select('*').eq('id_usuario', user.id_usuario).maybeSingle();
-      
-      if (existing) {
-        const { error } = await supabase.from('Usuario-Rol').update({
-          id_Rol: selectedRole
-        }).eq('id_usuario', user.id_usuario);
-        if (error) throw error;
-      } else {
-        const { error } = await supabase.from('Usuario-Rol').insert([{
-          id_usuario: user.id_usuario,
-          id_Rol: selectedRole
-        }]);
-        if (error) throw error;
-      }
-      
+      // Antes esto decidía "insertar o actualizar" en Usuario-Rol desde el
+      // frontend; ahora el backend lo resuelve en un solo endpoint, y además
+      // valida que solo se pueda cambiar entre Visualizador y Publicador
+      // (nunca autoasignarse Administrador).
+      await cambiarMiRol(selectedRole);
+
       await fetchUserData(user.id_usuario, user.correo);
       setIsEditingRole(false);
       setShowRoleChangeConfirm(false);
@@ -251,12 +238,12 @@ export const Profile = () => {
                 <div className="bg-slate-50 p-4 border border-slate-200 rounded-xl mb-8 flex items-center gap-4">
                   <select 
                     value={selectedRole}
-                    onChange={(e) => setSelectedRole(e.target.value)}
+                    onChange={(e) => setSelectedRole(e.target.value as 'Publicador' | 'Visualizador')}
                     className="flex-1 bg-white border border-slate-300 rounded-lg px-3 py-2 outline-none"
                     disabled={loading}
                   >
                     {roles.map(r => (
-                      <option key={r.id} value={r.id}>{r.nombre}</option>
+                      <option key={r.nombre} value={r.nombre}>{r.nombre}</option>
                     ))}
                   </select>
                   <Button onClick={saveRole} disabled={loading} size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white">

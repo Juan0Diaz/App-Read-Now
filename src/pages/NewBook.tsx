@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { crearLibroConPublicacion } from '../lib/api';
+import { useGeneros } from '../hooks/useGeneros';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/Button';
 import { ArrowLeft, Upload, Book, AlignLeft, Calendar, Tag, Building2, AlertCircle, BookOpen, Plus, X, ImagePlus } from 'lucide-react';
@@ -20,14 +22,8 @@ export const NewBook = () => {
     descripcion: ''
   });
   const [selectedGeneros, setSelectedGeneros] = useState<string[]>(['']);
-  const [generos, setGeneros] = useState<{id_genero: string, nombre_genero: string}[]>([]);
+  const { generos } = useGeneros();
   const [imagenFile, setImagenFile] = useState<File | null>(null);
-
-  React.useEffect(() => {
-    supabase.from('Genero').select('*').then(({data}) => {
-      if (data) setGeneros(data);
-    });
-  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -114,38 +110,23 @@ export const NewBook = () => {
         portada_url = publicUrlData.publicUrl;
       }
 
-      // Insertar un libro
-      const primaryGenero = selectedGeneros[0] || null;
-      const secondaryGenero = selectedGeneros[1] || null;
-      const tertiaryGenero = selectedGeneros[2] || null;
-      
-      const { data: libroData, error: libroError } = await supabase.from('Libro').insert([{
+      // Antes esto eran dos llamadas sueltas (insertar el libro, luego insertar
+      // la publicación). Ahora el backend lo hace en una sola transacción atómica.
+      const primaryGenero = selectedGeneros[0] || undefined;
+      const secondaryGenero = selectedGeneros[1] || undefined;
+      const tertiaryGenero = selectedGeneros[2] || undefined;
+
+      await crearLibroConPublicacion({
         titulo: formData.titulo,
         autor: formData.autor,
         editorial: formData.editorial,
-        fecha_publicacion: formData.fecha_publicacion,
+        fecha_publicacion: formData.fecha_publicacion || undefined,
         id_genero: primaryGenero,
         id_genero_1: secondaryGenero,
         id_genero_2: tertiaryGenero,
         descripcion: desc,
-        disponible: true,
-        portada_url,
-        estado: 'Nuevo'
-      }]).select().single();
-
-
-      if (libroError) throw libroError;
-
-      // Insertar publicación
-      const { error: pubError } = await supabase.from('Publicacion').insert([{
-        id_usuario: user.id_usuario,
-        id_libro: libroData.id_libro,
-        precio: 0,
-        descripcion: 'Agregado al catálogo',
-        fecha_publicacion: new Date().toISOString()
-      }]);
-
-      if (pubError) throw pubError;
+        portada_url: portada_url || undefined,
+      });
 
       alert('¡Libro publicado con éxito!');
       navigate('/publicador/libros');

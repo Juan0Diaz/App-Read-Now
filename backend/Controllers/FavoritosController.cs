@@ -21,7 +21,7 @@ public class FavoritosController : ControllerBase
     public async Task<ActionResult<IEnumerable<Favorito>>> GetMine()
     {
         var favoritos = await _db.Favoritos
-            .Include(f => f.Libro)
+            .Include(f => f.Libro!).ThenInclude(l => l.Genero)
             .Where(f => f.IdUsuario == CurrentUserId)
             .AsNoTracking()
             .ToListAsync();

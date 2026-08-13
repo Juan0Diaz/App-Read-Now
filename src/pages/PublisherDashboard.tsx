@@ -3,66 +3,44 @@ import { useAuth } from '../context/AuthContext';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { BookPlus, List, Edit, Trash2 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
-import { supabase } from '../lib/supabase';
+import { getMisPublicaciones, getPublicaciones, eliminarPublicacionConLibro } from '../lib/api';
+import { Publicacion } from '../types';
 
 export const PublisherDashboard = () => {
   const { user, role } = useAuth();
   const navigate = useNavigate();
-  const [publicaciones, setPublicaciones] = useState<any[]>([]);
+  const [publicaciones, setPublicaciones] = useState<Publicacion[]>([]);
   const [loading, setLoading] = useState(true);
-  const [deleteConfirm, setDeleteConfirm] = useState<{id_libro: string, id_publicacion: string} | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ id_publicacion: string } | null>(null);
 
   useEffect(() => {
     fetchPublicaciones();
-  }, [user]);
+  }, [user, role]);
 
   const fetchPublicaciones = async () => {
     if (!user) return;
     try {
       setLoading(true);
-      let query = supabase
-        .from('Publicacion')
-        .select(`
-          id_publicacion,
-          fecha_publicacion,
-          Libro (*)
-        `);
-        
-      if (role !== 'Administrador') {
-        query = query.eq('id_usuario', user.id_usuario);
-      }
-      
-      const { data, error } = await query;
-        
-      if (error) throw error;
-      setPublicaciones(data || []);
-    } catch (err: any) {
+      // El Administrador ve el catálogo completo; el Publicador, solo lo suyo.
+      const data = role === 'Administrador'
+        ? await getPublicaciones()
+        : await getMisPublicaciones();
+      setPublicaciones(data);
+    } catch (err) {
       console.error('Error fetching publications', err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (id_libro: string, id_publicacion: string) => {
+  const handleDelete = async (id_publicacion: string) => {
     try {
-      // Borrar primero los favoritos relacionados al libro para evitar errores de llave foránea
-      await supabase.from('Favoritos').delete().eq('id_libro', id_libro);
-      
-      // Borrar de Publicacion (esto remueve el libro del dashboard del publicador)
-      const { error: pubError } = await supabase.from('Publicacion').delete().eq('id_publicacion', id_publicacion);
-      if (pubError) throw pubError;
-      
-      // Borrar de Libro
-      const { error: libroError } = await supabase.from('Libro').delete().eq('id_libro', id_libro);
-      
-      // Si falla por llaves foráneas u otra restricción, se marca como eliminado en su lugar
-      if (libroError) {
-        await supabase.from('Libro').update({ disponible: false, estado: 'Eliminado' }).eq('id_libro', id_libro);
-      }
-      
+      // Antes eran 3 llamadas sueltas a Supabase desde aquí; ahora es una sola
+      // transacción atómica en el backend (ver PublicacionesController.DeleteConLibro).
+      await eliminarPublicacionConLibro(id_publicacion);
       setPublicaciones(prev => prev.filter(p => p.id_publicacion !== id_publicacion));
       setDeleteConfirm(null);
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error eliminando la publicación: ', err);
       setDeleteConfirm(null);
     }
@@ -93,7 +71,7 @@ export const PublisherDashboard = () => {
             <List className="h-5 w-5 text-slate-400" />
             <h2 className="font-semibold text-slate-700">{role === 'Administrador' ? 'Todos los libros' : 'Tus libros recientes'}</h2>
           </div>
-          
+
           <div className="overflow-x-auto">
             {loading ? (
               <div className="p-8 text-center text-slate-500">Cargando publicaciones...</div>
@@ -109,7 +87,7 @@ export const PublisherDashboard = () => {
                 </div>
                 <div className="divide-y divide-slate-100">
                   {publicaciones.map(pub => {
-                    const libro = pub.Libro;
+                    const libro = pub.libro;
                     if (!libro) return null;
                     return (
                       <div key={pub.id_publicacion} className="flex flex-col md:grid md:grid-cols-12 gap-4 p-4 md:px-6 hover:bg-slate-50 transition-colors items-start md:items-center">
@@ -125,13 +103,13 @@ export const PublisherDashboard = () => {
                           </span>
                         </div>
                         <div className="col-span-2 text-sm text-slate-500">
-                          {new Date(pub.fecha_publicacion).toLocaleDateString()}
+                          {pub.fecha_publicacion ? new Date(pub.fecha_publicacion).toLocaleDateString() : '—'}
                         </div>
                         <div className="col-span-2 flex items-center gap-2 justify-end w-full md:w-auto">
                           <Button onClick={() => navigate(`/publicador/libros/editar/${libro.id_libro}`)} variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-indigo-600 border border-slate-200 md:border-transparent">
                             <Edit className="h-4 w-4"/>
                           </Button>
-                          <Button onClick={() => setDeleteConfirm({id_libro: libro.id_libro, id_publicacion: pub.id_publicacion})} variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-red-500 border border-slate-200 md:border-transparent">
+                          <Button onClick={() => setDeleteConfirm({ id_publicacion: pub.id_publicacion })} variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-red-500 border border-slate-200 md:border-transparent">
                             <Trash2 className="h-4 w-4"/>
                           </Button>
                         </div>
@@ -152,7 +130,7 @@ export const PublisherDashboard = () => {
             <p className="text-slate-600 text-sm mb-6">Esta acción es irreversible y eliminará el libro del catálogo.</p>
             <div className="flex justify-end gap-3">
               <Button variant="outline" onClick={() => setDeleteConfirm(null)}>Cancelar</Button>
-              <Button className="bg-rose-600 hover:bg-rose-700 text-white" onClick={() => handleDelete(deleteConfirm.id_libro, deleteConfirm.id_publicacion)}>Sí, Eliminar</Button>
+              <Button className="bg-rose-600 hover:bg-rose-700 text-white" onClick={() => handleDelete(deleteConfirm.id_publicacion)}>Sí, Eliminar</Button>
             </div>
           </div>
         </div>

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
+import { getLibro, actualizarLibro } from '../lib/api';
+import { useGeneros } from '../hooks/useGeneros';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/Button';
 import { ArrowLeft, Book, AlignLeft, Calendar, Tag, Building2, AlertCircle, BookOpen, Plus, X, Upload, ImagePlus } from 'lucide-react';
@@ -25,43 +27,37 @@ export const EditBook = () => {
     portada_url: ''
   });
   const [selectedGeneros, setSelectedGeneros] = useState<string[]>(['']);
-  const [generos, setGeneros] = useState<{id_genero: string, nombre_genero: string}[]>([]);
+  const { generos } = useGeneros();
   const [imagenFile, setImagenFile] = useState<File | null>(null);
 
   useEffect(() => {
-    supabase.from('Genero').select('*').then(({data}) => {
-      if (data) setGeneros(data);
-    });
-    
-    if (id) {
-      supabase.from('Libro').select('*').eq('id_libro', id).single().then(async ({data, error}) => {
-        if (data) {
-          setFormData({
-            titulo: data.titulo || '',
-            autor: data.autor || '',
-            editorial: data.editorial || '',
-            fecha_publicacion: data.fecha_publicacion ? data.fecha_publicacion.substring(0, 10) : '',
-            estado: data.estado || 'Nuevo',
-            disponible: data.disponible,
-            descripcion: data.descripcion || '',
-            portada_url: data.portada_url || ''
-          });
-          
-          let fetchedGeneros: string[] = [];
-          if (data.id_genero) fetchedGeneros.push(String(data.id_genero));
-          if (data.id_genero_1) fetchedGeneros.push(String(data.id_genero_1));
-          if (data.id_genero_2) fetchedGeneros.push(String(data.id_genero_2));
-          
-          setSelectedGeneros(fetchedGeneros.length > 0 ? fetchedGeneros : ['']);
-        }
-        if (error) {
-          setError('Error cargando los detalles del libro.');
-        }
-        setFetching(false);
-      });
-    } else {
+    if (!id) {
       setFetching(false);
+      return;
     }
+
+    getLibro(id)
+      .then((data) => {
+        setFormData({
+          titulo: data.titulo || '',
+          autor: data.autor || '',
+          editorial: data.editorial || '',
+          fecha_publicacion: data.fecha_publicacion ? data.fecha_publicacion.substring(0, 10) : '',
+          estado: data.estado || 'Nuevo',
+          disponible: data.disponible,
+          descripcion: data.descripcion || '',
+          portada_url: data.portada_url || ''
+        });
+
+        const fetchedGeneros: string[] = [];
+        if (data.id_genero) fetchedGeneros.push(data.id_genero);
+        if (data.id_genero_1) fetchedGeneros.push(data.id_genero_1);
+        if (data.id_genero_2) fetchedGeneros.push(data.id_genero_2);
+
+        setSelectedGeneros(fetchedGeneros.length > 0 ? fetchedGeneros : ['']);
+      })
+      .catch(() => setError('Error cargando los detalles del libro.'))
+      .finally(() => setFetching(false));
   }, [id]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -155,25 +151,23 @@ export const EditBook = () => {
         newPortadaUrl = publicUrlData.publicUrl;
       }
 
-      const primaryGenero = selectedGeneros[0] || null;
-      const secondaryGenero = selectedGeneros[1] || null;
-      const tertiaryGenero = selectedGeneros[2] || null;
+      const primaryGenero = selectedGeneros[0] || undefined;
+      const secondaryGenero = selectedGeneros[1] || undefined;
+      const tertiaryGenero = selectedGeneros[2] || undefined;
 
-      const { error: libroError } = await supabase.from('Libro').update({
+      await actualizarLibro(id, {
         titulo: formData.titulo,
         autor: formData.autor,
         editorial: formData.editorial,
-        fecha_publicacion: formData.fecha_publicacion,
+        fecha_publicacion: formData.fecha_publicacion || undefined,
         id_genero: primaryGenero,
         id_genero_1: secondaryGenero,
         id_genero_2: tertiaryGenero,
         descripcion: desc,
         estado: formData.estado,
         disponible: formData.disponible,
-        portada_url: newPortadaUrl
-      }).eq('id_libro', id);
-
-      if (libroError) throw libroError;
+        portada_url: newPortadaUrl || undefined
+      });
 
       alert('¡Libro actualizado con éxito!');
       navigate('/publicador/libros');
