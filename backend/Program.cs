@@ -25,6 +25,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
 
 builder.Services.AddScoped<IPrestamosServices, PrestamosServices>();
+builder.Services.AddScoped<IFavoritosServices, FavoritosServices>();
 
 builder.Services.AddScoped<IClaimsTransformation, RoleClaimsTransformation>();
 
