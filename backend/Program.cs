@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.Json;
 using Backend.Api.Auth;
 using Backend.Api.Data;
+using Backend.Api.Services;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -22,6 +23,8 @@ var supabaseUrl = builder.Configuration["SUPABASE_URL"] ?? builder.Configuration
 // ---------- Servicios ----------
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(connectionString));
+
+builder.Services.AddScoped<IPrestamosServices, PrestamosServices>();
 
 builder.Services.AddScoped<IClaimsTransformation, RoleClaimsTransformation>();
 
