@@ -82,11 +82,6 @@ export const agregarFavorito = (idLibro: string) =>
 export const quitarFavorito = (idLibro: string) =>
   request<void>(`/api/favoritos/${idLibro}`, { method: 'DELETE' });
 
-// ---------- Préstamos ----------
-export const solicitarPrestamo = (idLibro: string) =>
-  request<void>(`/api/prestamos/${idLibro}`, { method: 'POST' });
-export const getMisPrestamos = () => request<any[]>('/api/prestamos/mios');
-
 // ---------- Usuarios ----------
 export const getMiPerfil = () => request<User>('/api/usuarios/me');
 export const actualizarMiPerfil = (data: { nombre?: string; fecha_date?: string; numero_tel?: string }) =>
