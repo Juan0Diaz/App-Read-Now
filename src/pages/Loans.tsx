@@ -1,50 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useAuth } from '../context/AuthContext';
-import { supabase } from '../lib/supabase';
-import { Libro, Genero } from '../types';
+import { useLoans } from '../hooks/useLoans';
 import { Link } from 'react-router-dom';
 import { BookOpen, Search, Clock } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 
 export const Loans = () => {
   const { user } = useAuth();
-  const [libros, setLibros] = useState<(Libro & { Usuario_Prestamo_id: string | number, Genero: Genero | null })[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchLoans();
-  }, [user]);
-
-  const fetchLoans = async () => {
-    if (!user) return;
-    try {
-      setLoading(true);
-
-      const { data, error } = await supabase
-        .from('Usuario_Prestamo')
-        .select(`
-          id_libro,
-          Libro (
-            *,
-            Genero!Libro_id_genero_fkey (*)
-          )
-        `)
-        .eq('id_usuario', user.id_usuario);
-        
-      if (error) throw error;
-      
-      const formatted = (data || []).map((loan: any) => ({
-        ...loan.Libro,
-        Usuario_Prestamo_id: loan.id_libro,
-        Genero: loan.Libro?.Genero || null
-      }));
-      setLibros(formatted);
-    } catch (err: any) {
-      console.error('Error fetching loans:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { libros, loading } = useLoans(user);
 
   if (loading) {
     return <div className="p-8 text-center text-slate-500 font-semibold">Cargando préstamos...</div>;

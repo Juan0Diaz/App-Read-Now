@@ -67,6 +67,13 @@ export interface UsuarioFavorito {
   id_favoritos: string;
 }
 
+export interface UsuarioPrestamo {
+  id_usuario: string;
+  id_libro: string;
+  disponible?: boolean;
+  libro?: Libro;
+}
+
 // Extended types for UI convenience
 export interface LibroWithDetails extends Libro {
   publicacion?: Publicacion;
