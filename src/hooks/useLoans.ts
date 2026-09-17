@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
-import { getMisPrestamos, solicitarPrestamo as solicitarPrestamoApi } from '../lib/api';
-import { User, UsuarioPrestamo, Libro, Genero } from '../types';
+import { getMisPrestamos, solicitarPrestamo as solicitarPrestamoApi } from '../microservicios/prestamos';
+import { User, Libro, Genero } from '../types';
 
 type LibroPrestamo = Libro & {
   Usuario_Prestamo_id: string | number;
@@ -20,7 +20,7 @@ export function useLoans(user: User | null) {
 
     try {
       setLoading(true);
-      const prestamos = await getMisPrestamos() as UsuarioPrestamo[];
+      const prestamos = await getMisPrestamos();
 
       setLibros(
         prestamos

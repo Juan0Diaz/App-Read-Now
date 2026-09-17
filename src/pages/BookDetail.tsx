@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { isDemoMode, MOCK_LIBROS, MOCK_GENEROS } from '../lib/supabase';
-import { getLibro, getPublicaciones, solicitarPrestamo } from '../lib/api';
+import { getLibro, getPublicaciones } from '../lib/api';
+import { solicitarPrestamo } from '../microservicios/prestamos';
 import { Libro, Genero, User } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { useFavoritos } from '../hooks/useFavoritos';
