@@ -1,10 +1,9 @@
 using System.Security.Claims;
-using Backend.Api.Data;
 using Backend.Api.Dtos;
 using Backend.Api.Models;
+using Backend.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Api.Controllers;
 
@@ -13,8 +12,12 @@ namespace Backend.Api.Controllers;
 [Authorize(Policy = "Visualizador")]
 public class UsuariosController : ControllerBase
 {
-    private readonly AppDbContext _db;
-    public UsuariosController(AppDbContext db) => _db = db;
+    private readonly IUsuariosServices _usuariosServices;
+
+    public UsuariosController(IUsuariosServices usuariosServices)
+    {
+        _usuariosServices = usuariosServices;
+    }
 
     private Guid CurrentUserId => Guid.Parse(User.FindFirstValue("id_usuario")!);
 
@@ -22,10 +25,7 @@ public class UsuariosController : ControllerBase
     [HttpGet("me")]
     public async Task<ActionResult<Usuario>> GetMe()
     {
-        var usuario = await _db.Usuarios
-            .AsNoTracking()
-            .FirstOrDefaultAsync(u => u.IdUsuario == CurrentUserId);
-
+        var usuario = await _usuariosServices.ObtenerPorIdAsync(CurrentUserId);
         if (usuario is null) return NotFound();
         return Ok(usuario);
     }
@@ -33,14 +33,8 @@ public class UsuariosController : ControllerBase
     [HttpPut("me")]
     public async Task<IActionResult> UpdateMe([FromBody] UsuarioUpdateDto dto)
     {
-        var usuario = await _db.Usuarios.FindAsync(CurrentUserId);
-        if (usuario is null) return NotFound();
-
-        usuario.Nombre = dto.Nombre;
-        usuario.FechaDate = dto.FechaDate;
-        usuario.NumeroTel = dto.NumeroTel;
-        await _db.SaveChangesAsync();
-        return NoContent();
+        var actualizado = await _usuariosServices.ActualizarPerfilAsync(CurrentUserId, dto);
+        return actualizado ? NoContent() : NotFound();
     }
 
     // Cambio de rol propio: solo entre Visualizador y Publicador. Nunca permite
@@ -54,21 +48,8 @@ public class UsuariosController : ControllerBase
             return BadRequest("Solo puedes cambiar tu propio rol entre Visualizador y Publicador.");
         }
 
-        var rol = await _db.Roles.FirstOrDefaultAsync(r => r.NombreRol == nombreRol);
-        if (rol is null) return BadRequest("Rol inválido");
-
-        var actual = await _db.UsuarioRoles.FirstOrDefaultAsync(ur => ur.IdUsuario == CurrentUserId);
-        if (actual is null)
-        {
-            _db.UsuarioRoles.Add(new UsuarioRol { IdUsuario = CurrentUserId, IdRol = rol.IdRol });
-        }
-        else
-        {
-            actual.IdRol = rol.IdRol;
-        }
-
-        await _db.SaveChangesAsync();
-        return NoContent();
+        var actualizado = await _usuariosServices.CambiarMiRolAsync(CurrentUserId, nombreRol);
+        return actualizado ? NoContent() : BadRequest("Rol inválido");
     }
 
     // Borrar la cuenta propia. Antes esto eran 4 borrados sueltos hechos desde el
@@ -77,25 +58,7 @@ public class UsuariosController : ControllerBase
     [HttpDelete("me")]
     public async Task<IActionResult> DeleteMe()
     {
-        await using var transaction = await _db.Database.BeginTransactionAsync();
-        try
-        {
-            _db.Favoritos.RemoveRange(_db.Favoritos.Where(f => f.IdUsuario == CurrentUserId));
-            _db.Publicaciones.RemoveRange(_db.Publicaciones.Where(p => p.IdUsuario == CurrentUserId));
-            _db.UsuarioRoles.RemoveRange(_db.UsuarioRoles.Where(ur => ur.IdUsuario == CurrentUserId));
-
-            var usuario = await _db.Usuarios.FindAsync(CurrentUserId);
-            if (usuario is not null) _db.Usuarios.Remove(usuario);
-
-            await _db.SaveChangesAsync();
-            await transaction.CommitAsync();
-        }
-        catch
-        {
-            await transaction.RollbackAsync();
-            throw;
-        }
-
+        await _usuariosServices.EliminarCuentaAsync(CurrentUserId);
         return NoContent();
     }
 
@@ -104,38 +67,16 @@ public class UsuariosController : ControllerBase
     [HttpGet]
     [Authorize(Policy = "Administrador")]
     public async Task<ActionResult<IEnumerable<Usuario>>> GetAll()
-        => Ok(await _db.Usuarios.Include(u => u.Roles).ThenInclude(r => r.Rol).AsNoTracking().ToListAsync());
+        => Ok(await _usuariosServices.ObtenerTodosAsync());
 
     [HttpPut("{id:guid}/rol")]
     [Authorize(Policy = "Administrador")]
     public async Task<IActionResult> AssignRole(Guid id, [FromBody] string nombreRol)
     {
-        var usuario = await _db.Usuarios.FindAsync(id);
+        var usuario = await _usuariosServices.ObtenerPorIdAsync(id);
         if (usuario is null) return NotFound("Usuario no encontrado");
 
-        var rol = await _db.Roles.FirstOrDefaultAsync(r => r.NombreRol == nombreRol);
-        if (rol is null) return BadRequest("Rol inválido");
-
-        await using var transaction = await _db.Database.BeginTransactionAsync();
-
-        var actual = await _db.UsuarioRoles.FirstOrDefaultAsync(ur => ur.IdUsuario == id);
-        if (actual is null)
-        {
-            _db.UsuarioRoles.Add(new UsuarioRol { IdUsuario = id, IdRol = rol.IdRol });
-        }
-        else
-        {
-            actual.IdRol = rol.IdRol;
-        }
-
-        // Regla de negocio: al desactivar a alguien, se le quitan sus favoritos.
-        if (nombreRol == "Desactivado")
-        {
-            _db.Favoritos.RemoveRange(_db.Favoritos.Where(f => f.IdUsuario == id));
-        }
-
-        await _db.SaveChangesAsync();
-        await transaction.CommitAsync();
-        return NoContent();
+        var actualizado = await _usuariosServices.AsignarRolAsync(id, nombreRol);
+        return actualizado ? NoContent() : BadRequest("Rol inválido");
     }
 }
