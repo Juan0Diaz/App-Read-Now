@@ -28,6 +28,7 @@ builder.Services.AddScoped<IPrestamosServices, PrestamosServices>();
 builder.Services.AddScoped<IFavoritosServices, FavoritosServices>();
 builder.Services.AddScoped<IGenerosServices, GenerosServices>();
 builder.Services.AddScoped<ILibrosServices, LibrosServices>();
+builder.Services.AddScoped<IPublicacionesServices, PublicacionesServices>();
 
 builder.Services.AddScoped<IClaimsTransformation, RoleClaimsTransformation>();
 
