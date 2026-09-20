@@ -1,12 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { isDemoMode, MOCK_LIBROS, MOCK_GENEROS } from '../lib/supabase';
-import { getPublicaciones } from '../microservicios/Publicaciones';
-import { getLibro } from '../microservicios/Libros';
 import { solicitarPrestamo } from '../microservicios/prestamos';
-import { Libro, Genero, User } from '../types';
+import { Genero } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { useFavoritos } from '../hooks/useFavoritos';
+import { useLibroDetalle } from '../hooks/useLibroDetalle';
 import { ArrowLeft, Heart, Calendar, Bookmark, User as UserIcon, Tag } from 'lucide-react';
 import { Button, buttonVariants } from '../components/ui/Button';
 
@@ -14,47 +12,8 @@ export const BookDetail = () => {
   const { id } = useParams();
   const { user } = useAuth();
   const { isFavorito, toggleFavorito } = useFavoritos(user);
-
-  const [libro, setLibro] = useState<Libro | null>(null);
-  const [publisher, setPublisher] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { libro, publisher, loading, setLibro } = useLibroDetalle(id);
   const [requestingLoan, setRequestingLoan] = useState(false);
-
-  useEffect(() => {
-    const fetchBook = async () => {
-      const bookId = id?.trim();
-      if (!bookId) {
-        setLibro(null);
-        setLoading(false);
-        return;
-      }
-      setLoading(true);
-
-      if (isDemoMode) {
-        const found = MOCK_LIBROS.find((l: any) => String(l.id_libro) === bookId);
-        setLibro((found as unknown as Libro) ?? null);
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const bookData = await getLibro(bookId);
-        setLibro(bookData);
-
-        // Buscar quién publicó este libro (el backend ya incluye el Usuario anidado).
-        const publicaciones = await getPublicaciones();
-        const propia = publicaciones.find(p => p.id_libro === bookId);
-        if (propia?.usuario) setPublisher(propia.usuario);
-      } catch (err) {
-        console.error('Error al cargar el detalle del libro', err);
-        setLibro(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchBook();
-  }, [id]);
 
   const generosList: Genero[] = libro
     ? [libro.genero, libro.genero_1, libro.genero_2].filter((g): g is Genero => !!g)
