@@ -11,6 +11,9 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddReverseProxy()
+    .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
+
 // ---------- Configuración (variables de entorno / secretos de Codespaces) ----------
 // SUPABASE_DB_CONNECTION_STRING: cadena de conexión a Postgres (Project Settings > Database)
 // SUPABASE_JWT_SECRET: JWT Secret (Project Settings > API > JWT Settings)
@@ -88,6 +91,7 @@ if (app.Environment.IsDevelopment())
 app.UseCors("Frontend");
 app.UseAuthentication();
 app.UseAuthorization();
+app.MapReverseProxy();
 app.MapControllers();
 
 app.Run();

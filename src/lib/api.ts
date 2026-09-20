@@ -1,10 +1,9 @@
 import { supabase } from './supabase';
 import { Libro, Genero, Publicacion, Favorito, User } from '../types';
 
-// En Codespaces, define esta variable en tu .env como la URL forwarded del puerto 5080
-// (Codespaces te la genera automáticamente, algo como https://<nombre>-5080.app.github.dev)
-// En local (fuera de Codespaces) sería http://localhost:5080
-const API_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:5080').replace(/\/+$/, '');
+// En local usa el gateway de YARP: http://localhost:5080/gateway
+// En Codespaces define VITE_API_URL con la URL del puerto 5080 o del gateway forwarded
+const API_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:5080/gateway').replace(/\/+$/, '');
 
 async function authHeader(): Promise<HeadersInit> {
   const { data: { session }, error } = await supabase.auth.getSession();
