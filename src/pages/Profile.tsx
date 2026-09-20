@@ -3,55 +3,52 @@ import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { LogOut, User as UserIcon, Shield, Mail, Edit2, Save, X, AlertTriangle, Moon, Sun } from 'lucide-react';
-import { supabase } from '../lib/supabase';
-import { getMisPublicaciones } from '../microservicios/Publicaciones';
-import { actualizarMiPerfil, cambiarMiRol, eliminarMiCuenta } from '../lib/api';
 import { Role } from '../types';
 import { useNavigate } from 'react-router-dom';
 import { useDarkMode } from '../hooks/useDarkMode';
+import { useProfile } from '../hooks/useProfile';
 
 export const Profile = () => {
   const { user, role, signOut, fetchUserData } = useAuth();
   const navigate = useNavigate();
   const { isDark, setIsDark } = useDarkMode();
-  
+
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isEditingRole, setIsEditingRole] = useState(false);
   const [isEditingPassword, setIsEditingPassword] = useState(false);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const [profileError, setProfileError] = useState('');
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [showRoleChangeConfirm, setShowRoleChangeConfirm] = useState(false);
-  const [roleChangeBookCount, setRoleChangeBookCount] = useState(0);
-  
   const [nombre, setNombre] = useState(user?.nombre || '');
   const [fechaDate, setFechaDate] = useState(user?.fecha_date || '');
-  
-  const parseInitialPhone = (phone: string | null) => {
-    if (!phone) return { code: '+57', num: '' };
-    const codes = ['+57', '+1', '+52', '+34', '+54', '+56', '+51', '+593'];
-    for (const c of codes) {
-      if (phone.startsWith(c)) return { code: c, num: phone.slice(c.length) };
-    }
-    return { code: '+57', num: phone };
-  };
+
+  const {
+    loading,
+    profileError,
+    showDeleteConfirm,
+    setShowDeleteConfirm,
+    showRoleChangeConfirm,
+    setShowRoleChangeConfirm,
+    roleChangeBookCount,
+    parseInitialPhone,
+    handleDeleteAccount: deleteAccount,
+    saveProfile: saveProfileAction,
+    savePassword: savePasswordAction,
+    saveRole: saveRoleAction,
+    executeRoleChange: executeRoleChangeAction,
+  } = useProfile(user, role, fetchUserData, signOut, navigate);
+
   const initialPhone = parseInitialPhone(user?.numero_tel || null);
   const [countryCode, setCountryCode] = useState(initialPhone.code);
   const [phoneNumber, setPhoneNumber] = useState(initialPhone.num);
-  
-  // Antes esto tenía los UUID de los roles hardcodeados (frágil: si alguien
-  // recrea la tabla Rol en Supabase, esos IDs cambian y esto se rompe en
-  // silencio). Ahora se trabaja directo con el nombre del rol.
+
   const roles: { nombre: 'Publicador' | 'Visualizador' }[] = [
     { nombre: 'Publicador' },
-    { nombre: 'Visualizador' }
+    { nombre: 'Visualizador' },
   ];
 
   const [selectedRole, setSelectedRole] = useState<'Publicador' | 'Visualizador'>(
-    role === 'Publicador' ? 'Publicador' : 'Visualizador'
+    role === 'Publicador' ? 'Publicador' : 'Visualizador',
   );
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setSelectedRole(role === 'Publicador' ? 'Publicador' : 'Visualizador');
@@ -63,135 +60,33 @@ export const Profile = () => {
   };
 
   const handleDeleteAccount = async () => {
-    if (!user) return;
-    setLoading(true);
-    try {
-      // Antes esto eran 4 borrados sueltos hechos desde aquí; ahora el backend
-      // lo hace como una sola transacción (ver UsuariosController.DeleteMe).
-      await eliminarMiCuenta();
-      await signOut();
-      navigate('/login');
-    } catch (err: any) {
-      alert('Error eliminando la cuenta: ' + err.message);
-      setLoading(false);
-      setShowDeleteConfirm(false);
-    }
+    await deleteAccount();
+    setShowDeleteConfirm(false);
   };
 
   const saveProfile = async () => {
-    if (!user) return;
-    setProfileError('');
-    
-    if (nombre && nombre.length > 50) {
-      setProfileError("Error: El nombre excede el límite máximo permitido de 50 caracteres.");
-      return;
-    }
-
-    if (fechaDate) {
-      const birthDate = new Date(fechaDate);
-      const today = new Date();
-      if (birthDate > today) {
-        setProfileError("Error: La fecha de nacimiento no puede ser una fecha futura.");
-        return;
-      }
-      
-      let age = today.getFullYear() - birthDate.getFullYear();
-      const m = today.getMonth() - birthDate.getMonth();
-      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
-      }
-      
-      if (age < 18) {
-        setProfileError("Error: Debes ser mayor de 18 años para registrarte.");
-        return;
-      }
-    }
-
-    setLoading(true);
-    try {
-      await actualizarMiPerfil({
-        nombre: nombre || undefined,
-        fecha_date: fechaDate || undefined,
-        numero_tel: phoneNumber ? `${countryCode}${phoneNumber}` : undefined
-      });
-      await fetchUserData(user.id_usuario, user.correo);
-      setIsEditingProfile(false);
-    } catch(err: any) {
-      setProfileError("Error al actualizar: " + err.message);
-    } finally {
-      setLoading(false);
-    }
+    await saveProfileAction(nombre, fechaDate, countryCode, phoneNumber);
+    setIsEditingProfile(false);
   };
 
   const savePassword = async () => {
-    if (!user || !user.correo) return;
-    setLoading(true);
-    try {
-      const { error: signInError } = await supabase.auth.signInWithPassword({ email: user.correo, password: currentPassword });
-      if (signInError) throw new Error("La contraseña actual es incorrecta.");
-      
-      const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[^a-zA-Z\d\s])[^\s]+$/;
-      if (!passwordRegex.test(newPassword)) {
-        throw new Error('La nueva contraseña debe contener letras, números y signos/caracteres especiales, y no debe contener espacios.');
-      }
-
-      const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
-      if (updateError) throw updateError;
-
-      // Nota: ya no se guarda la contraseña en texto plano en la tabla "Usuario".
-      // Supabase Auth es la única fuente de verdad para credenciales; esa columna
-      // era redundante y un riesgo de seguridad innecesario.
-
-      alert("Contraseña actualizada con éxito.");
+    const ok = await savePasswordAction(currentPassword, newPassword);
+    if (ok) {
       setIsEditingPassword(false);
-      setCurrentPassword("");
-      setNewPassword("");
-    } catch(err: any) {
-      alert(err.message);
-    } finally {
-      setLoading(false);
+      setCurrentPassword('');
+      setNewPassword('');
     }
   };
 
   const saveRole = async () => {
-    if (!user) return;
-    setLoading(true);
-    try {
-      if (selectedRole === 'Visualizador' && role === 'Publicador') {
-        const misPublicaciones = await getMisPublicaciones();
-        if (misPublicaciones.length > 0) {
-          setRoleChangeBookCount(misPublicaciones.length);
-          setShowRoleChangeConfirm(true);
-          setLoading(false);
-          return;
-        }
-      }
-
-      await executeRoleChange();
-    } catch(err: any) {
-      alert("Error al verificar cambio de rol: " + err.message);
-      setLoading(false);
-    }
+    await saveRoleAction(selectedRole);
+    setIsEditingRole(false);
   };
 
   const executeRoleChange = async () => {
-    if (!user) return;
-    setLoading(true);
-    try {
-      // Antes esto decidía "insertar o actualizar" en Usuario-Rol desde el
-      // frontend; ahora el backend lo resuelve en un solo endpoint, y además
-      // valida que solo se pueda cambiar entre Visualizador y Publicador
-      // (nunca autoasignarse Administrador).
-      await cambiarMiRol(selectedRole);
-
-      await fetchUserData(user.id_usuario, user.correo);
-      setIsEditingRole(false);
-      setShowRoleChangeConfirm(false);
-    } catch(err: any) {
-      alert("Error al actualizar rol: " + err.message);
-    } finally {
-      setLoading(false);
-    }
+    await executeRoleChangeAction(selectedRole);
+    setIsEditingRole(false);
+    setShowRoleChangeConfirm(false);
   };
 
   return (
@@ -202,8 +97,7 @@ export const Profile = () => {
 
       <div className="p-4 md:p-8 flex-1 overflow-y-auto w-full mx-auto md:max-w-4xl">
         <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden mb-8">
-          <div className="bg-gradient-to-r from-indigo-500 to-purple-600 h-24 md:h-32 w-full relative">
-          </div>
+          <div className="bg-gradient-to-r from-indigo-500 to-purple-600 h-24 md:h-32 w-full relative" />
           <div className="p-6 md:p-8 pt-0 relative">
             <div className="flex flex-col md:flex-row md:justify-between md:items-end -mt-12 md:-mt-16 mb-4 gap-4">
               <div className="w-24 h-24 md:w-32 md:h-32 bg-white rounded-full p-1.5 md:p-2 shadow-lg shrink-0">
@@ -211,11 +105,11 @@ export const Profile = () => {
                   {user?.correo?.charAt(0).toUpperCase()}
                 </div>
               </div>
-              
+
               <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
-                <Button 
-                  onClick={() => setIsDark(!isDark)} 
-                  variant="outline" 
+                <Button
+                  onClick={() => setIsDark(!isDark)}
+                  variant="outline"
                   className="text-indigo-600 border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 font-bold w-full md:w-auto"
                 >
                   {isDark ? <Sun className="h-4 w-4 mr-2" /> : <Moon className="h-4 w-4 mr-2" />}
@@ -237,13 +131,13 @@ export const Profile = () => {
 
               {isEditingRole ? (
                 <div className="bg-slate-50 p-4 border border-slate-200 rounded-xl mb-8 flex items-center gap-4">
-                  <select 
+                  <select
                     value={selectedRole}
                     onChange={(e) => setSelectedRole(e.target.value as 'Publicador' | 'Visualizador')}
                     className="flex-1 bg-white border border-slate-300 rounded-lg px-3 py-2 outline-none"
                     disabled={loading}
                   >
-                    {roles.map(r => (
+                    {roles.map((r) => (
                       <option key={r.nombre} value={r.nombre}>{r.nombre}</option>
                     ))}
                   </select>
@@ -278,22 +172,22 @@ export const Profile = () => {
                   </Button>
                 )}
               </div>
-              
+
               {isEditingProfile ? (
                 <div className="space-y-4 bg-slate-50 p-6 rounded-2xl border border-slate-200">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-bold text-slate-700 mb-1">Nombre</label>
-                      <Input 
-                        value={nombre} 
+                      <Input
+                        value={nombre}
                         onChange={(e) => {
                           const val = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
                           if (val.length <= 50) {
                             setNombre(val);
                           }
-                        }} 
+                        }}
                         maxLength={50}
-                        disabled={loading} 
+                        disabled={loading}
                         className={`bg-white ${nombre.length >= 50 ? 'border-amber-400 focus:ring-amber-500' : ''}`}
                         placeholder="Tu nombre completo"
                       />
@@ -305,10 +199,10 @@ export const Profile = () => {
                     </div>
                     <div>
                       <label className="block text-sm font-bold text-slate-700 mb-1">Fecha de Nacimiento</label>
-                      <Input 
-                        type="date" 
-                        value={fechaDate} 
-                        onChange={(e) => setFechaDate(e.target.value)} 
+                      <Input
+                        type="date"
+                        value={fechaDate}
+                        onChange={(e) => setFechaDate(e.target.value)}
                         disabled={loading}
                         className="bg-white"
                       />
@@ -317,7 +211,7 @@ export const Profile = () => {
                       <div className="sm:col-span-2">
                         <label className="block text-sm font-bold text-slate-700 mb-1">Número de Teléfono (Contacto)</label>
                         <div className="flex gap-2">
-                          <select 
+                          <select
                             value={countryCode}
                             onChange={(e) => setCountryCode(e.target.value)}
                             disabled={loading}
@@ -332,10 +226,10 @@ export const Profile = () => {
                             <option value="+51">🇵🇪 +51</option>
                             <option value="+593">🇪🇨 +593</option>
                           </select>
-                          <Input 
-                            type="tel" 
-                            value={phoneNumber} 
-                            onChange={(e) => setPhoneNumber(e.target.value.replace(/[^0-9]/g, ''))} 
+                          <Input
+                            type="tel"
+                            value={phoneNumber}
+                            onChange={(e) => setPhoneNumber(e.target.value.replace(/[^0-9]/g, ''))}
                             disabled={loading}
                             className="bg-white flex-1"
                             placeholder="Ej: 3001234567"
@@ -370,7 +264,7 @@ export const Profile = () => {
                   <div>
                     <label className="block text-sm font-bold text-slate-700 mb-1">Correo Electrónico</label>
                     <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-slate-500">
-                      {user?.correo} {/* Read-only */}
+                      {user?.correo}
                     </div>
                   </div>
                   <div>
@@ -390,7 +284,7 @@ export const Profile = () => {
                 </div>
               )}
             </div>
-            
+
             <div className="mt-8 space-y-6">
               <div className="flex items-center justify-between border-b border-slate-100 pb-2">
                 <h3 className="text-xl font-bold text-slate-900">Seguridad</h3>
@@ -400,27 +294,27 @@ export const Profile = () => {
                   </Button>
                 )}
               </div>
-              
+
               {isEditingPassword && (
                 <div className="space-y-4 bg-slate-50 p-6 rounded-2xl border border-slate-200">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-bold text-slate-700 mb-1">Contraseña Actual</label>
-                      <Input 
+                      <Input
                         type="password"
-                        value={currentPassword} 
-                        onChange={(e) => setCurrentPassword(e.target.value)} 
-                        disabled={loading} 
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                        disabled={loading}
                         className="bg-white"
                         placeholder="••••••••"
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-bold text-slate-700 mb-1">Nueva Contraseña</label>
-                      <Input 
+                      <Input
                         type="password"
-                        value={newPassword} 
-                        onChange={(e) => setNewPassword(e.target.value)} 
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
                         disabled={loading}
                         className="bg-white"
                         placeholder="Simbolos, números y letras, sin blancos"
@@ -428,7 +322,7 @@ export const Profile = () => {
                     </div>
                   </div>
                   <div className="flex justify-end gap-3 pt-4">
-                    <Button onClick={() => { setIsEditingPassword(false); setCurrentPassword(""); setNewPassword(""); }} disabled={loading} variant="outline">
+                    <Button onClick={() => { setIsEditingPassword(false); setCurrentPassword(''); setNewPassword(''); }} disabled={loading} variant="outline">
                       Cancelar
                     </Button>
                     <Button onClick={savePassword} disabled={loading || !currentPassword || !newPassword} className="bg-indigo-600 hover:bg-indigo-700 text-white">
@@ -441,9 +335,9 @@ export const Profile = () => {
 
             {role !== 'Administrador' && (
               <div className="mt-12 pt-8 border-t border-slate-200 text-center">
-                <Button 
-                  onClick={() => setShowDeleteConfirm(true)} 
-                  variant="outline" 
+                <Button
+                  onClick={() => setShowDeleteConfirm(true)}
+                  variant="outline"
                   className="text-rose-600 border-rose-200 hover:bg-rose-50 hover:text-rose-700"
                 >
                   Eliminar Mi Cuenta
@@ -469,16 +363,16 @@ export const Profile = () => {
               ¿Estás seguro de que deseas proceder?
             </p>
             <div className="flex flex-col gap-3">
-              <Button 
-                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold" 
+              <Button
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
                 onClick={executeRoleChange}
                 disabled={loading}
               >
                 {loading ? 'Cambiando...' : 'Sí, cambiar rol'}
               </Button>
-              <Button 
-                variant="outline" 
-                className="w-full" 
+              <Button
+                variant="outline"
+                className="w-full"
                 onClick={() => setShowRoleChangeConfirm(false)}
                 disabled={loading}
               >
@@ -500,16 +394,16 @@ export const Profile = () => {
               Esta acción es irreversible. Se eliminará permanentemente tu usuario y todos los datos asociados de la base de datos.
             </p>
             <div className="flex flex-col gap-3">
-              <Button 
-                className="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold" 
+              <Button
+                className="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold"
                 onClick={handleDeleteAccount}
                 disabled={loading}
               >
                 {loading ? 'Eliminando...' : 'Sí, eliminar permanentemente'}
               </Button>
-              <Button 
-                variant="outline" 
-                className="w-full" 
+              <Button
+                variant="outline"
+                className="w-full"
                 onClick={() => setShowDeleteConfirm(false)}
                 disabled={loading}
               >
