@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { isDemoMode, MOCK_GENEROS } from '../lib/supabase';
-import { getGeneros } from '../lib/api';
+import { getGeneros } from '../microservicios/Generos';
 import { Genero } from '../types';
 
 /**

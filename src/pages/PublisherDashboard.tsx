@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { BookPlus, List, Edit, Trash2 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
-import { getMisPublicaciones, getPublicaciones, eliminarPublicacionConLibro } from '../lib/api';
+import { getMisPublicaciones, getPublicaciones, eliminarPublicacionConLibro } from '../microservicios/Publicaciones';
 import { Publicacion } from '../types';
 
 export const PublisherDashboard = () => {

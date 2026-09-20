@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { crearLibroConPublicacion } from '../lib/api';
+import { crearLibroConPublicacion } from '../microservicios/Libros';
 import { useGeneros } from '../hooks/useGeneros';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/Button';

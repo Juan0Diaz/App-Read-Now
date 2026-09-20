@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { getLibro, actualizarLibro } from '../lib/api';
+import { getLibro, actualizarLibro } from '../microservicios/Libros';
 import { useGeneros } from '../hooks/useGeneros';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/Button';

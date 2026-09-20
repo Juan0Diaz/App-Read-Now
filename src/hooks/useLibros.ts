@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { isDemoMode, MOCK_LIBROS } from '../lib/supabase';
-import { getLibros } from '../lib/api';
+import { getLibros } from '../microservicios/Libros';
 import { Libro } from '../types';
 
 /**

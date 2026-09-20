@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import { Libro, Genero, Publicacion, Favorito, User } from '../types';
+import { Favorito, User } from '../types';
 
 // En Codespaces, define esta variable en tu .env como la URL forwarded del puerto 5080
 // (Codespaces te la genera automáticamente, algo como https://<nombre>-5080.app.github.dev)
@@ -47,33 +47,6 @@ async function request<T>(path: string | undefined, options: RequestInit = {}): 
   if (res.status === 204) return undefined as T;
   return res.json() as Promise<T>;
 }
-
-// ---------- Libros ----------
-export const getLibros = () => request<Libro[]>('/api/libros');
-export const getLibro = (id: string) => request<Libro>(`/api/libros/${id}`);
-export const crearLibro = (data: Partial<Libro>) =>
-  request<Libro>('/api/libros', { method: 'POST', body: JSON.stringify(data) });
-export const crearLibroConPublicacion = (data: Partial<Libro>) =>
-  request<Libro>('/api/libros/publicar', { method: 'POST', body: JSON.stringify(data) });
-export const actualizarLibro = (id: string, data: Partial<Libro>) =>
-  request<void>(`/api/libros/${id}`, { method: 'PUT', body: JSON.stringify(data) });
-export const eliminarLibro = (id: string) =>
-  request<void>(`/api/libros/${id}`, { method: 'DELETE' });
-
-// ---------- Géneros ----------
-export const getGeneros = () => request<Genero[]>('/api/generos');
-
-// ---------- Publicaciones ----------
-export const getPublicaciones = () => request<Publicacion[]>('/api/publicaciones');
-export const getMisPublicaciones = () => request<Publicacion[]>('/api/publicaciones/mias');
-export const crearPublicacion = (data: Partial<Publicacion>) =>
-  request<Publicacion>('/api/publicaciones', { method: 'POST', body: JSON.stringify(data) });
-export const actualizarPublicacion = (id: string, data: Partial<Publicacion>) =>
-  request<void>(`/api/publicaciones/${id}`, { method: 'PUT', body: JSON.stringify(data) });
-export const eliminarPublicacion = (id: string) =>
-  request<void>(`/api/publicaciones/${id}`, { method: 'DELETE' });
-export const eliminarPublicacionConLibro = (id: string) =>
-  request<void>(`/api/publicaciones/${id}/con-libro`, { method: 'DELETE' });
 
 // ---------- Favoritos ----------
 export const getFavoritos = () => request<Favorito[]>('/api/favoritos');
