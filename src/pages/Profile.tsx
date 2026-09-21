@@ -90,73 +90,75 @@ export const Profile = () => {
   };
 
   return (
-    <div className="flex flex-col h-full animate-in fade-in duration-500">
-      <header className="h-20 bg-white border-b border-slate-200 px-8 flex items-center shrink-0 sticky top-0 z-10 w-full">
-        <h1 className="text-xl font-bold text-slate-900">Perfil de Usuario</h1>
+    <div className="flex h-full flex-col bg-surface-soft text-text-strong animate-in fade-in duration-500">
+      <header className="sticky top-0 z-10 h-20 w-full shrink-0 border-b border-border bg-surface px-8 shadow-sm">
+        <h1 className="flex h-full items-center text-xl font-bold text-text-strong">Perfil de Usuario</h1>
       </header>
 
-      <div className="p-4 md:p-8 flex-1 overflow-y-auto w-full mx-auto md:max-w-4xl">
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden mb-8">
-          <div className="bg-gradient-to-r from-indigo-500 to-purple-600 h-24 md:h-32 w-full relative" />
-          <div className="p-6 md:p-8 pt-0 relative">
-            <div className="flex flex-col md:flex-row md:justify-between md:items-end -mt-12 md:-mt-16 mb-4 gap-4">
-              <div className="w-24 h-24 md:w-32 md:h-32 bg-white rounded-full p-1.5 md:p-2 shadow-lg shrink-0">
-                <div className="w-full h-full bg-indigo-100 rounded-full flex items-center justify-center text-3xl md:text-4xl font-bold text-indigo-700">
+      <div className="mx-auto flex w-full max-w-4xl flex-1 overflow-y-auto p-4 md:p-8">
+        <div className="mb-8 w-full overflow-hidden rounded-3xl border border-border bg-surface shadow-md">
+          <div className="relative h-24 w-full bg-gradient-to-r from-primary to-secondary md:h-32" />
+          <div className="relative p-6 pt-0 md:p-8 md:pt-0">
+            <div className="mb-4 flex -mt-12 flex-col gap-4 md:-mt-16 md:flex-row md:items-end md:justify-between">
+              <div className="h-24 w-24 shrink-0 rounded-full border-4 border-white bg-primary p-1.5 shadow-lg md:h-32 md:w-32 md:p-2">
+                <div className="flex h-full w-full items-center justify-center rounded-full bg-primary/10 text-3xl font-bold text-primary md:text-4xl">
                   {user?.correo?.charAt(0).toUpperCase()}
                 </div>
               </div>
 
-              <div className="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
+              <div className="flex w-full flex-col items-center gap-3 md:w-auto md:flex-row">
                 <Button
                   onClick={() => setIsDark(!isDark)}
                   variant="outline"
-                  className="text-indigo-600 border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 font-bold w-full md:w-auto"
+                  aria-label={isDark ? 'Activar modo claro' : 'Activar modo oscuro'}
+                  aria-pressed={isDark}
+                  className="w-full border-primary/20 text-primary hover:bg-primary/5 hover:text-primary md:w-auto"
                 >
-                  {isDark ? <Sun className="h-4 w-4 mr-2" /> : <Moon className="h-4 w-4 mr-2" />}
+                  {isDark ? <Sun className="mr-2 h-4 w-4" /> : <Moon className="mr-2 h-4 w-4" />}
                   {isDark ? 'Modo Claro' : 'Modo Oscuro'}
                 </Button>
-                <Button onClick={handleLogout} variant="outline" className="text-rose-600 border-rose-200 hover:bg-rose-50 hover:text-rose-700 font-bold w-full md:w-auto">
-                  <LogOut className="h-4 w-4 mr-2" />
+                <Button onClick={handleLogout} variant="outline" className="w-full border-error/20 text-error hover:bg-error/10 hover:text-error md:w-auto">
+                  <LogOut className="mr-2 h-4 w-4" />
                   Cerrar Sesión
                 </Button>
               </div>
             </div>
 
             <div>
-              <h2 className="text-3xl font-bold text-slate-900 mb-1">{user?.nombre || user?.correo?.split('@')[0]}</h2>
-              <div className="flex items-center gap-2 text-slate-500 mb-6">
+              <h2 className="mb-1 text-3xl font-bold text-text-strong">{user?.nombre || user?.correo?.split('@')[0]}</h2>
+              <div className="mb-6 flex items-center gap-2 text-text-muted">
                 <Mail className="h-4 w-4" />
                 <span>{user?.correo}</span>
               </div>
 
               {isEditingRole ? (
-                <div className="bg-slate-50 p-4 border border-slate-200 rounded-xl mb-8 flex items-center gap-4">
+                <div className="mb-8 flex items-center gap-4 rounded-xl border border-border bg-surface-soft p-4">
                   <select
                     value={selectedRole}
                     onChange={(e) => setSelectedRole(e.target.value as 'Publicador' | 'Visualizador')}
-                    className="flex-1 bg-white border border-slate-300 rounded-lg px-3 py-2 outline-none"
+                    className="flex-1 rounded-lg border border-border bg-surface px-3 py-2 text-text-strong outline-none focus:border-primary"
                     disabled={loading}
                   >
                     {roles.map((r) => (
                       <option key={r.nombre} value={r.nombre}>{r.nombre}</option>
                     ))}
                   </select>
-                  <Button onClick={saveRole} disabled={loading} size="sm" className="bg-indigo-600 hover:bg-indigo-700 text-white">
-                    <Save className="h-4 w-4 mr-2" /> Guardar
+                  <Button onClick={saveRole} aria-label="Guardar rol de usuario" disabled={loading} size="sm" variant="accent">
+                    <Save className="mr-2 h-4 w-4" /> Guardar
                   </Button>
-                  <Button onClick={() => setIsEditingRole(false)} disabled={loading} size="sm" variant="ghost">
+                  <Button onClick={() => setIsEditingRole(false)} aria-label="Cancelar edición de rol" disabled={loading} size="sm" variant="ghost">
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
               ) : (
-                <div className="flex items-center gap-4 mb-8">
-                  <div className="flex items-center gap-2 bg-indigo-50 text-indigo-700 px-4 py-2 rounded-xl inline-flex font-semibold">
+                <div className="mb-8 flex items-center gap-4">
+                  <div className="inline-flex items-center gap-2 rounded-xl bg-secondary/10 px-4 py-2 font-semibold text-secondary">
                     <Shield className="h-5 w-5" />
                     <span>Rol actual: {role}</span>
                   </div>
                   {role !== 'Desactivado' && (
-                    <Button onClick={() => setIsEditingRole(true)} variant="ghost" size="sm" className="text-slate-500 hover:text-indigo-600">
-                      <Edit2 className="h-4 w-4 mr-1" /> Editar
+                    <Button onClick={() => setIsEditingRole(true)} aria-label="Editar rol de usuario" variant="ghost" size="sm" className="text-primary hover:text-primary-hover">
+                      <Edit2 className="mr-1 h-4 w-4" /> Editar
                     </Button>
                   )}
                 </div>
@@ -164,21 +166,22 @@ export const Profile = () => {
             </div>
 
             <div className="space-y-6">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                <h3 className="text-xl font-bold text-slate-900">Información del Perfil</h3>
+              <div className="flex items-center justify-between border-b border-border pb-2">
+                <h3 className="text-xl font-bold text-text-strong">Información del Perfil</h3>
                 {!isEditingProfile && (
-                  <Button onClick={() => setIsEditingProfile(true)} variant="ghost" size="sm" className="text-slate-500 hover:text-indigo-600">
-                    <Edit2 className="h-4 w-4 mr-1" /> Editar Perfil
+                  <Button onClick={() => setIsEditingProfile(true)} aria-label="Editar información de perfil" variant="ghost" size="sm" className="text-primary hover:text-primary-hover">
+                    <Edit2 className="mr-1 h-4 w-4" /> Editar Perfil
                   </Button>
                 )}
               </div>
 
               {isEditingProfile ? (
-                <div className="space-y-4 bg-slate-50 p-6 rounded-2xl border border-slate-200">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4 rounded-2xl border border-border bg-surface-soft p-6">
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div>
-                      <label className="block text-sm font-bold text-slate-700 mb-1">Nombre</label>
+                      <label htmlFor="profile-name" className="mb-1 block text-sm font-bold text-text-body">Nombre</label>
                       <Input
+                        id="profile-name"
                         value={nombre}
                         onChange={(e) => {
                           const val = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
@@ -188,34 +191,36 @@ export const Profile = () => {
                         }}
                         maxLength={50}
                         disabled={loading}
-                        className={`bg-white ${nombre.length >= 50 ? 'border-amber-400 focus:ring-amber-500' : ''}`}
+                        className={`bg-surface ${nombre.length >= 50 ? 'border-warning focus:ring-warning' : ''}`}
                         placeholder="Tu nombre completo"
                       />
                       {nombre.length >= 50 && (
-                        <p className="text-xs text-amber-600 mt-1 font-semibold">
+                        <p className="mt-1 text-xs font-semibold text-warning">
                           Has alcanzado el límite máximo de 50 caracteres.
                         </p>
                       )}
                     </div>
                     <div>
-                      <label className="block text-sm font-bold text-slate-700 mb-1">Fecha de Nacimiento</label>
+                      <label htmlFor="profile-date" className="mb-1 block text-sm font-bold text-text-body">Fecha de Nacimiento</label>
                       <Input
+                        id="profile-date"
                         type="date"
                         value={fechaDate}
                         onChange={(e) => setFechaDate(e.target.value)}
                         disabled={loading}
-                        className="bg-white"
+                        className="bg-surface"
                       />
                     </div>
                     {role === 'Publicador' && (
                       <div className="sm:col-span-2">
-                        <label className="block text-sm font-bold text-slate-700 mb-1">Número de Teléfono (Contacto)</label>
+                        <label htmlFor="profile-phone" className="mb-1 block text-sm font-bold text-text-body">Número de Teléfono (Contacto)</label>
                         <div className="flex gap-2">
                           <select
+                            id="profile-phone-country"
                             value={countryCode}
                             onChange={(e) => setCountryCode(e.target.value)}
                             disabled={loading}
-                            className="bg-white border border-slate-200 rounded-xl px-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none w-28 shrink-0 appearance-none bg-[url('data:image/svg+xml;base64,PHN2ZyBmaWxsPSJub25lIiBoZWlnaHQ9IjIwIiB2aWV3Qm94PSIwIDAgMjAgMjAiIHdpZHRoPSIyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNNSA3LjVMMTAgMTIuNUwxNSA3LjUiIHN0cm9rZT0iIzZCNzI4MCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2Utd2lkdGg9IjEuNSIvPjwvc3ZnPg==')] bg-no-repeat bg-[position:right_0.5rem_center]"
+                            className="w-28 shrink-0 appearance-none rounded-xl border border-border bg-surface px-3 py-2 text-sm text-text-strong outline-none focus:border-primary"
                           >
                             <option value="+57">🇨🇴 +57</option>
                             <option value="+1">🇺🇸 +1</option>
@@ -227,11 +232,12 @@ export const Profile = () => {
                             <option value="+593">🇪🇨 +593</option>
                           </select>
                           <Input
+                            id="profile-phone"
                             type="tel"
                             value={phoneNumber}
                             onChange={(e) => setPhoneNumber(e.target.value.replace(/[^0-9]/g, ''))}
                             disabled={loading}
-                            className="bg-white flex-1"
+                            className="flex-1 bg-surface"
                             placeholder="Ej: 3001234567"
                           />
                         </div>
@@ -239,7 +245,7 @@ export const Profile = () => {
                     )}
                   </div>
                   {profileError && (
-                    <div className="p-3 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl flex items-center gap-2 text-sm font-semibold">
+                    <div className="flex items-center gap-2 rounded-xl border border-error/20 bg-error/10 p-3 text-sm font-semibold text-error">
                       <AlertTriangle className="h-4 w-4 shrink-0" />
                       <p>{profileError}</p>
                     </div>
@@ -248,35 +254,35 @@ export const Profile = () => {
                     <Button onClick={() => setIsEditingProfile(false)} disabled={loading} variant="outline">
                       Cancelar
                     </Button>
-                    <Button onClick={saveProfile} disabled={loading} className="bg-indigo-600 hover:bg-indigo-700 text-white">
+                    <Button onClick={saveProfile} aria-label="Guardar cambios del perfil" disabled={loading} variant="accent">
                       {loading ? 'Guardando...' : 'Guardar Cambios'}
                     </Button>
                   </div>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                   <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-1">Nombre</label>
-                    <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800">
+                    <label htmlFor="profile-name-display" className="mb-1 block text-sm font-bold text-text-body">Nombre</label>
+                    <div id="profile-name-display" className="rounded-xl border border-border bg-surface-soft p-3 text-text-strong">
                       {user?.nombre || 'No especificado'}
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-1">Correo Electrónico</label>
-                    <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-slate-500">
+                    <label htmlFor="profile-email-display" className="mb-1 block text-sm font-bold text-text-body">Correo Electrónico</label>
+                    <div id="profile-email-display" className="rounded-xl border border-border bg-surface-soft p-3 text-text-muted">
                       {user?.correo}
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-bold text-slate-700 mb-1">Fecha de Nacimiento</label>
-                    <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800">
+                    <label htmlFor="profile-date-display" className="mb-1 block text-sm font-bold text-text-body">Fecha de Nacimiento</label>
+                    <div id="profile-date-display" className="rounded-xl border border-border bg-surface-soft p-3 text-text-strong">
                       {user?.fecha_date ? new Date(user.fecha_date).toLocaleDateString() : 'No especificada'}
                     </div>
                   </div>
                   {role === 'Publicador' && (
                     <div>
-                      <label className="block text-sm font-bold text-slate-700 mb-1">Número de Teléfono</label>
-                      <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-800">
+                      <label htmlFor="profile-phone-display" className="mb-1 block text-sm font-bold text-text-body">Número de Teléfono</label>
+                      <div id="profile-phone-display" className="rounded-xl border border-border bg-surface-soft p-3 text-text-strong">
                         {user?.numero_tel || 'No especificado'}
                       </div>
                     </div>
@@ -286,38 +292,40 @@ export const Profile = () => {
             </div>
 
             <div className="mt-8 space-y-6">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                <h3 className="text-xl font-bold text-slate-900">Seguridad</h3>
+              <div className="flex items-center justify-between border-b border-border pb-2">
+                <h3 className="text-xl font-bold text-text-strong">Seguridad</h3>
                 {!isEditingPassword && (
-                  <Button onClick={() => setIsEditingPassword(true)} variant="ghost" size="sm" className="text-slate-500 hover:text-indigo-600">
-                    <Edit2 className="h-4 w-4 mr-1" /> Cambiar Contraseña
+                  <Button onClick={() => setIsEditingPassword(true)} aria-label="Cambiar contraseña" variant="ghost" size="sm" className="text-primary hover:text-primary-hover">
+                    <Edit2 className="mr-1 h-4 w-4" /> Cambiar Contraseña
                   </Button>
                 )}
               </div>
 
               {isEditingPassword && (
-                <div className="space-y-4 bg-slate-50 p-6 rounded-2xl border border-slate-200">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4 rounded-2xl border border-border bg-surface-soft p-6">
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                     <div>
-                      <label className="block text-sm font-bold text-slate-700 mb-1">Contraseña Actual</label>
+                      <label htmlFor="current-password" className="mb-1 block text-sm font-bold text-text-body">Contraseña Actual</label>
                       <Input
+                        id="current-password"
                         type="password"
                         value={currentPassword}
                         onChange={(e) => setCurrentPassword(e.target.value)}
                         disabled={loading}
-                        className="bg-white"
+                        className="bg-surface"
                         placeholder="••••••••"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-bold text-slate-700 mb-1">Nueva Contraseña</label>
+                      <label htmlFor="new-password" className="mb-1 block text-sm font-bold text-text-body">Nueva Contraseña</label>
                       <Input
+                        id="new-password"
                         type="password"
                         value={newPassword}
                         onChange={(e) => setNewPassword(e.target.value)}
                         disabled={loading}
-                        className="bg-white"
-                        placeholder="Simbolos, números y letras, sin blancos"
+                        className="bg-surface"
+                        placeholder="Símbolos, números y letras, sin blancos"
                       />
                     </div>
                   </div>
@@ -325,7 +333,7 @@ export const Profile = () => {
                     <Button onClick={() => { setIsEditingPassword(false); setCurrentPassword(''); setNewPassword(''); }} disabled={loading} variant="outline">
                       Cancelar
                     </Button>
-                    <Button onClick={savePassword} disabled={loading || !currentPassword || !newPassword} className="bg-indigo-600 hover:bg-indigo-700 text-white">
+                    <Button onClick={savePassword} aria-label="Guardar nueva contraseña" disabled={loading || !currentPassword || !newPassword} variant="accent">
                       {loading ? 'Guardando...' : 'Cambiar Contraseña'}
                     </Button>
                   </div>
@@ -334,11 +342,11 @@ export const Profile = () => {
             </div>
 
             {role !== 'Administrador' && (
-              <div className="mt-12 pt-8 border-t border-slate-200 text-center">
+              <div className="mt-12 border-t border-border pt-8 text-center">
                 <Button
                   onClick={() => setShowDeleteConfirm(true)}
                   variant="outline"
-                  className="text-rose-600 border-rose-200 hover:bg-rose-50 hover:text-rose-700"
+                  className="border-error/20 text-error hover:bg-error/10 hover:text-error"
                 >
                   Eliminar Mi Cuenta
                 </Button>

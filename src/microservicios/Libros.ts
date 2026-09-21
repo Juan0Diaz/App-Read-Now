@@ -3,7 +3,11 @@ import { Libro } from '../types';
 
 const API_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:5080').replace(/\/+$/, '');
 
-async function authHeader(): Promise<HeadersInit> {
+async function authHeader(requiredAuth = true): Promise<HeadersInit> {
+  if (!supabase) {
+    return {};
+  }
+
   const { data: { session }, error } = await supabase.auth.getSession();
 
   if (error) {
@@ -11,16 +15,19 @@ async function authHeader(): Promise<HeadersInit> {
   }
 
   if (!session?.access_token) {
-    throw new Error('Debes iniciar sesión para acceder a esta información.');
+    if (requiredAuth) {
+      throw new Error('Debes iniciar sesión para acceder a esta información.');
+    }
+    return {};
   }
 
   return { Authorization: `Bearer ${session.access_token}` };
 }
 
-async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+async function request<T>(path: string, options: RequestInit = {}, requiredAuth = true): Promise<T> {
   const headers = {
     'Content-Type': 'application/json',
-    ...(await authHeader()),
+    ...(await authHeader(requiredAuth)),
     ...options.headers,
   };
 
@@ -41,13 +48,13 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   return response.json() as Promise<T>;
 }
 
-export const getLibros = () => request<Libro[]>('/api/libros');
-export const getLibro = (id: string) => request<Libro>(`/api/libros/${id}`);
+export const getLibros = () => request<Libro[]>('/api/libros', {}, false);
+export const getLibro = (id: string) => request<Libro>(`/api/libros/${id}`, {}, false);
 export const crearLibro = (data: Partial<Libro>) =>
-  request<Libro>('/api/libros', { method: 'POST', body: JSON.stringify(data) });
+  request<Libro>('/api/libros', { method: 'POST', body: JSON.stringify(data) }, true);
 export const crearLibroConPublicacion = (data: Partial<Libro>) =>
-  request<Libro>('/api/libros/publicar', { method: 'POST', body: JSON.stringify(data) });
+  request<Libro>('/api/libros/publicar', { method: 'POST', body: JSON.stringify(data) }, true);
 export const actualizarLibro = (id: string, data: Partial<Libro>) =>
-  request<void>(`/api/libros/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+  request<void>(`/api/libros/${id}`, { method: 'PUT', body: JSON.stringify(data) }, true);
 export const eliminarLibro = (id: string) =>
-  request<void>(`/api/libros/${id}`, { method: 'DELETE' });
+  request<void>(`/api/libros/${id}`, { method: 'DELETE' }, true);

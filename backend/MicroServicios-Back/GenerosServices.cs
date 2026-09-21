@@ -22,9 +22,28 @@ public sealed class GenerosServices : IGenerosServices
 
 	public async Task<IReadOnlyList<Genero>> ObtenerTodosAsync()
 	{
-		return await _db.Generos
+		var generos = await _db.Generos
 			.AsNoTracking()
 			.ToListAsync();
+
+		if (generos.Count == 0)
+		{
+			var defaults = new[]
+			{
+				new Genero { IdGenero = Guid.NewGuid(), NombreGenero = "Ficción" },
+				new Genero { IdGenero = Guid.NewGuid(), NombreGenero = "Ciencia" },
+				new Genero { IdGenero = Guid.NewGuid(), NombreGenero = "Historia" },
+				new Genero { IdGenero = Guid.NewGuid(), NombreGenero = "Romance" },
+				new Genero { IdGenero = Guid.NewGuid(), NombreGenero = "Tecnología" },
+				new Genero { IdGenero = Guid.NewGuid(), NombreGenero = "Biografía" }
+			};
+
+			_db.Generos.AddRange(defaults);
+			await _db.SaveChangesAsync();
+			return defaults;
+		}
+
+		return generos;
 	}
 
 	public async Task<Genero> CrearAsync(Genero genero)

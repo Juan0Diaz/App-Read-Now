@@ -114,8 +114,8 @@ export const AdminDashboard = () => {
                       {u.id_usuario !== user.id_usuario && u.correo !== 'admin@gmail.com' && u.correo !== 'admin1@gmail.com' && (
                         <Button
                           onClick={() => handleRoleChange(u.id_usuario, userRole)}
-                          variant={userRole === 'Desactivado' ? 'outline' : 'default'}
-                          className={userRole === 'Desactivado' ? '' : 'bg-rose-600 hover:bg-rose-700 text-white'}
+                          variant={userRole === 'Desactivado' ? 'outline' : 'destructive'}
+                          className={userRole === 'Desactivado' ? '' : 'text-white'}
                           size="sm"
                           disabled={actionLoading}
                         >
