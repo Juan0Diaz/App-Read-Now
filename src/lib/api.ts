@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import { Favorito, User } from '../types';
+import { User } from '../types';
 
 // En Codespaces, define esta variable en tu .env como la URL forwarded del puerto 5080
 // (Codespaces te la genera automáticamente, algo como https://<nombre>-5080.app.github.dev)
@@ -47,13 +47,6 @@ async function request<T>(path: string | undefined, options: RequestInit = {}): 
   if (res.status === 204) return undefined as T;
   return res.json() as Promise<T>;
 }
-
-// ---------- Favoritos ----------
-export const getFavoritos = () => request<Favorito[]>('/api/favoritos');
-export const agregarFavorito = (idLibro: string) =>
-  request<void>(`/api/favoritos/${idLibro}`, { method: 'POST' });
-export const quitarFavorito = (idLibro: string) =>
-  request<void>(`/api/favoritos/${idLibro}`, { method: 'DELETE' });
 
 // ---------- Usuarios ----------
 export const getMiPerfil = () => request<User>('/api/usuarios/me');
