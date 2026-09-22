@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import { Favorito, User } from '../types';
+import { Favorito } from '../types';
 
 // En Codespaces, define esta variable en tu .env como la URL forwarded del puerto 5080
 // (Codespaces te la genera automáticamente, algo como https://<nombre>-5080.app.github.dev)
@@ -55,17 +55,3 @@ export const agregarFavorito = (idLibro: string) =>
 export const quitarFavorito = (idLibro: string) =>
   request<void>(`/api/favoritos/${idLibro}`, { method: 'DELETE' });
 
-// ---------- Usuarios ----------
-export const getMiPerfil = () => request<User>('/api/usuarios/me');
-export const actualizarMiPerfil = (data: { nombre?: string; fecha_date?: string; numero_tel?: string }) =>
-  request<void>('/api/usuarios/me', { method: 'PUT', body: JSON.stringify(data) });
-export const cambiarMiRol = (nombreRol: 'Visualizador' | 'Publicador') =>
-  request<void>('/api/usuarios/me/rol', { method: 'PUT', body: JSON.stringify(nombreRol) });
-export const eliminarMiCuenta = () =>
-  request<void>('/api/usuarios/me', { method: 'DELETE' });
-export const getUsuarios = () => request<User[]>('/api/usuarios');
-export const asignarRol = (idUsuario: string, nombreRol: string) =>
-  request<void>(`/api/usuarios/${idUsuario}/rol`, {
-    method: 'PUT',
-    body: JSON.stringify(nombreRol),
-  });
