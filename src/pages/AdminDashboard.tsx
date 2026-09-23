@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Navigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
-import { getUsuarios, asignarRol } from '../lib/api';
+import { getUsuarios, asignarRol } from '../microservicios/Usuarios';
 import { User } from '../types';
 import { AlertTriangle } from 'lucide-react';
 
