@@ -69,22 +69,39 @@ public sealed class UsuariosServices : IUsuariosServices
             return false;
         }
 
-        var actual = await _db.UsuarioRoles.FirstOrDefaultAsync(ur => ur.IdUsuario == idUsuario);
-        if (actual is null)
+        await using var transaction = await _db.Database.BeginTransactionAsync();
+        try
         {
-            _db.UsuarioRoles.Add(new UsuarioRol
+            var actual = await _db.UsuarioRoles.FirstOrDefaultAsync(ur => ur.IdUsuario == idUsuario);
+            if (actual is null)
             {
-                IdUsuario = idUsuario,
-                IdRol = rol.IdRol
-            });
-        }
-        else
-        {
-            actual.IdRol = rol.IdRol;
-        }
+                _db.UsuarioRoles.Add(new UsuarioRol
+                {
+                    IdUsuario = idUsuario,
+                    IdRol = rol.IdRol
+                });
+            }
+            else if (actual.IdRol != rol.IdRol)
+            {
+                _db.UsuarioRoles.Remove(actual);
+                await _db.SaveChangesAsync();
 
-        await _db.SaveChangesAsync();
-        return true;
+                _db.UsuarioRoles.Add(new UsuarioRol
+                {
+                    IdUsuario = idUsuario,
+                    IdRol = rol.IdRol
+                });
+            }
+
+            await _db.SaveChangesAsync();
+            await transaction.CommitAsync();
+            return true;
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 
     public async Task<bool> EliminarCuentaAsync(Guid idUsuario)
@@ -135,9 +152,12 @@ public sealed class UsuariosServices : IUsuariosServices
             {
                 _db.UsuarioRoles.Add(new UsuarioRol { IdUsuario = idUsuario, IdRol = rol.IdRol });
             }
-            else
+            else if (actual.IdRol != rol.IdRol)
             {
-                actual.IdRol = rol.IdRol;
+                _db.UsuarioRoles.Remove(actual);
+                await _db.SaveChangesAsync();
+
+                _db.UsuarioRoles.Add(new UsuarioRol { IdUsuario = idUsuario, IdRol = rol.IdRol });
             }
 
             if (nombreRol == "Desactivado")
