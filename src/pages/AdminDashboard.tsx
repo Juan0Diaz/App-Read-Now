@@ -74,40 +74,40 @@ export const AdminDashboard = () => {
   }
 
   return (
-    <div className="flex flex-col h-full animate-in fade-in duration-500">
-      <header className="h-20 bg-white border-b border-slate-200 px-8 flex items-center shrink-0 sticky top-0 z-10 w-full">
-        <h1 className="text-xl font-bold text-slate-900">Admin Dashboard</h1>
+    <div className="flex h-full flex-col animate-in fade-in bg-surface-soft text-text-strong duration-500 dark:bg-surface-soft">
+      <header className="sticky top-0 z-10 flex h-20 w-full shrink-0 items-center border-b border-border bg-surface px-8 dark:border-border dark:bg-surface">
+        <h1 className="text-xl font-bold text-text-strong">Admin Dashboard</h1>
       </header>
 
-      <div className="p-8 flex-1 overflow-y-auto max-w-6xl mx-auto w-full">
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Gestión de Usuarios</h2>
+      <div className="mx-auto flex w-full max-w-6xl flex-1 overflow-y-auto p-8">
+        <div className="mb-8 w-full">
+          <h2 className="text-2xl font-bold tracking-tight text-text-strong">Gestión de Usuarios</h2>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 overflow-hidden">
+        <div className="overflow-hidden rounded-2xl border border-border bg-surface p-6 shadow-sm">
           {loading ? (
-            <div className="text-center py-10 text-slate-500 font-semibold">Cargando usuarios...</div>
+            <div className="py-10 text-center text-sm font-semibold text-text-muted">Cargando usuarios...</div>
           ) : (
             <div className="space-y-4">
               {users.map((u) => {
                 const userRole = getRoleName(u);
                 return (
-                  <div key={u.id_usuario} className={`flex flex-col sm:flex-row sm:items-center justify-between p-4 border border-slate-100/50 hover:bg-slate-50 rounded-xl transition-colors ${userRole === 'Desactivado' ? 'opacity-60 grayscale' : ''}`}>
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                      <div className={`h-10 w-10 ${userRole === 'Desactivado' ? 'bg-slate-200 text-slate-500' : 'bg-indigo-100 text-indigo-700'} rounded-full flex items-center justify-center font-bold shrink-0`}>
+                  <div key={u.id_usuario} className={`flex flex-col justify-between rounded-xl border border-border p-4 transition-colors hover:bg-surface-soft sm:flex-row sm:items-center ${userRole === 'Desactivado' ? 'opacity-60 grayscale' : ''}`}>
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                      <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full font-bold ${userRole === 'Desactivado' ? 'bg-surface-muted text-text-muted' : 'bg-primary/10 text-primary'}`}>
                         {(u.nombre || u.correo || '?').charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <div className="font-semibold text-slate-900">{u.nombre || 'Sin nombre'}</div>
-                        <div className="text-sm text-slate-500">{u.correo}</div>
+                        <div className="font-semibold text-text-strong">{u.nombre || 'Sin nombre'}</div>
+                        <div className="text-sm text-text-muted">{u.correo}</div>
                       </div>
                     </div>
-                    <div className="mt-4 sm:mt-0 flex items-center gap-4">
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                        userRole === 'Publicador' ? 'bg-indigo-100 text-indigo-700' :
-                        userRole === 'Administrador' ? 'bg-rose-100 text-rose-700' :
-                        userRole === 'Desactivado' ? 'bg-slate-200 text-slate-600' :
-                        'bg-emerald-100 text-emerald-700'
+                    <div className="mt-4 flex items-center gap-4 sm:mt-0">
+                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                        userRole === 'Publicador' ? 'bg-primary/10 text-primary' :
+                        userRole === 'Administrador' ? 'bg-error/10 text-error' :
+                        userRole === 'Desactivado' ? 'bg-surface-muted text-text-muted' :
+                        'bg-success-soft text-success'
                       }`}>
                         {userRole.toUpperCase()}
                       </span>
@@ -133,12 +133,12 @@ export const AdminDashboard = () => {
 
       {deactivateConfirm && (
         <div className="fixed inset-0 bg-slate-900/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
-            <div className="flex justify-center mb-4 text-rose-500">
+          <div className="w-full max-w-sm rounded-2xl bg-surface p-6 shadow-xl dark:bg-slate-900">
+            <div className="mb-4 flex justify-center text-rose-500">
               <AlertTriangle className="h-12 w-12" />
             </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-2 text-center">¿Desactivar usuario?</h3>
-            <p className="text-slate-600 text-sm mb-6 text-center">
+            <h3 className="mb-2 text-center text-xl font-bold text-text-strong dark:text-white">¿Desactivar usuario?</h3>
+            <p className="mb-6 text-center text-sm text-text-body dark:text-slate-300">
               El usuario perderá el acceso a funcionalidades y sus favoritos serán eliminados.
             </p>
             <div className="flex flex-col gap-3">

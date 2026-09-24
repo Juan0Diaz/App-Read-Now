@@ -17,6 +17,8 @@ export const Layout = () => {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  const profileInitial = (user?.nombre || user?.correo || 'U').charAt(0).toUpperCase();
+
   const handleLogout = async () => {
     await signOut();
     navigate('/login');
@@ -40,7 +42,7 @@ export const Layout = () => {
   };
 
   return (
-    <div className="bg-surface-soft min-h-screen w-full flex flex-col md:flex-row font-sans text-text-strong overflow-hidden dark:bg-surface-soft dark:text-text-strong">
+    <div className="flex h-screen w-full overflow-hidden bg-surface-soft font-sans text-text-strong dark:bg-surface-soft dark:text-text-strong md:flex-row">
       {/* Mobile Top Header */}
       <header className="md:hidden bg-surface border-b border-border p-4 flex items-center justify-between shrink-0 z-30 h-[73px] dark:bg-surface dark:border-border">
         <div className="flex items-center gap-2">
@@ -50,8 +52,8 @@ export const Layout = () => {
           <span className="font-bold text-lg tracking-tight text-text-strong">READNOW</span>
         </div>
         {user ? (
-          <Link to="/perfil" className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold border border-primary/20">
-            {user.correo?.charAt(0).toUpperCase()}
+          <Link to="/perfil" className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold border border-primary/20 dark:bg-primary/20 dark:text-white">
+            {profileInitial}
           </Link>
         ) : (
           <Link to="/login" className="text-sm font-semibold text-primary">Entrar</Link>
@@ -59,33 +61,33 @@ export const Layout = () => {
       </header>
 
       {/* Sidebar Navigation */}
-      <aside className="w-64 bg-surface border-r border-border flex-col h-screen shrink-0 sticky top-0 hidden md:flex dark:bg-surface dark:border-border">
-        <div className="p-6 flex items-center gap-3">
-          <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20 shrink-0">
-            <Library className="w-6 h-6" />
+      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-border bg-surface dark:border-border dark:bg-surface md:flex">
+        <div className="flex items-center gap-3 p-6">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-white shadow-lg shadow-primary/20">
+            <Library className="h-6 w-6" />
           </div>
-          <span className="font-bold text-xl tracking-tight text-text-strong truncate">READNOW</span>
+          <span className="truncate text-xl font-bold tracking-tight text-text-strong">READNOW</span>
         </div>
-        
-        <nav className="flex-1 px-4 space-y-1 mt-4 overflow-y-auto">
+
+        <nav className="mt-4 flex-1 space-y-1 overflow-y-auto px-4">
           {role !== 'Desactivado' && <NavLink to="/" icon={<LayoutDashboard className="w-5 h-5" />} label="Catálogo" />}
-          
+
           {user && (
             <>
               {role !== 'Desactivado' && <NavLink to="/favoritos" icon={<Heart className="w-5 h-5" />} label="Mis Favoritos" />}
               {role !== 'Desactivado' && <NavLink to="/prestamos" icon={<Clock className="w-5 h-5" />} label="Mis Préstamos" />}
               <NavLink to="/perfil" icon={<User className="w-5 h-5" />} label="Mi Perfil" />
-              
+
               {role === 'Publicador' && (
                 <>
-                  <div className="pt-8 pb-2 px-4 text-xs font-semibold uppercase tracking-[0.2em] text-text-muted">PUBLICADOR</div>
+                  <div className="px-4 pb-2 pt-8 text-xs font-semibold uppercase tracking-[0.2em] text-text-muted">PUBLICADOR</div>
                   <NavLink to="/publicador/libros" icon={<BookOpen className="w-5 h-5" />} label="Mis Publicaciones" />
                 </>
               )}
-              
+
               {role === 'Administrador' && (
                 <>
-                  <div className="pt-8 pb-2 px-4 text-xs font-semibold uppercase tracking-[0.2em] text-text-muted">ADMIN</div>
+                  <div className="px-4 pb-2 pt-8 text-xs font-semibold uppercase tracking-[0.2em] text-text-muted">ADMIN</div>
                   <NavLink to="/publicador/libros" icon={<BookOpen className="w-5 h-5" />} label="Gestión de Catálogo" />
                   <NavLink to="/admin" icon={<Users className="w-5 h-5" />} label="Gestión de Usuarios" />
                 </>
@@ -95,31 +97,31 @@ export const Layout = () => {
         </nav>
 
         {user ? (
-          <div className="p-4 border-t border-border dark:border-border">
-            <div className="flex items-center gap-3 p-2 rounded-lg bg-surface-soft mb-2 dark:bg-surface-soft">
-              <div className="w-10 h-10 rounded-full bg-primary/10 border-2 border-surface overflow-hidden shrink-0 flex items-center justify-center text-primary font-bold">
-                {user.correo?.charAt(0).toUpperCase()}
+          <div className="mt-auto border-t border-border p-4 dark:border-border">
+            <div className="mb-2 flex items-center gap-3 rounded-xl border border-border bg-surface-soft p-2 shadow-sm dark:border-border dark:bg-surface-muted dark:shadow-none">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-border bg-primary/10 text-sm font-bold text-primary dark:border-border dark:bg-primary/20 dark:text-text-strong">
+                {profileInitial}
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-text-strong truncate">{user.correo}</p>
-                <p className="text-xs text-text-muted truncate">{role}</p>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-sm font-bold text-text-strong dark:text-text-strong">{user.correo}</p>
+                <p className="truncate text-xs font-medium text-text-muted dark:text-text-body">{role}</p>
               </div>
             </div>
-            <button 
+            <button
               onClick={handleLogout}
               aria-label="Cerrar sesión"
-              className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-error bg-error/10 hover:bg-error/20 rounded-lg transition-colors"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-error/10 px-4 py-2 text-sm font-medium text-error transition-colors hover:bg-error/20"
             >
               <LogOut className="h-4 w-4" />
               Cerrar Sesión
             </button>
           </div>
         ) : (
-          <div className="p-4 border-t border-border space-y-2 dark:border-border">
-            <Link to="/login" className="flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-text-body bg-surface-soft hover:bg-surface-muted rounded-lg transition-colors">
+          <div className="mt-auto space-y-2 border-t border-border p-4 dark:border-border">
+            <Link to="/login" className="flex w-full items-center justify-center rounded-lg bg-surface-soft px-4 py-2 text-sm font-medium text-text-body transition-colors hover:bg-surface-muted">
               Iniciar Sesión
             </Link>
-            <Link to="/login?register=true" className="flex items-center justify-center w-full px-4 py-2 text-sm font-semibold text-white bg-primary hover:bg-primary-hover rounded-lg shadow-md shadow-primary/20 transition-colors">
+            <Link to="/login?register=true" className="flex w-full items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-md shadow-primary/20 transition-colors hover:bg-primary-hover">
               Registrarse
             </Link>
           </div>
@@ -127,7 +129,7 @@ export const Layout = () => {
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col overflow-y-auto bg-surface-soft relative dark:bg-surface-soft">
+      <main className="relative flex min-h-0 flex-1 flex-col overflow-y-auto bg-surface-soft dark:bg-surface-soft">
         {role === 'Desactivado' && location.pathname !== '/perfil' ? (
           <div className="flex-1 flex flex-col items-center justify-center p-8 text-center animate-in fade-in zoom-in-95 duration-500">
             <div className="w-20 h-20 bg-error/10 text-error rounded-full flex items-center justify-center mb-6 shadow-sm border border-surface">
