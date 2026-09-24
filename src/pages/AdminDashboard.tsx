@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { Navigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { getUsuarios, asignarRol } from '../microservicios/Usuarios';
-import { User } from '../types';
+import { Role, User } from '../types';
 import { AlertTriangle } from 'lucide-react';
 
 export const AdminDashboard = () => {
@@ -29,27 +29,23 @@ export const AdminDashboard = () => {
     }
   };
 
-  const getRoleName = (u: User) => u.roles?.[0]?.rol?.nombre_Rol || 'Sin Rol';
+  const getRoleName = (u: User) => u.roles?.[0]?.rol?.nombre_rol || 'Sin Rol';
 
-  // Antes, esta función hacía todo el trabajo desde el frontend: buscar el id
-  // del rol "Visualizador"/"Desactivado", decidir si insertar o actualizar en
-  // Usuario-Rol, y (al desactivar) borrar los favoritos por separado. Ahora
-  // solo le dice al backend qué rol asignar; el resto vive en un solo lugar
-  // (UsuariosController.AssignRole), dentro de una transacción.
-  const handleRoleChange = async (userId: string, currentRole: string) => {
-    if (currentRole === 'Desactivado') {
-      try {
-        setActionLoading(true);
-        await asignarRol(userId, 'Visualizador');
-        await fetchUsers();
-      } catch (err: any) {
-        console.error(err);
-        alert('Error updating user role: ' + (err.message || 'Unknown error'));
-      } finally {
-        setActionLoading(false);
-      }
-    } else {
+  const handleRoleChange = async (userId: string, selectedRole: Role) => {
+    if (selectedRole === 'Desactivado') {
       setDeactivateConfirm(userId);
+      return;
+    }
+
+    try {
+      setActionLoading(true);
+      await asignarRol(userId, selectedRole);
+      await fetchUsers();
+    } catch (err: any) {
+      console.error(err);
+      alert('Error updating user role: ' + (err.message || 'Unknown error'));
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -112,15 +108,24 @@ export const AdminDashboard = () => {
                         {userRole.toUpperCase()}
                       </span>
                       {u.id_usuario !== user.id_usuario && u.correo !== 'admin@gmail.com' && u.correo !== 'admin1@gmail.com' && (
-                        <Button
-                          onClick={() => handleRoleChange(u.id_usuario, userRole)}
-                          variant={userRole === 'Desactivado' ? 'outline' : 'default'}
-                          className={userRole === 'Desactivado' ? '' : 'bg-rose-600 hover:bg-rose-700 text-white'}
-                          size="sm"
+                        <select
+                          value={userRole === 'Sin Rol' ? '' : userRole}
+                          onChange={(event) =>
+                            handleRoleChange(u.id_usuario, event.target.value as Role)
+                          }
+                          className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
                           disabled={actionLoading}
                         >
-                          {userRole === 'Desactivado' ? 'Activar' : 'Desactivar'}
-                        </Button>
+                          {userRole === 'Sin Rol' && (
+                            <option value="" disabled>
+                              Sin Rol
+                            </option>
+                          )}
+                          <option value="Visualizador">Visualizador</option>
+                          <option value="Publicador">Publicador</option>
+                          <option value="Administrador">Administrador</option>
+                          <option value="Desactivado">Desactivado</option>
+                        </select>
                       )}
                     </div>
                   </div>
