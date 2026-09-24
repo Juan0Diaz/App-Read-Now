@@ -1,10 +1,9 @@
 using System.Security.Claims;
-using Backend.Api.Data;
 using Backend.Api.Dtos;
 using Backend.Api.Models;
+using Backend.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Api.Controllers;
 
@@ -12,33 +11,24 @@ namespace Backend.Api.Controllers;
 [Route("api/libros")]
 public class LibrosController : ControllerBase
 {
-    private readonly AppDbContext _db;
-    public LibrosController(AppDbContext db) => _db = db;
+    private readonly ILibrosServices _librosServices;
+
+    public LibrosController(ILibrosServices librosServices)
+    {
+        _librosServices = librosServices;
+    }
 
     // Catálogo público: cualquiera puede ver los libros (visualizador incluido).
     [HttpGet]
     [AllowAnonymous]
     public async Task<ActionResult<IEnumerable<Libro>>> GetAll()
-    {
-        var libros = await _db.Libros
-            .Include(l => l.Genero)
-            .Include(l => l.Genero1)
-            .Include(l => l.Genero2)
-            .AsNoTracking()
-            .ToListAsync();
-        return Ok(libros);
-    }
+        => Ok(await _librosServices.ObtenerTodosAsync());
 
     [HttpGet("{id:guid}")]
     [AllowAnonymous]
     public async Task<ActionResult<Libro>> GetById(Guid id)
     {
-        var libro = await _db.Libros
-            .Include(l => l.Genero)
-            .Include(l => l.Genero1)
-            .Include(l => l.Genero2)
-            .AsNoTracking()
-            .FirstOrDefaultAsync(l => l.IdLibro == id);
+        var libro = await _librosServices.ObtenerPorIdAsync(id);
 
         return libro is null ? NotFound() : Ok(libro);
     }
@@ -48,24 +38,7 @@ public class LibrosController : ControllerBase
     [Authorize(Policy = "Publicador")]
     public async Task<ActionResult<Libro>> Create(LibroCreateDto dto)
     {
-        var libro = new Libro
-        {
-            IdLibro = Guid.NewGuid(),
-            Titulo = dto.Titulo,
-            Autor = dto.Autor,
-            Disponible = dto.Disponible,
-            Editorial = dto.Editorial,
-            Estado = dto.Estado,
-            FechaPublicacion = dto.FechaPublicacion,
-            IdGenero = dto.IdGenero,
-            IdGenero1 = dto.IdGenero1,
-            IdGenero2 = dto.IdGenero2,
-            Descripcion = dto.Descripcion,
-            PortadaUrl = dto.PortadaUrl
-        };
-
-        _db.Libros.Add(libro);
-        await _db.SaveChangesAsync();
+        var libro = await _librosServices.CrearAsync(dto);
         return CreatedAtAction(nameof(GetById), new { id = libro.IdLibro }, libro);
     }
 
@@ -77,46 +50,8 @@ public class LibrosController : ControllerBase
     public async Task<ActionResult<Libro>> CrearConPublicacion(LibroConPublicacionCreateDto dto)
     {
         var userId = Guid.Parse(User.FindFirstValue("id_usuario")!);
-
-        await using var transaction = await _db.Database.BeginTransactionAsync();
-        try
-        {
-            var libro = new Libro
-            {
-                IdLibro = Guid.NewGuid(),
-                Titulo = dto.Titulo,
-                Autor = dto.Autor,
-                Disponible = true,
-                Editorial = dto.Editorial,
-                Estado = "Nuevo",
-                FechaPublicacion = dto.FechaPublicacion,
-                IdGenero = dto.IdGenero,
-                IdGenero1 = dto.IdGenero1,
-                IdGenero2 = dto.IdGenero2,
-                Descripcion = dto.Descripcion,
-                PortadaUrl = dto.PortadaUrl
-            };
-            _db.Libros.Add(libro);
-
-            _db.Publicaciones.Add(new Publicacion
-            {
-                IdPublicacion = Guid.NewGuid(),
-                IdUsuario = userId,
-                IdLibro = libro.IdLibro,
-                Precio = 0,
-                Descripcion = "Agregado al catálogo",
-                FechaPublicacion = DateOnly.FromDateTime(DateTime.UtcNow)
-            });
-
-            await _db.SaveChangesAsync();
-            await transaction.CommitAsync();
-            return CreatedAtAction(nameof(GetById), new { id = libro.IdLibro }, libro);
-        }
-        catch
-        {
-            await transaction.RollbackAsync();
-            throw;
-        }
+        var libro = await _librosServices.CrearConPublicacionAsync(userId, dto);
+        return CreatedAtAction(nameof(GetById), new { id = libro.IdLibro }, libro);
     }
 
     // Editar libro: Publicador o Administrador.
@@ -126,23 +61,8 @@ public class LibrosController : ControllerBase
     [Authorize(Policy = "Publicador")]
     public async Task<IActionResult> Update(Guid id, LibroUpdateDto dto)
     {
-        var libro = await _db.Libros.FindAsync(id);
-        if (libro is null) return NotFound();
-
-        if (dto.Titulo is not null) libro.Titulo = dto.Titulo;
-        if (dto.Autor is not null) libro.Autor = dto.Autor;
-        if (dto.Disponible is not null) libro.Disponible = dto.Disponible.Value;
-        if (dto.Editorial is not null) libro.Editorial = dto.Editorial;
-        if (dto.Estado is not null) libro.Estado = dto.Estado;
-        if (dto.FechaPublicacion is not null) libro.FechaPublicacion = dto.FechaPublicacion;
-        if (dto.IdGenero is not null) libro.IdGenero = dto.IdGenero;
-        if (dto.IdGenero1 is not null) libro.IdGenero1 = dto.IdGenero1;
-        if (dto.IdGenero2 is not null) libro.IdGenero2 = dto.IdGenero2;
-        if (dto.Descripcion is not null) libro.Descripcion = dto.Descripcion;
-        if (dto.PortadaUrl is not null) libro.PortadaUrl = dto.PortadaUrl;
-
-        await _db.SaveChangesAsync();
-        return NoContent();
+        var actualizado = await _librosServices.ActualizarAsync(id, dto);
+        return actualizado ? NoContent() : NotFound();
     }
 
     // Eliminar libro: solo Administrador.
@@ -150,11 +70,7 @@ public class LibrosController : ControllerBase
     [Authorize(Policy = "Administrador")]
     public async Task<IActionResult> Delete(Guid id)
     {
-        var libro = await _db.Libros.FindAsync(id);
-        if (libro is null) return NotFound();
-
-        _db.Libros.Remove(libro);
-        await _db.SaveChangesAsync();
-        return NoContent();
+        var eliminado = await _librosServices.EliminarAsync(id);
+        return eliminado ? NoContent() : NotFound();
     }
 }

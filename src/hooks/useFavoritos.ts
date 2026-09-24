@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { isDemoMode } from '../lib/supabase';
-import { getFavoritos, agregarFavorito, quitarFavorito } from '../lib/api';
+import { getFavoritos, agregarFavorito, quitarFavorito } from '../microservicios/favorites';
 import { User } from '../types';
 
 /**

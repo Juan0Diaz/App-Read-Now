@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { getFavoritos, quitarFavorito } from '../lib/api';
+import { getFavoritos, quitarFavorito } from '../microservicios/favorites';
 import { Favorito } from '../types';
 import { Link } from 'react-router-dom';
 import { Heart, Search, BookOpen } from 'lucide-react';
