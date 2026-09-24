@@ -33,7 +33,7 @@ export function useLoans(user: User | null) {
       );
     } catch (err: any) {
       console.error('Error al cargar préstamos:', err);
-      alert('Error al cargar préstamos: ' + err.message);
+      setLibros([]);
     } finally {
       setLoading(false);
     }

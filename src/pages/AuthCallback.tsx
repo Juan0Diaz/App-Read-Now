@@ -55,10 +55,10 @@ export const AuthCallback = () => {
   }, [navigate]);
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-slate-50">
-      <div className="p-8 text-center bg-white shadow-xl rounded-2xl animate-pulse">
-        <h2 className="text-xl font-bold text-slate-800">Autenticando...</h2>
-        <p className="text-slate-500 mt-2">Por favor espera un momento.</p>
+    <div className="flex min-h-screen items-center justify-center bg-surface-soft">
+      <div className="animate-pulse rounded-2xl bg-surface p-8 text-center shadow-xl shadow-border/20">
+        <h2 className="text-xl font-bold text-text-strong">Autenticando...</h2>
+        <p className="mt-2 text-text-muted">Por favor espera un momento.</p>
       </div>
     </div>
   );
