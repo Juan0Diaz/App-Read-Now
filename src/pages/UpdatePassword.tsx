@@ -91,33 +91,33 @@ export const UpdatePassword = () => {
   };
 
   return (
-    <div className="flex flex-col h-full animate-in fade-in duration-500 w-full items-center justify-center -mt-10">
-      <div className="w-full max-w-md mx-auto bg-white p-8 sm:p-10 border border-slate-200 shadow-xl shadow-slate-200/50 rounded-3xl">
-        <div className="flex flex-col items-center mb-8 text-center">
-          <div className="h-16 w-16 bg-indigo-50 border border-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
+    <div className="-mt-10 flex h-full w-full flex-col items-center justify-center animate-in fade-in bg-surface-soft text-text-strong duration-500 dark:bg-surface-soft">
+      <div className="mx-auto w-full max-w-md rounded-3xl border border-border bg-surface p-8 shadow-xl shadow-border/20 dark:shadow-none sm:p-10">
+        <div className="mb-8 flex flex-col items-center text-center">
+          <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary shadow-sm">
             <Lock className="h-8 w-8" />
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
+          <h1 className="text-3xl font-extrabold tracking-tight text-text-strong">
             Nueva Contraseña
           </h1>
-          <p className="text-sm font-medium text-slate-500 mt-2">
+          <p className="mt-2 text-sm font-medium text-text-muted">
             Ingresa y confirma tu nueva contraseña para acceder a la plataforma.
           </p>
         </div>
 
         {sessionError ? (
           <div className="space-y-5 text-center">
-            <div className="bg-rose-50 text-rose-700 p-4 rounded-xl border border-rose-100 text-sm font-medium mb-4">
+            <div className="mb-4 rounded-xl border border-error/20 bg-error-soft p-4 text-sm font-medium text-error">
               El enlace es inválido o ha expirado. Ha sido utilizado o se superó el tiempo límite.
             </div>
             
             {recoverySent ? (
-              <div className="bg-emerald-50 text-emerald-700 p-4 rounded-xl border border-emerald-100 text-sm font-medium">
+              <div className="rounded-xl border border-success/20 bg-success-soft p-4 text-sm font-medium text-success">
                 Se ha enviado un nuevo enlace. Por favor revisa tu correo.
               </div>
             ) : (
               <form onSubmit={handleResendRecovery} className="space-y-4">
-                <p className="text-sm text-slate-600">Ingresa tu correo para solicitar un nuevo enlace:</p>
+                <p className="text-sm text-text-body">Ingresa tu correo para solicitar un nuevo enlace:</p>
                 <Input 
                   type="email" 
                   placeholder="tu@correo.com" 
@@ -127,25 +127,25 @@ export const UpdatePassword = () => {
                   disabled={loading}
                 />
                 {error && <p className="text-sm font-semibold text-rose-600 p-2">{error}</p>}
-                <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl h-12" disabled={loading}>
+                <Button type="submit" className="h-12 w-full rounded-xl" disabled={loading}>
                   {loading ? 'Enviando...' : 'Solicitar nuevo enlace'}
                 </Button>
               </form>
             )}
-            <Button variant="outline" className="w-full h-12 rounded-xl mt-2" onClick={() => navigate('/login')}>
+            <Button variant="outline" className="mt-2 h-12 w-full rounded-xl" onClick={() => navigate('/login')}>
               Volver a Iniciar Sesión
             </Button>
           </div>
         ) : success ? (
-          <div className="mb-4 flex flex-col items-center p-6 bg-emerald-50 border border-emerald-200 rounded-2xl text-center">
-            <ShieldCheck className="h-12 w-12 text-emerald-500 mb-3" />
-            <p className="text-emerald-800 font-bold tracking-tight text-lg mb-1">¡Contraseña actualizada!</p>
-            <p className="text-emerald-700/80 text-sm">Serás redirigido al inicio en unos segundos...</p>
+          <div className="mb-4 flex flex-col items-center rounded-2xl border border-success/20 bg-success-soft p-6 text-center">
+            <ShieldCheck className="mb-3 h-12 w-12 text-success" />
+            <p className="mb-1 text-lg font-bold tracking-tight text-success">¡Contraseña actualizada!</p>
+            <p className="text-sm text-success/80">Serás redirigido al inicio en unos segundos...</p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-1.5">Nueva Contraseña</label>
+              <label className="mb-1.5 block text-sm font-bold text-text-body">Nueva Contraseña</label>
               <Input 
                 type="password" 
                 placeholder="Simbolos, números y letras, sin blancos" 
@@ -154,13 +154,13 @@ export const UpdatePassword = () => {
                 required 
                 minLength={6}
                 disabled={loading}
-                className="rounded-xl h-12"
+                className="h-12 rounded-xl"
               />
             </div>
 
-            {error && <p className="text-sm font-semibold text-rose-600 bg-rose-50 p-3 rounded-lg border border-rose-100">{error}</p>}
+            {error && <p className="rounded-lg border border-error/20 bg-error-soft p-3 text-sm font-semibold text-error">{error}</p>}
 
-            <Button type="submit" size="lg" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl h-12 font-bold shadow-md shadow-indigo-200" disabled={loading || !password}>
+            <Button type="submit" size="lg" className="h-12 w-full rounded-xl font-bold shadow-md shadow-primary/20" disabled={loading || !password}>
               {loading ? 'Actualizando...' : 'Actualizar contraseña'}
             </Button>
           </form>
