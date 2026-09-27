@@ -7,6 +7,8 @@ import { useFavoritos } from '../hooks/useFavoritos';
 import { useLibroDetalle } from '../hooks/useLibroDetalle';
 import { ArrowLeft, Heart, Calendar, Bookmark, User as UserIcon, Tag } from 'lucide-react';
 import { Button, buttonVariants } from '../components/ui/Button';
+import { Badge } from '../components/ui/Badge';
+import { BookCover } from '../components/ui/BookCover';
 
 export const BookDetail = () => {
   const { id } = useParams();
@@ -40,12 +42,12 @@ export const BookDetail = () => {
 
   if (loading) {
     return (
-      <div className="animate-pulse max-w-4xl mx-auto flex flex-col md:flex-row gap-8 p-8">
-        <div className="w-full md:w-1/3 aspect-[2/3] bg-slate-200 rounded-xl" />
-        <div className="w-full md:w-2/3 space-y-4 pt-4">
-          <div className="h-8 bg-slate-200 w-3/4 rounded" />
-          <div className="h-4 bg-slate-200 w-1/2 rounded" />
-          <div className="h-24 bg-slate-200 w-full rounded mt-8" />
+      <div className="mx-auto flex max-w-4xl animate-pulse flex-col gap-8 p-8 md:flex-row">
+        <div className="aspect-[2/3] w-full rounded-xl bg-surface-soft md:w-1/3" />
+        <div className="w-full space-y-4 pt-4 md:w-2/3">
+          <div className="h-8 w-3/4 rounded bg-surface-soft" />
+          <div className="h-4 w-1/2 rounded bg-surface-soft" />
+          <div className="mt-8 h-24 w-full rounded bg-surface-soft" />
         </div>
       </div>
     );
@@ -53,10 +55,10 @@ export const BookDetail = () => {
 
   if (!libro) {
     return (
-      <div className="text-center py-20 p-8">
-        <h2 className="text-2xl font-bold text-slate-800">Libro no encontrado</h2>
-        <Link to="/" className={`${buttonVariants({ variant: "link" })} mt-4 text-indigo-600`}>
-          <ArrowLeft className="h-4 w-4 mr-2" /> Volver al catálogo
+      <div className="p-8 py-20 text-center">
+        <h2 className="text-2xl font-bold text-text-strong">Libro no encontrado</h2>
+        <Link to="/" className={`${buttonVariants({ variant: 'link' })} mt-4`}>
+          <ArrowLeft className="mr-2 h-4 w-4" /> Volver al catálogo
         </Link>
       </div>
     );
@@ -65,86 +67,80 @@ export const BookDetail = () => {
   const favorito = isFavorito(libro.id_libro);
 
   return (
-    <div className="flex flex-col h-full animate-in fade-in duration-500">
-      <header className="h-20 bg-white border-b border-slate-200 px-8 flex items-center shrink-0 sticky top-0 z-10 w-full">
-        <Link to="/" className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-900 transition-colors">
-          <ArrowLeft className="h-4 w-4 mr-2" /> Volver al catálogo
+    <div className="flex h-full flex-col animate-in fade-in duration-500">
+      <header className="sticky top-0 z-10 flex h-20 w-full shrink-0 items-center border-b border-border bg-surface px-8 dark:border-border dark:bg-surface">
+        <Link to="/" className="inline-flex items-center text-sm font-medium text-text-muted transition-colors hover:text-text-strong">
+          <ArrowLeft className="mr-2 h-4 w-4" /> Volver al catálogo
         </Link>
       </header>
 
-      <div className="p-4 md:p-8 flex-1 overflow-y-auto max-w-5xl mx-auto w-full">
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col md:flex-row">
-
-          {/* Cover side */}
-          <div className="w-full md:w-2/5 lg:w-1/3 bg-gradient-to-br from-indigo-50 to-slate-100 p-6 md:p-8 flex items-center justify-center border-b md:border-b-0 md:border-r border-slate-200">
+      <div className="mx-auto w-full max-w-5xl flex-1 overflow-y-auto p-4 md:p-8">
+        <div className="flex flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-sm md:flex-row">
+          <div className="flex w-full items-center justify-center border-b border-border bg-gradient-to-br from-primary/10 to-surface-soft p-6 md:w-2/5 md:border-b-0 md:border-r lg:w-1/3 md:p-8">
             {libro.portada_url ? (
-              <img
-                src={libro.portada_url}
-                alt={`Portada de ${libro.titulo}`}
-                className="w-48 md:w-full max-w-[280px] h-auto rounded-xl shadow-xl object-cover"
-              />
+              <BookCover src={libro.portada_url} alt={`Portada de ${libro.titulo}`} size="lg" className="w-48 max-w-[280px] shadow-xl md:w-full" />
             ) : (
-              <div className="w-48 md:w-full max-w-[280px] aspect-[2/3] bg-white rounded-xl shadow-xl flex items-center justify-center text-indigo-200 border border-slate-100 p-6 text-center">
-                 <div>
-                   <div className="text-[10px] md:text-xs font-bold text-indigo-400 uppercase tracking-widest mb-1">
-                     {generosList.length > 0 ? generosList.map(g => g.nombre_genero).join(', ') : 'GÉNERO'}
-                   </div>
-                   <div className="text-lg md:text-xl font-serif italic text-indigo-900 font-bold leading-tight line-clamp-3">{libro.titulo}</div>
-                 </div>
+              <div className="flex aspect-[2/3] w-48 max-w-[280px] items-center justify-center rounded-xl border border-border bg-surface p-6 text-center shadow-xl md:w-full">
+                <div>
+                  <div className="mb-1 text-xs font-bold uppercase tracking-[0.2em] text-primary">
+                    {generosList.length > 0 ? generosList.map(g => g.nombre_genero).join(', ') : 'GÉNERO'}
+                  </div>
+                  <div className="font-serif text-lg font-bold italic leading-tight text-text-strong md:text-xl">{libro.titulo}</div>
+                </div>
               </div>
             )}
           </div>
 
-          {/* Info side */}
-          <div className="w-full md:w-3/5 lg:w-2/3 p-6 md:p-8 flex flex-col">
-            <div className="flex items-start justify-between gap-4 mb-2">
-              <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900">{libro.titulo}</h1>
+          <div className="flex w-full flex-col p-6 md:w-3/5 md:p-8 lg:w-2/3">
+            <div className="mb-2 flex items-start justify-between gap-4">
+              <h1 className="text-2xl font-extrabold tracking-tight text-text-strong md:text-3xl">{libro.titulo}</h1>
               <Button
+                aria-label={favorito ? 'Quitar de favoritos' : 'Agregar a favoritos'}
                 onClick={() => toggleFavorito(libro.id_libro)}
                 variant="outline"
                 size="icon"
-                className={`shrink-0 transition-colors rounded-full ${favorito ? 'text-rose-500 border-rose-200 bg-rose-50' : 'text-slate-400 hover:text-rose-500 hover:border-rose-200 hover:bg-rose-50'}`}
+                className={`shrink-0 rounded-full ${favorito ? 'border-error/20 bg-error/10 text-error' : 'border-border text-text-muted hover:border-error/20 hover:bg-error/10 hover:text-error'}`}
               >
                 <Heart className={`h-5 w-5 ${favorito ? 'fill-current' : ''}`} />
               </Button>
             </div>
 
-            <div className="text-lg text-slate-600 font-medium mb-4 flex items-center gap-2">
-              <UserIcon className="h-5 w-5 text-indigo-400" />
+            <div className="mb-4 flex items-center gap-2 text-lg font-medium text-text-body">
+              <UserIcon className="h-5 w-5 text-primary" />
               {libro.autor}
             </div>
 
             {publisher && (
               <div className="mb-6">
-                <span className="text-sm text-slate-500 mr-2">Publicado por:</span>
+                <span className="mr-2 text-sm text-text-muted">Publicado por:</span>
                 <Link to={`/publicador/perfil/${publisher.id_usuario}`} className="inline-flex flex-col">
-                  <span className="font-bold text-indigo-600 hover:underline">{publisher.nombre || publisher.correo.split('@')[0]}</span>
+                  <span className="font-bold text-primary hover:underline">{publisher.nombre || publisher.correo.split('@')[0]}</span>
                 </Link>
               </div>
             )}
 
-            <div className="flex flex-wrap gap-4 mb-8">
-               <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded-full">
-                 <Tag className="h-3.5 w-3.5" />
-                 {generosList.length > 0 ? generosList.map(g => g.nombre_genero).join(', ') : 'Sin género'}
-               </div>
-               <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider bg-slate-100 text-slate-700 px-3 py-1.5 rounded-full">
-                 <Bookmark className="h-3.5 w-3.5" />
-                 {libro.estado}
-               </div>
-               {libro.fecha_publicacion && (
-                 <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider bg-slate-100 text-slate-700 px-3 py-1.5 rounded-full">
-                   <Calendar className="h-3.5 w-3.5" />
-                   {new Date(libro.fecha_publicacion).getFullYear()}
-                 </div>
-               )}
+            <div className="mb-8 flex flex-wrap gap-4">
+              <Badge variant="primary" className="gap-1.5">
+                <Tag className="h-3.5 w-3.5" />
+                {generosList.length > 0 ? generosList.map(g => g.nombre_genero).join(', ') : 'Sin género'}
+              </Badge>
+              <Badge variant="secondary" className="gap-1.5">
+                <Bookmark className="h-3.5 w-3.5" />
+                {libro.estado}
+              </Badge>
+              {libro.fecha_publicacion && (
+                <Badge variant="secondary" className="gap-1.5">
+                  <Calendar className="h-3.5 w-3.5" />
+                  {new Date(libro.fecha_publicacion).getFullYear()}
+                </Badge>
+              )}
             </div>
 
             {libro.descripcion && (
               <div className="mb-8">
-                <h3 className="text-sm font-bold text-slate-900 tracking-tight mb-3">Sinopsis</h3>
-                <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                  <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">
+                <h3 className="mb-3 text-xl font-semibold text-text-strong">Sinopsis</h3>
+                <div className="rounded-xl border border-border bg-surface-soft p-4">
+                  <p className="whitespace-pre-line text-sm leading-relaxed text-text-body">
                     {libro.descripcion}
                   </p>
                 </div>
@@ -152,31 +148,32 @@ export const BookDetail = () => {
             )}
 
             <div className="mb-8 flex-1">
-              <h3 className="text-sm font-bold text-slate-900 tracking-tight mb-3">Detalles</h3>
-              <ul className="space-y-3 text-sm text-slate-600 border-t border-slate-100 pt-4">
-                <li className="flex justify-between items-center pb-2 border-b border-slate-50">
-                  <span className="text-slate-500">Editorial</span>
-                  <span className="font-medium text-slate-900">{libro.editorial}</span>
+              <h3 className="mb-3 text-xl font-semibold text-text-strong">Detalles</h3>
+              <ul className="space-y-3 border-t border-border pt-4 text-sm text-text-body">
+                <li className="flex items-center justify-between border-b border-border pb-2">
+                  <span className="text-text-muted">Editorial</span>
+                  <span className="font-medium text-text-strong">{libro.editorial}</span>
                 </li>
-                <li className="flex justify-between items-center pb-2 border-b border-slate-50">
-                  <span className="text-slate-500">Disponibilidad</span>
-                  <span className={`font-medium ${libro.disponible ? 'text-emerald-600' : 'text-slate-500'}`}>
+                <li className="flex items-center justify-between border-b border-border pb-2">
+                  <span className="text-text-muted">Disponibilidad</span>
+                  <span className={`font-medium ${libro.disponible ? 'text-secondary' : 'text-text-muted'}`}>
                     {libro.disponible ? 'Disponible ahora' : 'Reservado'}
                   </span>
                 </li>
               </ul>
             </div>
 
-            <div className="pt-6 border-t border-slate-100 mt-auto flex flex-col sm:flex-row items-center gap-4">
+            <div className="mt-auto flex flex-col items-center gap-4 border-t border-border pt-6 sm:flex-row">
               <Button
                 onClick={handleRequestLoan}
-                className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-100 rounded-lg text-white font-semibold px-8"
+                variant="primary"
                 size="lg"
+                className="w-full sm:w-auto"
                 disabled={!libro.disponible || requestingLoan}
               >
                 {requestingLoan ? 'Procesando...' : (libro.disponible ? 'Solicitar Préstamo' : 'No Disponible')}
               </Button>
-              <p className="text-xs text-slate-500 text-center sm:text-left">
+              <p className="text-center text-xs text-text-muted sm:text-left">
                 Si solicitas este libro, tendrás un plazo de 14 días para leerlo.
               </p>
             </div>
