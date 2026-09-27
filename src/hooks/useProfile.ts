@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { actualizarMiPerfil, cambiarMiRol, eliminarMiCuenta } from '../lib/api';
+import { actualizarMiPerfil, cambiarMiRol, eliminarMiCuenta } from '../microservicios/Usuarios';
 import { getMisPublicaciones } from '../microservicios/Publicaciones';
 import { Role } from '../types';
 
