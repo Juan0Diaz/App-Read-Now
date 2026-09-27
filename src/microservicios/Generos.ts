@@ -3,7 +3,11 @@ import { Genero } from '../types';
 
 const API_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:5080').replace(/\/+$/, '');
 
-async function authHeader(): Promise<HeadersInit> {
+async function authHeader(requiredAuth = true): Promise<HeadersInit> {
+  if (!supabase) {
+    return {};
+  }
+
   const { data: { session }, error } = await supabase.auth.getSession();
 
   if (error) {
@@ -11,16 +15,19 @@ async function authHeader(): Promise<HeadersInit> {
   }
 
   if (!session?.access_token) {
-    throw new Error('Debes iniciar sesión para acceder a esta información.');
+    if (requiredAuth) {
+      throw new Error('Debes iniciar sesión para acceder a esta información.');
+    }
+    return {};
   }
 
   return { Authorization: `Bearer ${session.access_token}` };
 }
 
-async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+async function request<T>(path: string, options: RequestInit = {}, requiredAuth = true): Promise<T> {
   const headers = {
     'Content-Type': 'application/json',
-    ...(await authHeader()),
+    ...(await authHeader(requiredAuth)),
     ...options.headers,
   };
 
@@ -41,8 +48,8 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   return response.json() as Promise<T>;
 }
 
-export const getGeneros = () => request<Genero[]>('/api/generos');
+export const getGeneros = () => request<Genero[]>('/api/generos', {}, false);
 export const crearGenero = (data: Partial<Genero>) =>
-  request<Genero>('/api/generos', { method: 'POST', body: JSON.stringify(data) });
+  request<Genero>('/api/generos', { method: 'POST', body: JSON.stringify(data) }, true);
 export const eliminarGenero = (id: string) =>
-  request<void>(`/api/generos/${id}`, { method: 'DELETE' });
+  request<void>(`/api/generos/${id}`, { method: 'DELETE' }, true);

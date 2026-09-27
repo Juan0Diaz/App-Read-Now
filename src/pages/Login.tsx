@@ -238,33 +238,33 @@ export const Login = () => {
   };
 
   return (
-    <div className="flex flex-col h-full animate-in fade-in duration-500 w-full items-center justify-center -mt-10">
-      <div className="w-full max-w-md mx-auto bg-white p-8 sm:p-10 border border-slate-200 shadow-xl shadow-slate-200/50 rounded-3xl">
-        <div className="flex flex-col items-center mb-10 text-center">
-          <div className="h-16 w-16 bg-indigo-50 border border-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center mb-6 shadow-sm">
+    <div className="flex h-full w-full flex-col items-center justify-center py-10 animate-in fade-in duration-500 dark:bg-surface-soft">
+      <div className="mx-auto w-full max-w-md rounded-3xl border border-border bg-surface p-8 shadow-xl shadow-border/20 dark:shadow-none sm:p-10">
+        <div className="mb-10 flex flex-col items-center text-center">
+          <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary shadow-sm">
             <BookOpen className="h-8 w-8" />
           </div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900">
+          <h1 className="text-3xl font-extrabold tracking-tight text-text-strong">
             {isRegister ? 'Crear una cuenta' : 'Bienvenido de nuevo'}
           </h1>
-          <p className="text-sm font-medium text-slate-500 mt-2">
+          <p className="mt-2 text-sm font-medium text-text-muted">
             {isRegister ? 'Regístrate para acceder al catálogo virtual.' : 'Ingresa tus credenciales para continuar.'}
           </p>
         </div>
 
         {isDemoMode && (
-          <div className="mb-8 p-5 bg-amber-50 border border-amber-200 text-amber-800 rounded-2xl text-sm flex items-start gap-3 shadow-sm">
-            <ShieldAlert className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+          <div className="mb-8 flex items-start gap-3 rounded-2xl border border-warning/30 bg-warning-soft p-5 text-sm text-warning shadow-sm">
+            <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-warning" />
             <div>
               <p className="font-bold tracking-tight">Modo Demostración</p>
-              <p className="mt-1 text-amber-700/80 leading-relaxed">
+              <p className="mt-1 leading-relaxed text-warning/90">
                 Las credenciales de Supabase no están configuradas en las variables de entorno. 
                 Puedes iniciar sesión como Visualizador, Publicador o Administrador haciendo clic en los botones debajo para probar la UI.
               </p>
-              <div className="flex flex-wrap gap-2 mt-4 text-xs font-semibold">
-                <Button size="sm" className="bg-white border-amber-300 text-amber-800 hover:bg-amber-100 hover:text-amber-900" variant="outline" onClick={() => simulateLogin('Visualizador')} type="button">Visualizador</Button>
-                <Button size="sm" className="bg-white border-amber-300 text-amber-800 hover:bg-amber-100 hover:text-amber-900" variant="outline" onClick={() => simulateLogin('Publicador')} type="button">Publicador</Button>
-                <Button size="sm" className="bg-white border-amber-300 text-amber-800 hover:bg-amber-100 hover:text-amber-900" variant="outline" onClick={() => simulateLogin('Administrador')} type="button">Admin</Button>
+              <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold">
+                <Button size="sm" variant="outline" onClick={() => simulateLogin('Visualizador')} type="button">Visualizador</Button>
+                <Button size="sm" variant="outline" onClick={() => simulateLogin('Publicador')} type="button">Publicador</Button>
+                <Button size="sm" variant="outline" onClick={() => simulateLogin('Administrador')} type="button">Admin</Button>
               </div>
             </div>
           </div>
@@ -272,7 +272,7 @@ export const Login = () => {
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-bold text-slate-700 mb-1.5">Correo Electrónico</label>
+            <label className="mb-1.5 block text-sm font-bold text-text-body">Correo Electrónico</label>
             <Input 
               type="email" 
               placeholder="tu@correo.com" 
@@ -280,17 +280,17 @@ export const Login = () => {
               onChange={e => setEmail(e.target.value)}
               required 
               disabled={isDemoMode}
-              className="rounded-xl h-12"
+              className="h-12 rounded-xl"
             />
           </div>
           <div>
-            <div className="flex justify-between items-center mb-1.5">
-              <label className="block text-sm font-bold text-slate-700">Contraseña</label>
+            <div className="mb-1.5 flex items-center justify-between">
+              <label className="block text-sm font-bold text-text-body">Contraseña</label>
               {!isRegister && !isDemoMode && (
                 <button 
                   type="button" 
                   onClick={handleResetPassword}
-                  className="text-xs font-bold text-indigo-600 hover:text-indigo-800 focus:outline-none focus:underline"
+                  className="text-xs font-bold text-primary hover:text-primary-hover focus:outline-none focus:underline"
                 >
                   ¿Olvidaste tu contraseña?
                 </button>
@@ -303,20 +303,20 @@ export const Login = () => {
               onChange={e => setPassword(e.target.value)}
               required
               disabled={isDemoMode}
-              className="rounded-xl h-12"
+              className="h-12 rounded-xl"
             />
           </div>
 
           {isRegister && (
             <div>
-              <label className="block text-sm font-bold text-slate-700 mb-1.5">Fecha de Nacimiento</label>
+              <label className="mb-1.5 block text-sm font-bold text-text-body">Fecha de Nacimiento</label>
               <Input 
                 type="date"
                 value={birthDate}
                 onChange={e => setBirthDate(e.target.value)}
                 required={isRegister}
                 disabled={isDemoMode}
-                className="rounded-xl h-12"
+                className="h-12 rounded-xl"
               />
             </div>
           )}
@@ -328,33 +328,33 @@ export const Login = () => {
                 id="terms" 
                 checked={acceptTerms}
                 onChange={e => setAcceptTerms(e.target.checked)}
-                className="mt-1 h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                className="mt-1 h-4 w-4 rounded border-border text-primary focus:ring-primary"
               />
-              <label htmlFor="terms" className="text-sm text-slate-600">
-                Acepto los <button type="button" onClick={() => setShowTermsModal(true)} className="font-bold text-indigo-600 hover:underline">Términos y Condiciones</button> y la <button type="button" onClick={() => setShowTermsModal(true)} className="font-bold text-indigo-600 hover:underline">Política de Privacidad</button>
+              <label htmlFor="terms" className="text-sm text-text-body">
+                Acepto los <button type="button" onClick={() => setShowTermsModal(true)} className="font-bold text-primary hover:underline">Términos y Condiciones</button> y la <button type="button" onClick={() => setShowTermsModal(true)} className="font-bold text-primary hover:underline">Política de Privacidad</button>
               </label>
             </div>
           )}
 
-          {error && <p className="text-sm font-semibold text-rose-600 bg-rose-50 p-3 rounded-lg border border-rose-100">{error}</p>}
-          {resetMessage && <p className="text-sm font-semibold text-emerald-700 bg-emerald-50 p-3 rounded-lg border border-emerald-100">{resetMessage}</p>}
+          {error && <p className="rounded-lg border border-error/20 bg-error-soft p-3 text-sm font-semibold text-error">{error}</p>}
+          {resetMessage && <p className="rounded-lg border border-success/20 bg-success-soft p-3 text-sm font-semibold text-success">{resetMessage}</p>}
 
-          <Button type="submit" size="lg" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl h-12 font-bold shadow-md shadow-indigo-200" disabled={loading || isDemoMode}>
+          <Button type="submit" size="lg" className="h-12 w-full rounded-xl font-bold shadow-md shadow-primary/20" disabled={loading || isDemoMode}>
             {loading ? 'Cargando...' : (isRegister ? 'Registrarse' : 'Iniciar sesión')}
           </Button>
         </form>
 
         <div className="mt-6 flex items-center justify-center">
-          <div className="h-px bg-slate-200 flex-1"></div>
-          <span className="px-3 text-sm font-medium text-slate-400">o continuar con</span>
-          <div className="h-px bg-slate-200 flex-1"></div>
+          <div className="h-px flex-1 bg-border"></div>
+          <span className="px-3 text-sm font-medium text-text-muted">o continuar con</span>
+          <div className="h-px flex-1 bg-border"></div>
         </div>
 
         <div className="mt-6 grid grid-cols-2 gap-3">
           <Button 
             type="button" 
             variant="outline" 
-            className="w-full rounded-xl h-12 border-slate-200 text-slate-700 font-bold hover:bg-slate-50"
+            className="h-12 w-full rounded-xl font-bold"
             disabled={loading || isDemoMode}
             onClick={() => handleOAuthLogin('google')}
           >
@@ -369,7 +369,7 @@ export const Login = () => {
           <Button 
             type="button" 
             variant="outline" 
-            className="w-full rounded-xl h-12 border-slate-200 text-slate-700 font-bold hover:bg-slate-50"
+            className="h-12 w-full rounded-xl font-bold"
             disabled={loading || isDemoMode}
             onClick={() => handleOAuthLogin('github')}
           >
@@ -380,11 +380,11 @@ export const Login = () => {
           </Button>
         </div>
 
-        <div className="mt-8 text-center text-sm font-medium text-slate-500">
+        <div className="mt-8 text-center text-sm font-medium text-text-muted">
           {isRegister ? '¿Ya tienes una cuenta?' : '¿No tienes una cuenta?'} {' '}
           <button 
             onClick={() => setIsRegister(!isRegister)} 
-            className="text-indigo-600 font-bold hover:text-indigo-800 transition-colors focus:outline-none focus:underline"
+            className="font-bold text-primary hover:text-primary-hover transition-colors focus:outline-none focus:underline"
           >
             {isRegister ? 'Inicia sesión' : 'Regístrate'}
           </button>
@@ -392,18 +392,18 @@ export const Login = () => {
       </div>
 
       {showTermsModal && (
-        <div className="fixed inset-0 bg-slate-900/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[80vh] flex flex-col overflow-hidden shadow-2xl">
-            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50 shrink-0">
-              <h2 className="text-xl font-bold text-slate-900">Términos y Condiciones y Política de Privacidad</h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
+          <div className="flex max-h-[80vh] w-full max-w-2xl flex-col overflow-hidden rounded-3xl bg-surface shadow-2xl">
+            <div className="flex shrink-0 items-center justify-between border-b border-border bg-surface-soft p-6">
+              <h2 className="text-xl font-bold text-text-strong">Términos y Condiciones y Política de Privacidad</h2>
               <button 
                 onClick={() => setShowTermsModal(false)}
-                className="text-slate-500 hover:text-slate-900 transition-colors p-2 shrink-0"
+                className="shrink-0 p-2 text-text-muted transition-colors hover:text-text-strong"
               >
                 Cerrar
               </button>
             </div>
-            <div className="p-6 overflow-y-auto flex-1 space-y-4 text-sm text-slate-700 leading-relaxed font-medium">
+            <div className="flex-1 space-y-4 overflow-y-auto p-6 text-sm font-medium leading-relaxed text-text-body">
               <p>Al registrarse y utilizar la aplicación Biblioteca Virtual, el usuario acepta cumplir los presentes términos y condiciones de uso. En caso de no estar de acuerdo con alguna de las disposiciones establecidas, deberá abstenerse de utilizar la plataforma y sus servicios.</p>
               
               <p>La aplicación ReadNow es una plataforma digital diseñada para la visualización, publicación y gestión de libros digitales, permitiendo la interacción entre usuarios, publicadores y administradores. La plataforma actúa únicamente como intermediario tecnológico para facilitar el acceso y administración del contenido publicado dentro del sistema.</p>
@@ -432,8 +432,8 @@ export const Login = () => {
               
               <p>Como medida preventiva para evitar problemas legales y técnicos, la aplicación deberá implementar validaciones de archivos, restricciones de formatos permitidos, límites de tamaño de carga, registros de actividad de usuarios, validaciones de permisos antes de operaciones críticas y mecanismos de recuperación de cuenta. Además, se recomienda utilizar estrategias de “soft delete” para usuarios y libros, permitiendo conservar registros históricos en caso de auditorías o recuperación de información.</p>
             </div>
-            <div className="p-4 border-t border-slate-100 flex justify-end shrink-0 bg-slate-50">
-              <Button onClick={() => setShowTermsModal(false)} className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl">
+            <div className="flex shrink-0 justify-end border-t border-border bg-surface-soft p-4">
+              <Button onClick={() => setShowTermsModal(false)} className="rounded-xl">
                 Entendido
               </Button>
             </div>
