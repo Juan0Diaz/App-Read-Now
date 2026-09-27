@@ -27,7 +27,9 @@ export function useDarkMode() {
     listeners.add(listener);
     listener();
 
-    return () => listeners.delete(listener);
+    return () => {
+      listeners.delete(listener);
+    };
   }, []);
 
   useEffect(() => {

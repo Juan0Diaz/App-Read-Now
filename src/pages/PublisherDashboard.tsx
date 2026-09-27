@@ -4,6 +4,7 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import { BookPlus, List, Edit, Trash2 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { getMisPublicaciones, getPublicaciones, eliminarPublicacionConLibro } from '../microservicios/Publicaciones';
+import { formatDisplayDate, getDisplayPublicationDate } from '../lib/dateUtils';
 import { Publicacion } from '../types';
 
 export const PublisherDashboard = () => {
@@ -125,7 +126,7 @@ export const PublisherDashboard = () => {
                       </div>
 
                       <div className="rounded-xl border border-border bg-surface-soft px-3 py-2 text-sm text-gray-800 dark:border-border dark:bg-surface-muted dark:text-slate-300">
-                        {selectedPublication.fecha_publicacion ? new Date(selectedPublication.fecha_publicacion).toLocaleDateString() : 'Sin fecha'}
+                        {selectedLibro.fecha_publicacion ? formatDisplayDate(selectedLibro.fecha_publicacion) : 'Sin fecha'}
                       </div>
 
                       <p className="line-clamp-5 text-sm leading-relaxed text-gray-800 dark:text-slate-300">
@@ -186,7 +187,7 @@ export const PublisherDashboard = () => {
                               </span>
                             </div>
                             <div className="min-w-0 text-sm text-text-muted dark:text-text-body">
-                              {pub.fecha_publicacion ? new Date(pub.fecha_publicacion).toLocaleDateString() : '—'}
+                              {getDisplayPublicationDate(pub) ? formatDisplayDate(getDisplayPublicationDate(pub)) : '—'}
                             </div>
                             <div className="flex min-w-0 items-center justify-end gap-2 md:justify-self-end" onClick={e => e.stopPropagation()}>
                               <Button onClick={() => navigate(`/publicador/libros/editar/${libro.id_libro}`)} variant="ghost" size="icon" className="h-8 w-8 border border-border text-text-muted hover:text-indigo-600 dark:border-border dark:text-text-body dark:hover:text-indigo-400 md:border-transparent">
