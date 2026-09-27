@@ -75,12 +75,12 @@ export const AdminDashboard = () => {
         <h1 className="text-xl font-bold text-text-strong">Admin Dashboard</h1>
       </header>
 
-      <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col overflow-y-auto p-8">
+      <div className="mx-auto flex w-full max-w-6xl flex-1 flex-col min-h-0 overflow-y-auto p-8">
         <div className="mb-8 w-full">
           <h2 className="text-2xl font-bold tracking-tight text-text-strong">Gestión de Usuarios</h2>
         </div>
 
-        <div className="overflow-hidden rounded-2xl border border-border bg-surface p-6 shadow-sm">
+        <div className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
           {loading ? (
             <div className="py-10 text-center text-sm font-semibold text-text-muted">Cargando usuarios...</div>
           ) : (
