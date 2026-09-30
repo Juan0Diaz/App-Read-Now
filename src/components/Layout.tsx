@@ -61,7 +61,7 @@ export const Layout = () => {
       </header>
 
       {/* Sidebar Navigation */}
-      <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-border bg-surface dark:border-border dark:bg-surface md:flex">
+      <aside className="layout-divider-right sticky top-0 hidden h-screen w-64 shrink-0 flex-col bg-surface md:flex">
         <div className="flex items-center gap-3 p-6">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-white shadow-lg shadow-primary/20">
             <Library className="h-6 w-6" />
@@ -97,7 +97,7 @@ export const Layout = () => {
         </nav>
 
         {user ? (
-          <div className="mt-auto border-t border-border p-4 dark:border-border">
+          <div className="layout-divider-top mt-auto min-h-[132px] p-4 md:h-36 md:min-h-0">
             <div className="mb-2 flex items-center gap-3 rounded-xl border border-border bg-surface-soft p-2 shadow-sm dark:border-border dark:bg-surface-muted dark:shadow-none">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-border bg-primary/10 text-sm font-bold text-primary dark:border-border dark:bg-primary/20 dark:text-text-strong">
                 {profileInitial}
@@ -117,7 +117,7 @@ export const Layout = () => {
             </button>
           </div>
         ) : (
-          <div className="mt-auto space-y-2 border-t border-border p-4 dark:border-border">
+          <div className="layout-divider-top mt-auto space-y-2 p-4">
             <Link to="/login" className="flex w-full items-center justify-center rounded-lg bg-surface-soft px-4 py-2 text-sm font-medium text-text-body transition-colors hover:bg-surface-muted">
               Iniciar Sesión
             </Link>
@@ -130,22 +130,54 @@ export const Layout = () => {
 
       {/* Main Content Area */}
       <main className="relative flex min-h-0 flex-1 flex-col overflow-y-auto bg-surface-soft dark:bg-surface-soft">
-        {role === 'Desactivado' && location.pathname !== '/perfil' ? (
-          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center animate-in fade-in zoom-in-95 duration-500">
-            <div className="w-20 h-20 bg-error/10 text-error rounded-full flex items-center justify-center mb-6 shadow-sm border border-surface">
-              <ShieldAlert className="w-10 h-10" />
+        <div className="min-h-full">
+          {role === 'Desactivado' && location.pathname !== '/perfil' ? (
+            <div className="flex min-h-full flex-col items-center justify-center p-8 text-center animate-in fade-in zoom-in-95 duration-500">
+              <div className="w-20 h-20 bg-error/10 text-error rounded-full flex items-center justify-center mb-6 shadow-sm border border-surface">
+                <ShieldAlert className="w-10 h-10" />
+              </div>
+              <h2 className="text-3xl font-extrabold text-text-strong mb-2">Cuenta Desactivada</h2>
+              <p className="text-text-muted max-w-md mx-auto mb-8">
+                Tu cuenta ha sido desactivada por un administrador. No puedes acceder al catálogo ni realizar acciones.
+              </p>
+              <Link to="/perfil" className="bg-primary hover:bg-primary-hover text-white shadow-md shadow-primary/20 px-6 py-3 rounded-xl font-bold transition-colors">
+                Ir a mi perfil
+              </Link>
             </div>
-            <h2 className="text-3xl font-extrabold text-text-strong mb-2">Cuenta Desactivada</h2>
-            <p className="text-text-muted max-w-md mx-auto mb-8">
-              Tu cuenta ha sido desactivada por un administrador. No puedes acceder al catálogo ni realizar acciones.
-            </p>
-            <Link to="/perfil" className="bg-primary hover:bg-primary-hover text-white shadow-md shadow-primary/20 px-6 py-3 rounded-xl font-bold transition-colors">
-              Ir a mi perfil
-            </Link>
+          ) : (
+            <Outlet />
+          )}
+        </div>
+
+        <footer className="layout-divider-top mt-auto bg-surface px-6 py-4 md:px-8" aria-label="Información de READNOW">
+          <div className="mx-auto grid w-full gap-4 text-sm text-text-muted sm:grid-cols-2 lg:grid-cols-[1.6fr_1.2fr_1.2fr]">
+            <div>
+              <div className="mb-2 flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-white shadow-md shadow-primary/20">
+                  <Library className="h-4 w-4" aria-hidden="true" />
+                </div>
+                <p className="font-bold tracking-tight text-text-strong">READNOW</p>
+              </div>
+              <p className="max-w-xs text-xs leading-5 text-text-muted">Tu biblioteca digital para descubrir, guardar y compartir libros.</p>
+              <p className="mt-3 text-xs text-text-muted">© {new Date().getFullYear()} READNOW · Lecturas para cada momento.</p>
+            </div>
+
+            <nav className="flex flex-col gap-1.5" aria-label="Explorar READNOW">
+              <p className="mb-1 text-xs font-bold uppercase tracking-[0.16em] text-text-strong">Explorar</p>
+              {role !== 'Desactivado' && <Link to="/" className="w-fit text-text-body transition-colors hover:text-primary">Catálogo de libros</Link>}
+              {role !== 'Desactivado' && <Link to="/favoritos" className="w-fit text-text-body transition-colors hover:text-primary">Mis favoritos</Link>}
+              {role !== 'Desactivado' && <Link to="/prestamos" className="w-fit text-text-body transition-colors hover:text-primary">Mis préstamos</Link>}
+            </nav>
+
+            <nav className="flex flex-col gap-1.5" aria-label="Cuenta de READNOW">
+              <p className="mb-1 text-xs font-bold uppercase tracking-[0.16em] text-text-strong">Tu cuenta</p>
+              <Link to="/perfil" className="w-fit text-text-body transition-colors hover:text-primary">Mi perfil</Link>
+              {role === 'Publicador' && <Link to="/publicador/libros" className="w-fit text-text-body transition-colors hover:text-primary">Mis publicaciones</Link>}
+              {role === 'Administrador' && <Link to="/admin" className="w-fit text-text-body transition-colors hover:text-primary">Gestión de usuarios</Link>}
+              <span className="mt-1 inline-flex w-fit items-center rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">Sesión: {role}</span>
+            </nav>
           </div>
-        ) : (
-          <Outlet />
-        )}
+        </footer>
       </main>
 
       {/* Mobile Bottom Navigation */}
