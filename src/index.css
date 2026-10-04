@@ -176,6 +176,14 @@
       opacity: 0.7;
     }
   }
+
+  .layout-divider-right {
+    @apply border-r border-border;
+  }
+
+  .layout-divider-top {
+    @apply border-t border-border;
+  }
 }
 
 @layer base {
