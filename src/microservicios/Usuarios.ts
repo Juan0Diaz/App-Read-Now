@@ -1,7 +1,7 @@
 import { supabase } from '../lib/supabase';
-import { Favorito } from '../types';
+import { User } from '../types';
 
-const API_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:5080/gateway').replace(/\/+$/, '');
+const API_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:5080').replace(/\/+$/, '');
 
 async function authHeader(): Promise<HeadersInit> {
   const { data: { session }, error } = await supabase.auth.getSession();
@@ -41,11 +41,38 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   return response.json() as Promise<T>;
 }
 
-export const getFavoritos = () =>
-  request<Favorito[]>('/api/favoritos');
+export const getMiPerfil = () =>
+  request<User>('/api/usuarios/me');
 
-export const agregarFavorito = (idLibro: string) =>
-  request<void>(`/api/favoritos/${idLibro}`, { method: 'POST' });
+export const actualizarMiPerfil = (
+  data: { nombre?: string; fecha_date?: string; numero_tel?: string }
+) =>
+  request<void>('/api/usuarios/me', {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
 
-export const quitarFavorito = (idLibro: string) =>
-  request<void>(`/api/favoritos/${idLibro}`, { method: 'DELETE' });
+export const cambiarMiRol = (
+  nombreRol: 'Visualizador' | 'Publicador'
+) =>
+  request<void>('/api/usuarios/me/rol', {
+    method: 'PUT',
+    body: JSON.stringify(nombreRol),
+  });
+
+export const eliminarMiCuenta = () =>
+  request<void>('/api/usuarios/me', {
+    method: 'DELETE',
+  });
+
+export const getUsuarios = () =>
+  request<User[]>('/api/usuarios');
+
+export const asignarRol = (
+  idUsuario: string,
+  nombreRol: string
+) =>
+  request<void>(`/api/usuarios/${idUsuario}/rol`, {
+    method: 'PUT',
+    body: JSON.stringify(nombreRol),
+  });

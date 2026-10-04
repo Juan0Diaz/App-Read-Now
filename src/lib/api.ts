@@ -1,10 +1,8 @@
 import { supabase } from './supabase';
-import { User } from '../types';
 
-// En Codespaces, define esta variable en tu .env como la URL forwarded del puerto 5080
-// (Codespaces te la genera automáticamente, algo como https://<nombre>-5080.app.github.dev)
-// En local (fuera de Codespaces) sería http://localhost:5080
-const API_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:5080').replace(/\/+$/, '');
+// En local usa el gateway de YARP: http://localhost:5080/gateway
+// En Codespaces define VITE_API_URL con la URL del puerto 5080 o del gateway forwarded
+const API_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:5080/gateway').replace(/\/+$/, '');
 
 async function authHeader(): Promise<HeadersInit> {
   const { data: { session }, error } = await supabase.auth.getSession();
@@ -48,17 +46,4 @@ async function request<T>(path: string | undefined, options: RequestInit = {}): 
   return res.json() as Promise<T>;
 }
 
-// ---------- Usuarios ----------
-export const getMiPerfil = () => request<User>('/api/usuarios/me');
-export const actualizarMiPerfil = (data: { nombre?: string; fecha_date?: string; numero_tel?: string }) =>
-  request<void>('/api/usuarios/me', { method: 'PUT', body: JSON.stringify(data) });
-export const cambiarMiRol = (nombreRol: 'Visualizador' | 'Publicador') =>
-  request<void>('/api/usuarios/me/rol', { method: 'PUT', body: JSON.stringify(nombreRol) });
-export const eliminarMiCuenta = () =>
-  request<void>('/api/usuarios/me', { method: 'DELETE' });
-export const getUsuarios = () => request<User[]>('/api/usuarios');
-export const asignarRol = (idUsuario: string, nombreRol: string) =>
-  request<void>(`/api/usuarios/${idUsuario}/rol`, {
-    method: 'PUT',
-    body: JSON.stringify(nombreRol),
-  });
+
