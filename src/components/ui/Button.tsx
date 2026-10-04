@@ -33,16 +33,43 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
+  shimmer?: boolean;
 }
 
+const shimmerColors: Record<NonNullable<ButtonProps["variant"]>, string> = {
+  primary: "var(--color-primary)",
+  accent: "var(--color-accent)",
+  secondary: "var(--color-surface-soft)",
+  destructive: "var(--color-error)",
+  outline: "var(--color-surface)",
+  ghost: "var(--color-surface-soft)",
+  link: "var(--color-primary)",
+};
+
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, ...props }, ref) => {
+  ({ className, variant, size, shimmer = false, style, children, ...props }, ref) => {
+    const buttonStyle = shimmer
+      ? { ...style, "--button-shimmer-color": shimmerColors[variant ?? "primary"] } as React.CSSProperties
+      : style;
+    const buttonChildren = shimmer
+      ? React.Children.map(children, (child, index) =>
+          child === null || typeof child === "boolean" ? child : (
+            <span key={index} className="relative z-10 inline-flex items-center">
+              {child}
+            </span>
+          )
+        )
+      : children;
+
     return (
       <button
-        className={cn(buttonVariants({ variant, size, className }))}
+        className={cn(buttonVariants({ variant, size, className }), shimmer && "button-shimmer")}
         ref={ref}
+        style={buttonStyle}
         {...props}
-      />
+      >
+        {buttonChildren}
+      </button>
     );
   }
 );

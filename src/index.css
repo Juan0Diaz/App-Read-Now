@@ -84,6 +84,99 @@
     @apply h-12 w-full rounded-xl border border-border bg-surface-soft px-4 text-text-strong placeholder:text-text-muted transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20;
   }
 
+  .button-shimmer {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    outline: 1px solid color-mix(in srgb, var(--button-shimmer-color) 18%, transparent);
+    filter: drop-shadow(0 0 7px color-mix(in srgb, var(--button-shimmer-color) 18%, transparent));
+  }
+
+  .dark .button-shimmer {
+    outline-color: color-mix(in srgb, var(--button-shimmer-color) 26%, transparent);
+    filter: drop-shadow(0 0 8px color-mix(in srgb, var(--button-shimmer-color) 26%, transparent));
+  }
+
+  .button-shimmer::before {
+    position: absolute;
+    z-index: 0;
+    top: -50%;
+    bottom: -50%;
+    left: 0;
+    width: 30%;
+    background: linear-gradient(
+      60deg,
+      transparent,
+      color-mix(in srgb, var(--button-shimmer-color) 25%, white 75%),
+      transparent
+    );
+    content: '';
+    opacity: 0.45;
+    pointer-events: none;
+    transform: translateX(-120%);
+    animation: button-shimmer-sweep 2.5s linear infinite;
+  }
+
+  .dark .button-shimmer::before {
+    opacity: 0.55;
+  }
+
+  @keyframes button-shimmer-sweep {
+    from {
+      transform: translateX(-120%);
+    }
+
+    to {
+      transform: translateX(450%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .button-shimmer::before {
+      animation: none;
+      opacity: 0;
+    }
+  }
+
+  .login-card-glow {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .login-card-glow::before {
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-accent) 18%, transparent), 0 0 26px color-mix(in srgb, var(--color-accent) 18%, transparent);
+    content: '';
+    opacity: 0.45;
+    pointer-events: none;
+    animation: login-card-glow-pulse 3.5s ease-in-out infinite;
+  }
+
+  .dark .login-card-glow::before {
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-primary) 28%, transparent), 0 0 26px color-mix(in srgb, var(--color-primary) 28%, transparent);
+  }
+
+  @keyframes login-card-glow-pulse {
+    0%,
+    100% {
+      opacity: 0.45;
+    }
+
+    50% {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .login-card-glow::before {
+      animation: none;
+      opacity: 0.7;
+    }
+  }
+
   .layout-divider-right {
     @apply border-r border-border;
   }

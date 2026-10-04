@@ -239,7 +239,7 @@ export const Login = () => {
 
   return (
     <div className="flex h-full w-full flex-col items-center justify-center py-10 animate-in fade-in duration-500 dark:bg-surface-soft">
-      <div className="mx-auto w-full max-w-md rounded-3xl border border-border bg-surface p-8 shadow-xl shadow-border/20 dark:shadow-none sm:p-10">
+      <div className="login-card-glow mx-auto w-full max-w-md rounded-3xl border border-border bg-surface p-8 shadow-xl shadow-border/20 dark:shadow-none sm:p-10">
         <div className="mb-10 flex flex-col items-center text-center">
           <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary shadow-sm">
             <BookOpen className="h-8 w-8" />
