@@ -69,7 +69,7 @@ export const PublisherDashboard = () => {
     <div className="flex h-full flex-col animate-in fade-in bg-bg-warm text-text-strong duration-500 dark:bg-surface-soft dark:text-text-strong">
       <header className="sticky top-0 z-10 flex w-full shrink-0 items-center justify-between gap-3 border-b border-border bg-bg-warm px-4 py-4 shadow-sm dark:border-border dark:bg-surface sm:px-6 lg:px-8">
         <h1 className="text-2xl font-bold tracking-tight text-text-strong dark:text-text-strong">{role === 'Administrador' ? 'Gestión de Catálogo' : 'Mis Publicaciones'}</h1>
-        <Button onClick={() => navigate('/publicador/libros/nuevo')} className="rounded-lg shadow-md shadow-primary/20">
+        <Button shimmer onClick={() => navigate('/publicador/libros/nuevo')} className="rounded-lg shadow-md shadow-primary/20">
           <BookPlus className="h-4 w-4 mr-2" />
           Publicar Libro
         </Button>

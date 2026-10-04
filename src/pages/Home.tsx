@@ -75,7 +75,7 @@ export const Home = () => {
           </Button>
           {role === 'Publicador' && (
             <Link to="/publicador/libros/nuevo" className="w-full sm:w-auto">
-              <Button variant="primary" className="w-full whitespace-nowrap rounded-lg">
+              <Button variant="primary" shimmer className="w-full whitespace-nowrap rounded-lg">
                 <Plus className="mr-2 h-4 w-4" />
                 Nueva Publicación
               </Button>
