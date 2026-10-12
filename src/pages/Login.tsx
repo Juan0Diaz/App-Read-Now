@@ -4,7 +4,7 @@ import { Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { isDemoMode, supabase } from '../lib/supabase';
-import { ShieldAlert, BookOpen } from 'lucide-react';
+import { ShieldAlert, BookOpen, Eye, EyeOff } from 'lucide-react';
 
 export const Login = () => {
   const { user, simulateLogin } = useAuth();
@@ -13,6 +13,7 @@ export const Login = () => {
   const [isRegister, setIsRegister] = useState(new URLSearchParams(location.search).get('register') === 'true');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [birthDate, setBirthDate] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -296,15 +297,27 @@ export const Login = () => {
                 </button>
               )}
             </div>
-            <Input 
-              type="password" 
-              placeholder="••••••••" 
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-              disabled={isDemoMode}
-              className="h-12 rounded-xl"
-            />
+            <div className="relative">
+              <Input
+                type={showPassword ? 'text' : 'password'}
+                placeholder="••••••••"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
+                disabled={isDemoMode}
+                className="h-12 rounded-xl pr-12"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(visible => !visible)}
+                disabled={isDemoMode}
+                aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                aria-pressed={showPassword}
+                className="absolute inset-y-0 right-0 flex items-center px-3 text-text-muted transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary disabled:cursor-not-allowed disabled:opacity-50 dark:text-text-body dark:hover:text-primary"
+              >
+                {showPassword ? <EyeOff className="h-5 w-5" aria-hidden="true" /> : <Eye className="h-5 w-5" aria-hidden="true" />}
+              </button>
+            </div>
           </div>
 
           {isRegister && (
