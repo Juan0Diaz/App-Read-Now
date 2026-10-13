@@ -49,7 +49,7 @@ export const Home = () => {
       : 'bg-surface border border-border text-text-body hover:bg-surface-soft';
 
   return (
-    <div className="flex h-full flex-col animate-in fade-in duration-500">
+    <div className="flex h-full flex-col animate-in fade-in duration-500 bg-bg-warm-strong dark:bg-surface-soft">
       <header className="sticky top-0 z-20 w-full border-b border-border bg-surface px-4 py-4 shadow-sm dark:border-border dark:bg-surface sm:flex-row sm:items-center sm:justify-between md:px-8">
         <div className="relative w-full max-w-md">
           <span className="absolute inset-y-0 left-3 flex items-center text-text-muted">
