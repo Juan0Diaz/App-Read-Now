@@ -159,6 +159,47 @@
     box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-primary) 28%, transparent), 0 0 26px color-mix(in srgb, var(--color-primary) 28%, transparent);
   }
 
+  .profile-card-glow {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .profile-card-glow::before {
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-accent) 18%, transparent), 0 0 18px color-mix(in srgb, var(--color-accent) 24%, transparent);
+    content: '';
+    opacity: 0.45;
+    pointer-events: none;
+    animation: login-card-glow-pulse 3.5s ease-in-out infinite;
+  }
+
+  .dark .profile-card-glow::before {
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-primary) 28%, transparent), 0 0 18px color-mix(in srgb, var(--color-primary) 34%, transparent);
+  }
+
+  .profile-avatar-glow {
+    --profile-avatar-glow-color: var(--color-accent);
+    animation: profile-avatar-glow-pulse 3.5s ease-in-out infinite;
+  }
+
+  .dark .profile-avatar-glow {
+    --profile-avatar-glow-color: var(--color-primary);
+  }
+
+  @keyframes profile-avatar-glow-pulse {
+    0%,
+    100% {
+      box-shadow: 0 0 0 1px color-mix(in srgb, var(--profile-avatar-glow-color) 25%, transparent), 0 0 6px color-mix(in srgb, var(--profile-avatar-glow-color) 25%, transparent);
+    }
+
+    50% {
+      box-shadow: 0 0 0 1px color-mix(in srgb, var(--profile-avatar-glow-color) 70%, transparent), 0 0 12px color-mix(in srgb, var(--profile-avatar-glow-color) 50%, transparent);
+    }
+  }
+
   @keyframes login-card-glow-pulse {
     0%,
     100% {
@@ -171,9 +212,15 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .login-card-glow::before {
+    .login-card-glow::before,
+    .profile-card-glow::before {
       animation: none;
       opacity: 0.7;
+    }
+
+    .profile-avatar-glow {
+      animation: none;
+      box-shadow: 0 0 0 1px color-mix(in srgb, var(--profile-avatar-glow-color) 45%, transparent), 0 0 8px color-mix(in srgb, var(--profile-avatar-glow-color) 35%, transparent);
     }
   }
 
