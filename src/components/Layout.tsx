@@ -98,8 +98,8 @@ export const Layout = () => {
 
         {user ? (
           <div className="layout-divider-top mt-auto min-h-[132px] p-4 md:h-36 md:min-h-0">
-            <div className="mb-2 flex items-center gap-3 rounded-xl border border-border bg-surface-soft p-2 shadow-sm dark:border-border dark:bg-surface-muted dark:shadow-none">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-border bg-primary/10 text-sm font-bold text-primary dark:border-border dark:bg-primary/20 dark:text-text-strong">
+            <div className="profile-card-glow mb-2 flex items-center gap-3 rounded-xl border border-border bg-surface-soft p-2 shadow-sm dark:border-border dark:bg-surface-muted dark:shadow-none">
+              <div className="profile-avatar-glow flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-border bg-primary/10 text-sm font-bold text-primary dark:border-border dark:bg-primary/20 dark:text-text-strong">
                 {profileInitial}
               </div>
               <div className="min-w-0 flex-1">
