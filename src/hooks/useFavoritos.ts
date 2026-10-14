@@ -10,10 +10,13 @@ import { User } from '../types';
  */
 export function useFavoritos(user: User | null) {
   const [favoritos, setFavoritos] = useState<string[]>([]); // ids de libro favoritos
+  const [loading, setLoading] = useState(true);
 
   const cargarFavoritos = useCallback(async () => {
+    setLoading(true);
     if (!user || isDemoMode) {
       setFavoritos([]);
+      setLoading(false);
       return;
     }
     try {
@@ -21,6 +24,8 @@ export function useFavoritos(user: User | null) {
       setFavoritos(data.map(f => f.id_libro));
     } catch (err) {
       console.error('Error al cargar favoritos', err);
+    } finally {
+      setLoading(false);
     }
   }, [user]);
 
@@ -57,5 +62,5 @@ export function useFavoritos(user: User | null) {
     }
   };
 
-  return { favoritos, toggleFavorito, isFavorito: (id: string) => favoritos.includes(id) };
+  return { favoritos, loading, toggleFavorito, isFavorito: (id: string) => favoritos.includes(id) };
 }

@@ -13,8 +13,8 @@ import { Badge } from '../components/ui/Badge';
 export const Home = () => {
   const { user, role } = useAuth();
   const { libros, loading } = useLibros();
-  const { generos } = useGeneros();
-  const { toggleFavorito, isFavorito } = useFavoritos(user);
+  const { generos, loading: loadingGeneros } = useGeneros();
+  const { toggleFavorito, isFavorito, loading: loadingFavoritos } = useFavoritos(user);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedGenero, setSelectedGenero] = useState<string | null>(null);
@@ -47,6 +47,15 @@ export const Home = () => {
     selected
       ? 'bg-primary text-white shadow-md shadow-primary/20'
       : 'bg-surface border border-border text-text-body hover:bg-surface-soft';
+
+  if (loading || loadingGeneros || loadingFavoritos) {
+    return (
+      <div className="flex min-h-[40vh] flex-1 items-center justify-center gap-2 p-8 text-text-muted" role="status" aria-live="polite">
+        <span aria-hidden="true" className="h-4 w-4 animate-spin rounded-full border-2 border-current border-r-transparent motion-reduce:animate-none" />
+        <span>Cargando catálogo...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-full flex-col animate-in fade-in duration-500 bg-bg-warm-strong dark:bg-surface-soft">
@@ -158,17 +167,7 @@ export const Home = () => {
           </div>
         </div>
 
-        {loading ? (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
-              <div key={i} className="animate-pulse rounded-xl border border-border bg-surface p-4">
-                <div className="mb-4 h-64 rounded-xl bg-surface-soft" />
-                <div className="mb-2 h-4 w-2/3 rounded bg-surface-soft" />
-                <div className="h-3 w-1/2 rounded bg-surface-soft" />
-              </div>
-            ))}
-          </div>
-        ) : filteredLibros.length === 0 ? (
+        {filteredLibros.length === 0 ? (
           <Card className="border-dashed border-border bg-surface py-20 text-center">
             <Book className="mx-auto mb-3 h-10 w-10 text-text-muted" />
             <h3 className="text-lg font-medium text-text-strong">No se encontraron libros</h3>
