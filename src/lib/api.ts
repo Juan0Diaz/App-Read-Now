@@ -4,6 +4,13 @@ import { supabase } from './supabase';
 // En Codespaces define VITE_API_URL con la URL del puerto 5080 o del gateway forwarded
 const API_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:5080/gateway').replace(/\/+$/, '');
 
+export class ApiError extends Error {
+  constructor(message: string, public readonly status: number) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
 async function authHeader(): Promise<HeadersInit> {
   const { data: { session }, error } = await supabase.auth.getSession();
 
@@ -27,7 +34,7 @@ function buildApiUrl(path: string | undefined): string {
   return normalizedPath;
 }
 
-async function request<T>(path: string | undefined, options: RequestInit = {}): Promise<T> {
+export async function request<T>(path: string | undefined, options: RequestInit = {}): Promise<T> {
   const headers = {
     'Content-Type': 'application/json',
     ...(await authHeader()),
@@ -39,7 +46,7 @@ async function request<T>(path: string | undefined, options: RequestInit = {}): 
 
   if (!res.ok) {
     const message = await res.text().catch(() => res.statusText);
-    throw new Error(`API ${res.status}: ${message}`);
+    throw new ApiError(`API ${res.status}: ${message}`, res.status);
   }
 
   if (res.status === 204) return undefined as T;
