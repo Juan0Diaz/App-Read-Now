@@ -83,6 +83,19 @@ public sealed class PublicacionesServices : IPublicacionesServices
 
         if (dto.Precio is not null) publicacion.Precio = dto.Precio;
         if (dto.Descripcion is not null) publicacion.Descripcion = dto.Descripcion;
+        if (dto.FechaPublicacion is not null)
+        {
+            publicacion.FechaPublicacion = dto.FechaPublicacion;
+
+            if (publicacion.IdLibro is not null)
+            {
+                var libro = await _db.Libros.FindAsync(publicacion.IdLibro.Value);
+                if (libro is not null)
+                {
+                    libro.FechaPublicacion = dto.FechaPublicacion;
+                }
+            }
+        }
 
         await _db.SaveChangesAsync();
         return new(PublicacionOperacionEstado.Ok);

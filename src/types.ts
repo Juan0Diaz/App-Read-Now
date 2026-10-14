@@ -11,13 +11,13 @@ export interface User {
 
 export interface UserRole {
   id_usuario: string;
-  id_Rol: string;
+  id_rol: string;
   rol?: Rol;
 }
 
 export interface Rol {
-  id_Rol: string;
-  nombre_Rol: Role;
+  id_rol: string;
+  nombre_rol: Role;
 }
 
 export interface Genero {

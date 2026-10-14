@@ -51,83 +51,83 @@ export const PublicProfile = () => {
 
   if (!publisher) {
     return (
-      <div className="text-center py-20 p-8">
-        <h2 className="text-2xl font-bold text-slate-800">Perfil no encontrado</h2>
-        <Link to="/" className="inline-flex items-center mt-4 text-indigo-600 font-bold hover:underline">
-          <ArrowLeft className="h-4 w-4 mr-2" /> Volver al catálogo
+      <div className="bg-surface-soft p-8 py-20 text-center text-text-strong dark:bg-surface-soft">
+        <h2 className="text-2xl font-bold text-text-strong">Perfil no encontrado</h2>
+        <Link to="/" className="mt-4 inline-flex items-center font-bold text-primary hover:underline">
+          <ArrowLeft className="mr-2 h-4 w-4" /> Volver al catálogo
         </Link>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full animate-in fade-in duration-500">
-      <header className="h-20 bg-white border-b border-slate-200 px-8 flex items-center shrink-0 sticky top-0 z-10 w-full">
-        <button onClick={() => window.history.back()} className="inline-flex items-center text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors">
-          <ArrowLeft className="h-4 w-4 mr-2" /> Volver
+    <div className="flex h-full flex-col animate-in fade-in bg-surface-soft text-text-strong duration-500 dark:bg-surface-soft">
+      <header className="sticky top-0 z-10 flex h-20 w-full shrink-0 items-center border-b border-border bg-surface px-8 dark:border-border dark:bg-surface">
+        <button onClick={() => window.history.back()} className="inline-flex items-center text-sm font-bold text-text-muted transition-colors hover:text-text-strong">
+          <ArrowLeft className="mr-2 h-4 w-4" /> Volver
         </button>
       </header>
 
-      <div className="p-8 flex-1 overflow-y-auto max-w-5xl mx-auto w-full">
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden mb-8">
-          <div className="bg-gradient-to-r from-indigo-500 to-purple-600 h-32 w-full"></div>
-          <div className="p-8 pt-0 relative">
+      <div className="mx-auto flex w-full max-w-5xl flex-1 overflow-y-auto p-8">
+        <div className="mb-8 w-full overflow-hidden rounded-3xl border border-border bg-surface shadow-sm">
+          <div className="h-32 w-full bg-gradient-to-r from-primary to-secondary"></div>
+          <div className="relative p-8 pt-0">
             <div className="-mt-16 mb-4">
-              <div className="w-32 h-32 bg-white rounded-full p-2 shadow-lg inline-block">
-                <div className="w-full h-full bg-indigo-100 rounded-full flex items-center justify-center text-4xl font-bold text-indigo-700">
+              <div className="inline-block h-32 w-32 rounded-full bg-surface p-2 shadow-lg">
+                <div className="flex h-full w-full items-center justify-center rounded-full bg-primary/10 text-4xl font-bold text-primary">
                   {publisher.correo.charAt(0).toUpperCase()}
                 </div>
               </div>
             </div>
 
-            <h1 className="text-3xl font-extrabold text-slate-900 mb-6">
+            <h1 className="mb-6 text-3xl font-extrabold text-text-strong">
               {publisher.nombre || publisher.correo.split('@')[0]}
             </h1>
             
-            <h3 className="text-sm font-bold text-slate-900 tracking-tight mb-4 uppercase">Información de Contacto</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 text-slate-600 font-medium">
-              <div className="flex items-center gap-3 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                <Mail className="h-5 w-5 text-indigo-400" />
-                <a href={`mailto:${publisher.correo}`} className="hover:text-indigo-600 hover:underline">{publisher.correo}</a>
+            <h3 className="mb-4 text-sm font-bold uppercase tracking-tight text-text-strong">Información de Contacto</h3>
+            <div className="mb-8 grid grid-cols-1 gap-4 text-text-body font-medium md:grid-cols-2">
+              <div className="flex items-center gap-3 rounded-xl border border-border bg-surface-soft p-4">
+                <Mail className="h-5 w-5 text-primary" />
+                <a href={`mailto:${publisher.correo}`} className="hover:text-primary hover:underline">{publisher.correo}</a>
               </div>
               {publisher.numero_tel && (
-                <div className="flex items-center gap-3 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                  <Phone className="h-5 w-5 text-indigo-400" />
-                  <a href={`tel:${publisher.numero_tel}`} className="hover:text-indigo-600 hover:underline">{publisher.numero_tel}</a>
+                <div className="flex items-center gap-3 rounded-xl border border-border bg-surface-soft p-4">
+                  <Phone className="h-5 w-5 text-primary" />
+                  <a href={`tel:${publisher.numero_tel}`} className="hover:text-primary hover:underline">{publisher.numero_tel}</a>
                 </div>
               )}
             </div>
           </div>
         </div>
 
-        <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-          <Book className="h-6 w-6 text-indigo-500" /> Libros Publicados
+        <h2 className="mb-6 flex items-center gap-2 text-2xl font-bold text-text-strong">
+          <Book className="h-6 w-6 text-primary" /> Libros Publicados
         </h2>
         
         {publications.length === 0 ? (
-          <div className="bg-white border border-slate-200 rounded-2xl p-10 text-center text-slate-500">
+          <div className="rounded-2xl border border-border bg-surface p-10 text-center text-text-muted">
             Este usuario no ha publicado libros aún.
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {publications.map((pub: any) => {
               const libro = pub.Libro;
               return (
-                <div key={libro.id_libro} className="bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-lg transition-all duration-300 group flex flex-col h-full">
-                  <div className="p-6 bg-slate-50 border-b border-slate-100 flex items-center justify-center aspect-[4/3]">
+                <div key={libro.id_libro} className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-surface transition-all duration-300 hover:shadow-lg">
+                  <div className="flex aspect-[4/3] items-center justify-center border-b border-border bg-surface-soft p-6">
                     {libro.portada_url ? (
-                      <img src={libro.portada_url} alt={libro.titulo} className="h-full object-contain drop-shadow-md group-hover:scale-105 transition-transform duration-300" />
+                      <img src={libro.portada_url} alt={libro.titulo} className="h-full object-contain drop-shadow-md transition-transform duration-300 group-hover:scale-105" />
                     ) : (
-                      <div className="w-24 h-36 bg-white shadow-sm border border-slate-200 rounded flex items-center justify-center text-indigo-200">
+                      <div className="flex h-36 w-24 items-center justify-center rounded border border-border bg-surface text-indigo-200 shadow-sm dark:border-slate-700 dark:bg-slate-900">
                         <Book className="h-8 w-8" />
                       </div>
                     )}
                   </div>
-                  <div className="p-5 flex flex-col flex-1">
-                    <h3 className="font-bold text-slate-900 truncate mb-1" title={libro.titulo}>{libro.titulo}</h3>
-                    <p className="text-sm text-slate-500 truncate mb-4">{libro.autor}</p>
+                  <div className="flex flex-1 flex-col p-5">
+                    <h3 className="mb-1 truncate font-bold text-text-strong dark:text-white" title={libro.titulo}>{libro.titulo}</h3>
+                    <p className="mb-4 truncate text-sm text-text-muted dark:text-slate-400">{libro.autor}</p>
                     <div className="mt-auto flex gap-2">
-                      <Link to={`/libro/${libro.id_libro}`} className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 px-4 rounded-lg text-center transition-colors text-sm">
+                      <Link to={`/libro/${libro.id_libro}`} className="w-full rounded-lg bg-surface-soft px-4 py-2 text-center text-sm font-semibold text-text-strong transition-colors hover:bg-surface-muted dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
                         Ver Detalles
                       </Link>
                     </div>
