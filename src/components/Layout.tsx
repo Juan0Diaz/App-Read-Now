@@ -42,7 +42,7 @@ export const Layout = () => {
   };
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-surface-soft font-sans text-text-strong dark:bg-surface-soft dark:text-text-strong md:flex-row">
+    <div className="flex h-screen w-full flex-col overflow-hidden bg-surface-soft font-sans text-text-strong dark:bg-surface-soft dark:text-text-strong md:flex-row">
       {/* Mobile Top Header */}
       <header className="md:hidden bg-surface border-b border-border p-4 flex items-center justify-between shrink-0 z-30 h-[73px] dark:bg-surface dark:border-border">
         <div className="flex items-center gap-2">
@@ -103,7 +103,7 @@ export const Layout = () => {
                 {profileInitial}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-bold text-text-strong dark:text-text-strong">{user.correo}</p>
+                <p className="truncate text-sm font-bold text-text-strong dark:text-text-strong">{user.nombre || user.correo}</p>
                 <p className="truncate text-xs font-medium text-text-muted dark:text-text-body">{role}</p>
               </div>
             </div>
@@ -129,7 +129,7 @@ export const Layout = () => {
       </aside>
 
       {/* Main Content Area */}
-      <main className="relative flex min-h-0 flex-1 flex-col overflow-y-auto bg-surface-soft dark:bg-surface-soft">
+      <main className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto bg-surface-soft dark:bg-surface-soft">
         <div className="min-h-full">
           {role === 'Desactivado' && location.pathname !== '/perfil' ? (
             <div className="flex min-h-full flex-col items-center justify-center p-8 text-center animate-in fade-in zoom-in-95 duration-500">
