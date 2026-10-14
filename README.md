@@ -81,6 +81,10 @@ npm run dev
 # Terminal 2 — Backend
 cd backend
 dotnet run
+
+# Terminal 3 - el api upstream
+cd backend
+dotnet run --launch-profile Backend.Api.Upstream
 ```
 
 Codespaces reenviará (forward) los puertos 3000 y 5080 automáticamente. Copia la URL

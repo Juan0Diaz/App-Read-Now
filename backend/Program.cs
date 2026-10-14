@@ -33,6 +33,7 @@ builder.Services.AddScoped<IGenerosServices, GenerosServices>();
 builder.Services.AddScoped<ILibrosServices, LibrosServices>();
 builder.Services.AddScoped<IPublicacionesServices, PublicacionesServices>();
 builder.Services.AddScoped<IUsuariosServices, UsuariosServices>();
+builder.Services.AddScoped<ILoginServices, LoginServices>();
 
 builder.Services.AddScoped<IClaimsTransformation, RoleClaimsTransformation>();
 
