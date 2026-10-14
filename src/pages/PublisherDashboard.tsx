@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { BookPlus, List, Edit, Trash2 } from 'lucide-react';
@@ -7,17 +7,57 @@ import { getMisPublicaciones, getPublicaciones, eliminarPublicacionConLibro } fr
 import { formatDisplayDate, getDisplayPublicationDate } from '../lib/dateUtils';
 import { Publicacion } from '../types';
 
+const publicationsCache = new Map<string, Publicacion[]>();
+
 export const PublisherDashboard = () => {
   const { user, role } = useAuth();
   const navigate = useNavigate();
-  const [publicaciones, setPublicaciones] = useState<Publicacion[]>([]);
-  const [loading, setLoading] = useState(true);
+  const cacheKey = user ? `${user.id_usuario}:${role}` : null;
+  const [publicaciones, setPublicaciones] = useState<Publicacion[]>(() =>
+    cacheKey ? publicationsCache.get(cacheKey) ?? [] : [],
+  );
+  const [loading, setLoading] = useState(() =>
+    !cacheKey || !publicationsCache.has(cacheKey),
+  );
   const [deleteConfirm, setDeleteConfirm] = useState<{ id_publicacion: string } | null>(null);
   const [selectedPublicacionId, setSelectedPublicacionId] = useState<string | null>(null);
 
+  const fetchPublicaciones = useCallback(async () => {
+    if (!user || !cacheKey) return;
+
+    if (!publicationsCache.has(cacheKey)) {
+      setLoading(true);
+    }
+
+    try {
+      // El Administrador ve el catálogo completo; el Publicador, solo lo suyo.
+      const data = role === 'Administrador'
+        ? await getPublicaciones()
+        : await getMisPublicaciones();
+      publicationsCache.set(cacheKey, data);
+      setPublicaciones(data);
+    } catch (err) {
+      console.error('Error fetching publications', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [cacheKey, role, user]);
+
   useEffect(() => {
-    fetchPublicaciones();
-  }, [user, role]);
+    const cachedPublications = cacheKey ? publicationsCache.get(cacheKey) : undefined;
+    setPublicaciones(cachedPublications ?? []);
+    setLoading(!cachedPublications);
+    void fetchPublicaciones();
+
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === 'visible') {
+        void fetchPublicaciones();
+      }
+    };
+    document.addEventListener('visibilitychange', refreshWhenVisible);
+
+    return () => document.removeEventListener('visibilitychange', refreshWhenVisible);
+  }, [cacheKey, fetchPublicaciones]);
 
   useEffect(() => {
     if (!publicaciones.length) {
@@ -30,28 +70,16 @@ export const PublisherDashboard = () => {
     }
   }, [publicaciones, selectedPublicacionId]);
 
-  const fetchPublicaciones = async () => {
-    if (!user) return;
-    try {
-      setLoading(true);
-      // El Administrador ve el catálogo completo; el Publicador, solo lo suyo.
-      const data = role === 'Administrador'
-        ? await getPublicaciones()
-        : await getMisPublicaciones();
-      setPublicaciones(data);
-    } catch (err) {
-      console.error('Error fetching publications', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleDelete = async (id_publicacion: string) => {
     try {
       // Antes eran 3 llamadas sueltas a Supabase desde aquí; ahora es una sola
       // transacción atómica en el backend (ver PublicacionesController.DeleteConLibro).
       await eliminarPublicacionConLibro(id_publicacion);
-      setPublicaciones(prev => prev.filter(p => p.id_publicacion !== id_publicacion));
+      const updatedPublications = publicaciones.filter(p => p.id_publicacion !== id_publicacion);
+      if (cacheKey) {
+        publicationsCache.set(cacheKey, updatedPublications);
+      }
+      setPublicaciones(updatedPublications);
       setDeleteConfirm(null);
     } catch (err) {
       console.error('Error eliminando la publicación: ', err);
