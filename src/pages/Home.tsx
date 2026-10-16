@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLibros } from '../hooks/useLibros';
 import { useGeneros } from '../hooks/useGeneros';
@@ -21,6 +21,31 @@ export const Home = () => {
   const [filterDisponibilidad, setFilterDisponibilidad] = useState<string>('todos');
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [selectedAutor, setSelectedAutor] = useState<string | null>(null);
+  const filtersRef = useRef<HTMLDivElement>(null);
+  const filtersButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!isFiltersOpen) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (event.target instanceof Node && !filtersRef.current?.contains(event.target)) {
+        setIsFiltersOpen(false);
+      }
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsFiltersOpen(false);
+        filtersButtonRef.current?.focus();
+      }
+    };
+
+    document.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isFiltersOpen]);
 
   const handleToggleFavorito = (e: React.MouseEvent, idLibro: string) => {
     e.preventDefault();
@@ -46,7 +71,17 @@ export const Home = () => {
   const chipClasses = (selected: boolean) =>
     selected
       ? 'bg-primary text-white shadow-md shadow-primary/20'
-      : 'bg-surface border border-border text-text-body hover:bg-surface-soft';
+      : 'bg-surface border border-border text-text-body hover:bg-surface-soft dark:bg-surface dark:text-text-body dark:hover:bg-surface-soft';
+  const activeFilterCount = Number(selectedGenero !== null) +
+    Number(selectedAutor !== null) +
+    Number(filterDisponibilidad !== 'todos');
+
+  const handleClearFilters = () => {
+    setSearchTerm('');
+    setSelectedGenero(null);
+    setSelectedAutor(null);
+    setFilterDisponibilidad('todos');
+  };
 
   if (loading || loadingGeneros || loadingFavoritos) {
     return (
@@ -59,7 +94,7 @@ export const Home = () => {
 
   return (
     <div className="flex h-full flex-col animate-in fade-in duration-500 bg-bg-warm-strong dark:bg-surface-soft">
-      <header className="sticky top-0 z-20 w-full border-b border-border bg-surface px-4 py-4 shadow-sm dark:border-border dark:bg-surface sm:flex-row sm:items-center sm:justify-between md:px-8">
+      <header className="sticky top-0 z-20 flex w-full flex-col gap-4 border-b border-border bg-surface px-4 py-4 shadow-sm dark:border-border dark:bg-surface sm:flex-row sm:items-center sm:justify-between sm:gap-6 md:px-8">
         <div className="relative w-full max-w-md">
           <span className="absolute inset-y-0 left-3 flex items-center text-text-muted">
             <Search className="w-5 h-5" />
@@ -73,15 +108,7 @@ export const Home = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <div className="mt-3 flex w-full items-center gap-2 sm:mt-0 sm:w-auto">
-          <Button
-            variant="secondary"
-            className="sm:hidden w-full"
-            onClick={() => setIsFiltersOpen(!isFiltersOpen)}
-          >
-            <SlidersHorizontal className="mr-2 h-4 w-4" />
-            Filtros
-          </Button>
+        <div className="flex w-full items-center gap-2 sm:w-auto sm:shrink-0">
           {role === 'Publicador' && (
             <Link to="/publicador/libros/nuevo" className="w-full sm:w-auto">
               <Button variant="primary" shimmer className="w-full whitespace-nowrap rounded-lg">
@@ -94,77 +121,118 @@ export const Home = () => {
       </header>
 
       <section className="flex-1 overflow-y-auto p-4 md:p-8">
-        <div className={`mb-6 space-y-4 transition-all duration-300 ${isFiltersOpen ? 'block' : 'hidden sm:block'}`}>
-          <div>
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-muted">Géneros</h3>
-            <div className="flex gap-2 overflow-x-auto pb-2">
-              <button
-                type="button"
-                aria-pressed={selectedGenero === null}
-                onClick={() => setSelectedGenero(null)}
-                className={`rounded-full px-4 py-1.5 text-xs font-medium whitespace-nowrap transition-colors ${chipClasses(selectedGenero === null)}`}
-              >
-                Todos
-              </button>
-              {generos.map(g => (
-                <button
-                  key={g.id_genero}
-                  type="button"
-                  aria-pressed={selectedGenero === g.id_genero}
-                  onClick={() => setSelectedGenero(g.id_genero)}
-                  className={`rounded-full px-4 py-1.5 text-xs font-medium whitespace-nowrap transition-colors ${chipClasses(selectedGenero === g.id_genero)}`}
-                >
-                  {g.nombre_genero}
-                </button>
-              ))}
-            </div>
-          </div>
+        <div className="relative z-20 mb-6" ref={filtersRef}>
+          <Button
+            ref={filtersButtonRef}
+            type="button"
+            variant="secondary"
+            aria-expanded={isFiltersOpen}
+            aria-controls="catalog-filters-panel"
+            className="w-full justify-start sm:w-auto"
+            onClick={() => setIsFiltersOpen(open => !open)}
+          >
+            <SlidersHorizontal className="mr-2 h-4 w-4" />
+            Filtros
+            {activeFilterCount > 0 && (
+              <Badge variant="primary" aria-label={`${activeFilterCount} filtros aplicados`} className="ml-2 px-2 py-0.5">
+                {activeFilterCount}
+              </Badge>
+            )}
+          </Button>
+          {isFiltersOpen && (
+            <div
+              id="catalog-filters-panel"
+              className="absolute left-0 top-full z-20 mt-2 max-h-[min(70vh,36rem)] w-[min(24rem,calc(100vw-2rem))] overflow-y-auto rounded-xl border border-border bg-surface p-4 shadow-sm dark:border-border dark:bg-surface"
+            >
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-sm font-semibold text-text-body">Filtros</h2>
+                {activeFilterCount > 0 && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    aria-label="Eliminar todos los filtros"
+                    className="h-auto min-h-0 px-2 py-1 text-xs text-primary focus-visible:ring-2"
+                    onClick={handleClearFilters}
+                  >
+                    Eliminar filtros
+                  </Button>
+                )}
+              </div>
+              <div className="space-y-5">
+                <div>
+                  <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-muted">Géneros</h3>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      aria-pressed={selectedGenero === null}
+                      onClick={() => setSelectedGenero(null)}
+                      className={`rounded-full px-4 py-1.5 text-xs font-medium whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${chipClasses(selectedGenero === null)}`}
+                    >
+                      Todos
+                    </button>
+                    {generos.map(g => (
+                      <button
+                        key={g.id_genero}
+                        type="button"
+                        aria-pressed={selectedGenero === g.id_genero}
+                        onClick={() => setSelectedGenero(g.id_genero)}
+                        className={`rounded-full px-4 py-1.5 text-xs font-medium whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${chipClasses(selectedGenero === g.id_genero)}`}
+                      >
+                        {g.nombre_genero}
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-          <div>
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-muted">Autores</h3>
-            <div className="flex gap-2 overflow-x-auto pb-2">
-              <button
-                type="button"
-                aria-pressed={selectedAutor === null}
-                onClick={() => setSelectedAutor(null)}
-                className={`rounded-full px-4 py-1.5 text-xs font-medium whitespace-nowrap transition-colors ${chipClasses(selectedAutor === null)}`}
-              >
-                Todos
-              </button>
-              {autores.map(autor => (
-                <button
-                  key={autor}
-                  type="button"
-                  aria-pressed={selectedAutor === autor}
-                  onClick={() => setSelectedAutor(autor)}
-                  className={`rounded-full px-4 py-1.5 text-xs font-medium whitespace-nowrap transition-colors ${chipClasses(selectedAutor === autor)}`}
-                >
-                  {autor}
-                </button>
-              ))}
-            </div>
-          </div>
+                <div>
+                  <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-muted">Autores</h3>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      aria-pressed={selectedAutor === null}
+                      onClick={() => setSelectedAutor(null)}
+                      className={`rounded-full px-4 py-1.5 text-xs font-medium whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${chipClasses(selectedAutor === null)}`}
+                    >
+                      Todos
+                    </button>
+                    {autores.map(autor => (
+                      <button
+                        key={autor}
+                        type="button"
+                        aria-pressed={selectedAutor === autor}
+                        onClick={() => setSelectedAutor(autor)}
+                        className={`rounded-full px-4 py-1.5 text-xs font-medium whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${chipClasses(selectedAutor === autor)}`}
+                      >
+                        {autor}
+                      </button>
+                    ))}
+                  </div>
+                </div>
 
-          <div>
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-muted">Estado</h3>
-            <div className="flex gap-2 overflow-x-auto pb-2">
-              {[
-                { value: 'todos', label: 'Todos' },
-                { value: 'disponible', label: 'Disponibles' },
-                { value: 'reservado', label: 'Reservados' },
-              ].map(opt => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  aria-pressed={filterDisponibilidad === opt.value}
-                  onClick={() => setFilterDisponibilidad(opt.value)}
-                  className={`rounded-full px-4 py-1.5 text-xs font-medium whitespace-nowrap transition-colors ${chipClasses(filterDisponibilidad === opt.value)}`}
-                >
-                  {opt.label}
-                </button>
-              ))}
+                <div>
+                  <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-muted">Estado</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { value: 'todos', label: 'Todos' },
+                      { value: 'disponible', label: 'Disponibles' },
+                      { value: 'reservado', label: 'Reservados' },
+                    ].map(opt => (
+                      <button
+                        key={opt.value}
+                        type="button"
+                        aria-pressed={filterDisponibilidad === opt.value}
+                        onClick={() => setFilterDisponibilidad(opt.value)}
+                        className={`rounded-full px-4 py-1.5 text-xs font-medium whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${chipClasses(filterDisponibilidad === opt.value)}`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {filteredLibros.length === 0 ? (
@@ -172,7 +240,7 @@ export const Home = () => {
             <Book className="mx-auto mb-3 h-10 w-10 text-text-muted" />
             <h3 className="text-lg font-medium text-text-strong">No se encontraron libros</h3>
             <p className="mx-auto mt-1 max-w-sm text-text-muted">Intenta ajustar tu búsqueda o seleccionar un filtro diferente.</p>
-            <Button variant="secondary" className="mt-4" onClick={() => { setSearchTerm(''); setSelectedGenero(null); setSelectedAutor(null); setFilterDisponibilidad('todos'); }}>
+            <Button variant="secondary" className="mt-4" onClick={handleClearFilters}>
               Limpiar filtros
             </Button>
           </Card>
