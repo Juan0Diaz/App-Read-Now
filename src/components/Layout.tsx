@@ -184,55 +184,55 @@ export const Layout = () => {
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden bg-surface border-t border-border h-16 flex items-center justify-around shrink-0 z-20 px-2 pb-safe dark:bg-surface dark:border-border">
         {role !== 'Desactivado' && (
-          <Link to="/" className={`p-3 rounded-full flex flex-col items-center gap-1 ${location.pathname === '/' ? 'text-primary' : 'text-text-muted'}`}>
+          <Link to="/" className={`p-3 rounded-full flex flex-col items-center gap-1 max-[376px]:flex-1 max-[376px]:min-w-0 max-[376px]:gap-0.5 max-[376px]:px-0.5 max-[376px]:py-1 ${location.pathname === '/' ? 'text-primary' : 'text-text-muted'}`}>
             <LayoutDashboard className="w-5 h-5" />
-            <span className="text-xs font-bold">Inicio</span>
+            <span className="text-xs font-bold max-[376px]:max-w-full max-[376px]:truncate max-[360px]:text-[10px]">Inicio</span>
           </Link>
         )}
         
         {role === 'Publicador' && (
-          <Link to="/publicador/libros" className={`p-3 rounded-full flex flex-col items-center gap-1 ${location.pathname.startsWith('/publicador') ? 'text-primary' : 'text-text-muted'}`}>
+          <Link to="/publicador/libros" className={`p-3 rounded-full flex flex-col items-center gap-1 max-[376px]:flex-1 max-[376px]:min-w-0 max-[376px]:gap-0.5 max-[376px]:px-0.5 max-[376px]:py-1 ${location.pathname.startsWith('/publicador') ? 'text-primary' : 'text-text-muted'}`}>
             <BookOpen className="w-5 h-5" />
-            <span className="text-xs font-bold">Mis Libros</span>
+            <span className="text-xs font-bold max-[376px]:max-w-full max-[376px]:truncate max-[360px]:text-[10px]">Mis Libros</span>
           </Link>
         )}
         
         {role === 'Administrador' && (
           <>
-            <Link to="/publicador/libros" className={`p-3 rounded-full flex flex-col items-center gap-1 ${location.pathname.startsWith('/publicador') ? 'text-primary' : 'text-text-muted'}`}>
+            <Link to="/publicador/libros" className={`p-3 rounded-full flex flex-col items-center gap-1 max-[376px]:flex-1 max-[376px]:min-w-0 max-[376px]:gap-0.5 max-[376px]:px-0.5 max-[376px]:py-1 ${location.pathname.startsWith('/publicador') ? 'text-primary' : 'text-text-muted'}`}>
               <BookOpen className="w-5 h-5" />
-              <span className="text-xs font-bold">Catálogo</span>
+              <span className="text-xs font-bold max-[376px]:max-w-full max-[376px]:truncate max-[360px]:text-[10px]">Catálogo</span>
             </Link>
-            <Link to="/admin" className={`p-3 rounded-full flex flex-col items-center gap-1 ${location.pathname.startsWith('/admin') ? 'text-primary' : 'text-text-muted'}`}>
+            <Link to="/admin" className={`p-3 rounded-full flex flex-col items-center gap-1 max-[376px]:flex-1 max-[376px]:min-w-0 max-[376px]:gap-0.5 max-[376px]:px-0.5 max-[376px]:py-1 ${location.pathname.startsWith('/admin') ? 'text-primary' : 'text-text-muted'}`}>
               <Users className="w-5 h-5" />
-              <span className="text-xs font-bold">Usuarios</span>
+              <span className="text-xs font-bold max-[376px]:max-w-full max-[376px]:truncate max-[360px]:text-[10px]">Usuarios</span>
             </Link>
           </>
         )}
 
         {user && role !== 'Desactivado' && (
-          <Link to="/favoritos" className={`p-3 rounded-full flex flex-col items-center gap-1 ${location.pathname === '/favoritos' ? 'text-primary' : 'text-text-muted'}`}>
+          <Link to="/favoritos" className={`p-3 rounded-full flex flex-col items-center gap-1 max-[376px]:flex-1 max-[376px]:min-w-0 max-[376px]:gap-0.5 max-[376px]:px-0.5 max-[376px]:py-1 ${location.pathname === '/favoritos' ? 'text-primary' : 'text-text-muted'}`}>
             <Heart className="w-5 h-5" />
-            <span className="text-xs font-bold">Favoritos</span>
+            <span className="text-xs font-bold max-[376px]:max-w-full max-[376px]:truncate max-[360px]:text-[10px]">Favoritos</span>
           </Link>
         )}
 
         {user && role !== 'Desactivado' && (
-          <Link to="/prestamos" className={`p-3 rounded-full flex flex-col items-center gap-1 ${location.pathname === '/prestamos' ? 'text-primary' : 'text-text-muted'}`}>
+          <Link to="/prestamos" className={`p-3 rounded-full flex flex-col items-center gap-1 max-[376px]:flex-1 max-[376px]:min-w-0 max-[376px]:gap-0.5 max-[376px]:px-0.5 max-[376px]:py-1 ${location.pathname === '/prestamos' ? 'text-primary' : 'text-text-muted'}`}>
             <Clock className="w-5 h-5" />
-            <span className="text-xs font-bold">Préstamos</span>
+            <span className="text-xs font-bold max-[376px]:max-w-full max-[376px]:truncate max-[360px]:text-[10px]">Préstamos</span>
           </Link>
         )}
 
         {user ? (
-          <Link to="/perfil" className={`p-3 rounded-full flex flex-col items-center gap-1 ${location.pathname === '/perfil' ? 'text-primary' : 'text-text-muted'}`}>
+          <Link to="/perfil" className={`p-3 rounded-full flex flex-col items-center gap-1 max-[376px]:flex-1 max-[376px]:min-w-0 max-[376px]:gap-0.5 max-[376px]:px-0.5 max-[376px]:py-1 ${location.pathname === '/perfil' ? 'text-primary' : 'text-text-muted'}`}>
             <User className="w-5 h-5" />
-            <span className="text-xs font-bold">Perfil</span>
+            <span className="text-xs font-bold max-[376px]:max-w-full max-[376px]:truncate max-[360px]:text-[10px]">Perfil</span>
           </Link>
         ) : (
-          <Link to="/login" className="p-3 rounded-full flex flex-col items-center gap-1 text-text-muted">
+          <Link to="/login" className="p-3 rounded-full flex flex-col items-center gap-1 max-[376px]:flex-1 max-[376px]:min-w-0 max-[376px]:gap-0.5 max-[376px]:px-0.5 max-[376px]:py-1 text-text-muted">
             <User className="w-5 h-5" />
-            <span className="text-xs font-bold">Entrar</span>
+            <span className="text-xs font-bold max-[376px]:max-w-full max-[376px]:truncate max-[360px]:text-[10px]">Entrar</span>
           </Link>
         )}
       </nav>
