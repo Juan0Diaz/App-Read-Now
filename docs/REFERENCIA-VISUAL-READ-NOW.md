@@ -39,7 +39,7 @@ La aplicación autenticada se distribuye en una columna lateral y un área princ
   4. **Mi Perfil** (User), para todo usuario autenticado.
   5. Para Publicador: rótulo de sección **PUBLICADOR** y **Mis Publicaciones** (BookOpen).
   6. Para Administrador: rótulo **ADMIN**, **Gestión de Catálogo** (BookOpen, enlaza al mismo `/publicador/libros`) y **Gestión de Usuarios** (Users).
-- El sidebar mantiene su pie de cuenta separado por una línea horizontal. Tarjeta compacta con avatar circular de inicial, correo truncado, rol; debajo, botón ancho rojizo **Cerrar Sesión** con icono LogOut.
+- Debajo de la marca READNOW, el sidebar muestra una tarjeta compacta de cuenta con avatar circular de inicial, nombre/correo truncado y rol; debajo, botón ancho rojizo **Cerrar Sesión** con icono LogOut. La navegación queda debajo de este bloque y conserva scroll propio para evitar solapamientos en ventanas bajas.
 - El contenido usa el ancho restante, fondo base suave y scroll vertical independiente. Footer con READNOW, icono Library, descripción “Tu biblioteca digital para descubrir, guardar y compartir libros.”, copyright y frase “Lecturas para cada momento.”; columnas **Explorar** (Catálogo de libros, Mis favoritos, Mis préstamos) y **Tu cuenta** (Mi perfil, enlace contextual de Mis publicaciones o Gestión de usuarios), más píldora `Sesión: [rol]`.
 - No hay botón hamburguesa desktop. El componente importa algunos iconos adicionales que no se presentan en el layout final (Settings, Search, UploadCloud, Menu); no recrearlos como controles visibles.
 
@@ -174,7 +174,7 @@ Formulario:
 
 **Estructura:** shell autenticado; la vista es columna de alto disponible. Barra superior sticky con borde y sombra. Sección inferior scrolleable, padding 16 px en móvil y 32 px en escritorio. No hay título hero: el encabezado empieza con búsqueda.
 
-**Encabezado:** campo con Search, placeholder **Buscar por título, autor o género...**. En móvil, botón secondary ancho **Filtros** con SlidersHorizontal. A Publicador se añade botón azul con shimmer y Plus: **Nueva Publicación**, enlazado a alta de libro. Administrador no ve este CTA aquí.
+**Encabezado:** barra sticky responsive. En escritorio, campo con Search (placeholder **Buscar por título, autor o género...**) a la izquierda y acciones alineadas a la derecha con espacio entre ellas. En móvil, buscador y acciones se apilan con separación; botón secondary ancho **Filtros** con SlidersHorizontal. A Publicador se añade botón azul con shimmer y Plus: **Nueva Publicación**, enlazado a alta de libro. Administrador no ve este CTA aquí.
 
 **Filtros, en orden:** rótulos pequeños uppercase **Géneros**, **Autores**, **Estado**; bajo cada uno una línea de chips desplazable horizontalmente. Géneros y autores derivan de los libros cargados y empiezan con **Todos**; estado ofrece **Todos**, **Disponibles**, **Reservados**. Chip seleccionado azul sólido con texto blanco, los demás superficie blanca, borde y texto gris. En escritorio los filtros están visibles; en móvil solo después de pulsar Filtros.
 
@@ -206,7 +206,7 @@ Solicitud exitosa genera confirmación del navegador “Préstamo solicitado con
 
 **Ruta y roles:** `/favoritos`, cualquier usuario activo autenticado. Archivo: [src/pages/Favorites.tsx](../src/pages/Favorites.tsx).
 
-**Estructura:** ancho máximo 80 rem, fondo cálido, padding 32 px. Encabezado sticky con Heart rojo relleno y título **Mis Favoritos**; debajo, subtítulo **Libros que has guardado para leer después.**. La grilla ocupa el resto y scrollea con la página.
+**Estructura:** la pantalla ocupa todo el ancho disponible y el alto del contenido; encabezado sticky de 80 px con Heart rojo relleno y título **Mis Favoritos** alineado arriba, seguido por un área scrolleable con padding adaptable (16 px en móvil, 32 px en escritorio). Incluye el subtítulo **Libros que has guardado para leer después.** y la grilla de resultados.
 
 **Vacío:** panel grande centrado con borde, fondo blanco y radio 16 px. Icono Heart gris dentro de caja 64×64; título **Aún no tienes favoritos**; texto “Explora el catálogo y guarda los libros que más te llamen la atención haciendo clic en el ícono de corazón.”; botón azul **Explorar Catálogo** con Search, abre `/`.
 
@@ -218,7 +218,7 @@ Solicitud exitosa genera confirmación del navegador “Préstamo solicitado con
 
 **Ruta y roles:** `/prestamos`, cualquier usuario activo autenticado. Archivo: [src/pages/Loans.tsx](../src/pages/Loans.tsx).
 
-**Estructura:** ancho máximo 80 rem; encabezado sticky con Clock azul y **Mis Préstamos**; subtítulo **Libros que has solicitado para leer.**. Área de resultados en grilla 1/2/3/4 columnas.
+**Estructura:** la pantalla ocupa todo el ancho disponible y el alto del contenido; encabezado sticky de 80 px con Clock azul y **Mis Préstamos** alineado arriba, seguido por un área scrolleable con padding adaptable (16 px en móvil, 32 px en escritorio). Incluye el subtítulo **Libros que has solicitado para leer.** y resultados en grilla 1/2/3/4 columnas.
 
 **Vacío:** panel centrado blanco, borde y radio 16 px; BookOpen gris en cuadrado suave; título **Aún no tienes préstamos**; texto “Explora el catálogo y solicita préstamos de los libros que más te gusten.”; botón azul **Explorar Catálogo** con Search.
 
