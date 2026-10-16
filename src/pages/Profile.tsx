@@ -109,7 +109,7 @@ export const Profile = () => {
                   </div>
                 </div>
 
-                <div className="flex w-full flex-col items-center gap-3 md:w-auto md:flex-row">
+                <div className="flex w-full flex-col items-center gap-3 md:w-auto md:flex-row md:max-lg:flex-col md:max-lg:items-end md:max-lg:gap-2 md:max-lg:translate-y-14">
                   <Button
                     onClick={() => setIsDark(!isDark)}
                     variant="outline"

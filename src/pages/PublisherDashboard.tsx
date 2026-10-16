@@ -188,7 +188,7 @@ export const PublisherDashboard = () => {
                   <div className="p-8 text-center text-text-muted dark:text-text-body">No tienes publicaciones aún.</div>
                 ) : (
                   <div className="w-full">
-                    <div className="hidden w-full min-w-0 md:grid md:grid-cols-[minmax(0,2.6fr)_minmax(110px,1fr)_minmax(120px,0.9fr)_110px] gap-4 border-b border-border bg-surface-soft/80 px-6 py-4 text-xs font-bold uppercase tracking-wider text-text-muted dark:border-border dark:bg-surface-muted dark:text-text-body">
+                    <div className="hidden w-full min-w-0 gap-4 border-b border-border bg-surface-soft/80 px-6 py-4 text-xs font-bold uppercase tracking-wider text-text-muted dark:border-border dark:bg-surface-muted dark:text-text-body lg:grid lg:grid-cols-[minmax(0,2.6fr)_minmax(110px,1fr)_minmax(120px,0.9fr)_110px]">
                       <div className="min-w-0">Título</div>
                       <div className="min-w-0">Estado</div>
                       <div className="min-w-0">Fecha</div>
@@ -204,7 +204,7 @@ export const PublisherDashboard = () => {
                           <div
                             key={pub.id_publicacion}
                             onClick={() => setSelectedPublicacionId(pub.id_publicacion)}
-                            className={`grid w-full cursor-pointer gap-3 p-4 transition-colors md:grid-cols-[minmax(0,2.6fr)_minmax(110px,1fr)_minmax(120px,0.9fr)_110px] md:items-center md:gap-4 md:px-6 ${isSelected ? 'bg-primary/5 dark:bg-surface-muted' : 'hover:bg-surface-soft dark:hover:bg-surface-muted'}`}
+                            className={`grid w-full cursor-pointer gap-3 p-4 transition-colors lg:grid-cols-[minmax(0,2.6fr)_minmax(110px,1fr)_minmax(120px,0.9fr)_110px] lg:items-center lg:gap-4 lg:px-6 ${isSelected ? 'bg-primary/5 dark:bg-surface-muted' : 'hover:bg-surface-soft dark:hover:bg-surface-muted'}`}
                           >
                             <div className="min-w-0">
                               <span className="block min-w-0 truncate font-bold text-text-strong dark:text-text-strong">{libro.titulo}</span>
