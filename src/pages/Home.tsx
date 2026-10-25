@@ -246,7 +246,7 @@ export const Home = () => {
           </Card>
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {filteredLibros.map(libro => (
+            {filteredLibros.map((libro, index) => (
               <Link to={`/libro/${libro.id_libro}`} key={libro.id_libro} className="group flex flex-col rounded-xl border border-border bg-surface p-4 shadow-sm transition-shadow hover:shadow-md">
                 <div className="relative mb-4 overflow-hidden rounded-xl bg-surface-soft">
                   <div className="absolute right-2 top-2 z-10">
@@ -263,7 +263,13 @@ export const Home = () => {
 
                   <div className="overflow-hidden rounded-xl">
                     {libro.portada_url ? (
-                      <BookCover src={libro.portada_url} alt={libro.titulo} className="w-full transition-transform duration-500 group-hover:scale-105" />
+                      <BookCover
+                        src={libro.portada_url}
+                        alt={libro.titulo}
+                        loading={index < 4 ? 'eager' : 'lazy'}
+                        fetchPriority={index < 4 ? 'high' : undefined}
+                        className="w-full transition-transform duration-500 group-hover:scale-105"
+                      />
                     ) : (
                       <div className="flex aspect-[2/3] w-full items-center justify-center bg-gradient-to-br from-primary/10 to-surface-soft p-6 text-center transition-transform duration-500 group-hover:scale-105">
                         <div>

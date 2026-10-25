@@ -116,7 +116,7 @@ export const PublicProfile = () => {
                 <div key={libro.id_libro} className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-surface transition-all duration-300 hover:shadow-lg">
                   <div className="flex aspect-[4/3] items-center justify-center border-b border-border bg-surface-soft p-6">
                     {libro.portada_url ? (
-                      <img src={libro.portada_url} alt={libro.titulo} className="h-full object-contain drop-shadow-md transition-transform duration-300 group-hover:scale-105" />
+                      <img src={libro.portada_url} alt={libro.titulo} width={400} height={600} loading="lazy" decoding="async" className="h-full object-contain drop-shadow-md transition-transform duration-300 group-hover:scale-105" />
                     ) : (
                       <div className="flex h-36 w-24 items-center justify-center rounded border border-border bg-surface text-indigo-200 shadow-sm dark:border-slate-700 dark:bg-slate-900">
                         <Book className="h-8 w-8" />

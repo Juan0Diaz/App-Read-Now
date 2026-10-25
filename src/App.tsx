@@ -23,15 +23,15 @@ const PublicProfile = React.lazy(() => import('./pages/PublicProfile').then(({ P
 const UpdatePassword = React.lazy(() => import('./pages/UpdatePassword').then(({ UpdatePassword }) => ({ default: UpdatePassword })));
 const AuthCallback = React.lazy(() => import('./pages/AuthCallback').then(({ AuthCallback }) => ({ default: AuthCallback })));
 
-const PageLoading = ({ pageName }: { pageName: string }) => (
+const PageLoading = () => (
   <div className="flex min-h-[40vh] items-center justify-center gap-2 text-text-muted" role="status" aria-live="polite">
     <span aria-hidden="true" className="h-4 w-4 animate-spin rounded-full border-2 border-current border-r-transparent motion-reduce:animate-none" />
-    <span>Cargando {pageName}...</span>
+    <span>Cargando...</span>
   </div>
 );
 
-const withPageLoading = (page: React.ReactNode, pageName: string) => (
-  <React.Suspense fallback={<PageLoading pageName={pageName} />}>{page}</React.Suspense>
+const withPageLoading = (page: React.ReactNode) => (
+  <React.Suspense fallback={<PageLoading />}>{page}</React.Suspense>
 );
 
 export default function App() {
@@ -41,21 +41,21 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/login" element={withPageLoading(<Login />, 'inicio de sesión')} />
-          <Route path="/reset-password" element={withPageLoading(<UpdatePassword />, 'restablecimiento de contraseña')} />
-          <Route path="/auth/callback" element={withPageLoading(<AuthCallback />, 'autenticación')} />
+          <Route path="/login" element={withPageLoading(<Login />)} />
+          <Route path="/reset-password" element={withPageLoading(<UpdatePassword />)} />
+          <Route path="/auth/callback" element={withPageLoading(<AuthCallback />)} />
           
           <Route path="/" element={<Layout />}>
-            <Route index element={withPageLoading(<Home />, 'el catálogo')} />
-            <Route path="perfil" element={withPageLoading(<Profile />, 'tu perfil')} />
-            <Route path="favoritos" element={withPageLoading(<Favorites />, 'tus favoritos')} />
-            <Route path="prestamos" element={withPageLoading(<Loans />, 'tus préstamos')} />
-            <Route path="libro/:id" element={withPageLoading(<BookDetail />, 'el libro')} />
-            <Route path="publicador/libros" element={withPageLoading(<PublisherDashboard />, 'tus publicaciones')} />
-            <Route path="publicador/libros/nuevo" element={withPageLoading(<NewBook />, 'el formulario de nuevo libro')} />
-            <Route path="publicador/libros/editar/:id" element={withPageLoading(<EditBook />, 'el formulario de edición del libro')} />
-            <Route path="publicador/perfil/:id" element={withPageLoading(<PublicProfile />, 'el perfil público')} />
-            <Route path="admin" element={withPageLoading(<AdminDashboard />, 'la gestión de usuarios')} />
+            <Route index element={withPageLoading(<Home />)} />
+            <Route path="perfil" element={withPageLoading(<Profile />)} />
+            <Route path="favoritos" element={withPageLoading(<Favorites />)} />
+            <Route path="prestamos" element={withPageLoading(<Loans />)} />
+            <Route path="libro/:id" element={withPageLoading(<BookDetail />)} />
+            <Route path="publicador/libros" element={withPageLoading(<PublisherDashboard />)} />
+            <Route path="publicador/libros/nuevo" element={withPageLoading(<NewBook />)} />
+            <Route path="publicador/libros/editar/:id" element={withPageLoading(<EditBook />)} />
+            <Route path="publicador/perfil/:id" element={withPageLoading(<PublicProfile />)} />
+            <Route path="admin" element={withPageLoading(<AdminDashboard />)} />
             {/* Catch-all */}
             <Route path="*" element={<div className="text-center py-20">404 No Encontrado</div>} />
           </Route>

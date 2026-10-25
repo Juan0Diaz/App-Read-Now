@@ -131,7 +131,7 @@ export const PublisherDashboard = () => {
                   <div className="p-5">
                     <div className="mb-4 overflow-hidden rounded-2xl border border-border bg-surface-soft p-3 dark:border-border dark:bg-surface-muted">
                       {selectedLibro.portada_url ? (
-                        <img src={selectedLibro.portada_url} alt={selectedLibro.titulo} className="h-56 w-full rounded-xl object-cover shadow-sm" />
+                        <img src={selectedLibro.portada_url} alt={selectedLibro.titulo} width={400} height={600} loading="lazy" decoding="async" className="h-56 w-full rounded-xl object-cover shadow-sm" />
                       ) : (
                         <div className="flex h-56 items-center justify-center rounded-xl border border-dashed border-border bg-surface text-center text-text-muted dark:border-border dark:bg-surface">
                           <div>
