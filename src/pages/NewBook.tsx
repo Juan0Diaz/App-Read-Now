@@ -232,7 +232,7 @@ export const NewBook = () => {
                 <div className="group relative aspect-[3/4] max-h-[500px] cursor-pointer rounded-3xl border-2 border-dashed border-border bg-surface-soft p-8 text-center transition-colors hover:bg-surface-muted">
                   {imagenFile ? (
                     <div className="absolute inset-0 h-full w-full p-2">
-                      <img src={URL.createObjectURL(imagenFile)} alt="Preview" className="h-full w-full rounded-2xl bg-surface object-contain shadow-sm" />
+                      <img src={URL.createObjectURL(imagenFile)} alt={formData.titulo || 'Portada del libro'} width={400} height={600} loading="lazy" decoding="async" className="h-full w-full rounded-2xl bg-surface object-contain shadow-sm" />
                       <button type="button" onClick={() => setImagenFile(null)} className="absolute right-4 top-4 z-10 rounded-full bg-surface p-2 text-error shadow-md transition-colors hover:bg-error-soft">
                         <X className="h-5 w-5" />
                       </button>

@@ -52,6 +52,10 @@ export const Loans = () => {
                       <img
                         src={libro.portada_url}
                         alt={libro.titulo}
+                        width={400}
+                        height={600}
+                        loading="lazy"
+                        decoding="async"
                         className="h-full w-full rounded-xl object-cover shadow-sm"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src = 'https://via.placeholder.com/400x300?text=Sin+Imagen';

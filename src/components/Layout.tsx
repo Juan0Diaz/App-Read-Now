@@ -31,7 +31,7 @@ export const Layout = () => {
         to={to} 
         className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
           isActive 
-            ? 'bg-primary/10 text-primary' 
+            ? 'bg-primary/10 text-blue-700 dark:text-blue-300'
             : 'text-text-body hover:bg-surface-soft dark:text-text-body dark:hover:bg-surface-muted'
         } ${mobileHide ? 'hidden md:flex' : ''}`}
       >
@@ -124,7 +124,7 @@ export const Layout = () => {
             <button
               onClick={handleLogout}
               aria-label="Cerrar sesión"
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-error/10 px-4 py-2 text-sm font-medium text-error transition-colors hover:bg-error/20"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-error/10 px-4 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-error/20 dark:text-red-300"
             >
               <LogOut className="h-4 w-4" />
               Cerrar Sesión

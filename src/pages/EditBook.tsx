@@ -272,14 +272,14 @@ export const EditBook = () => {
                 <div className="group relative aspect-[3/4] max-h-[500px] cursor-pointer rounded-3xl border-2 border-dashed border-border bg-surface-soft p-8 text-center transition-colors hover:bg-surface-muted dark:border-border dark:bg-surface-muted dark:hover:bg-surface-soft">
                   {imagenFile ? (
                     <div className="absolute inset-0 h-full w-full p-2">
-                      <img src={URL.createObjectURL(imagenFile)} alt="Preview" className="h-full w-full rounded-2xl bg-white object-contain shadow-sm" />
+                      <img src={URL.createObjectURL(imagenFile)} alt={formData.titulo || 'Portada del libro'} width={400} height={600} loading="lazy" decoding="async" className="h-full w-full rounded-2xl bg-white object-contain shadow-sm" />
                       <button type="button" onClick={() => setImagenFile(null)} className="absolute right-4 top-4 z-10 rounded-full bg-white p-2 text-rose-500 shadow-md transition-colors hover:bg-rose-50">
                         <X className="h-5 w-5" />
                       </button>
                     </div>
                   ) : formData.portada_url ? (
                     <div className="absolute inset-0 h-full w-full p-2">
-                      <img src={formData.portada_url} alt="Current" className="h-full w-full rounded-2xl bg-white object-contain shadow-sm" />
+                      <img src={formData.portada_url} alt={formData.titulo || 'Portada del libro'} width={400} height={600} loading="lazy" decoding="async" className="h-full w-full rounded-2xl bg-white object-contain shadow-sm" />
                        <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
                          <span className="rounded-lg bg-black/50 px-4 py-2 text-sm font-bold text-white">Cambiar Imagen</span>
                        </div>
