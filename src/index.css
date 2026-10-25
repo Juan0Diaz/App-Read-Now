@@ -2,60 +2,130 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* @theme define el tema claro base; useDarkMode activa .dark. Edita solo la variable del color: Tailwind las consume desde tailwind.config.js. */
 @theme {
+  /* Marca */
+  /* Color de acciones principales y enlaces. */
   --color-primary: #2563eb;
+  /* Hover de acciones principales. */
   --color-primary-hover: #1d4ed8;
+  /* Color de acciones secundarias. */
   --color-secondary: #16a34a;
+  /* Hover de acciones secundarias. */
   --color-secondary-hover: #15803d;
+  /* Color de acciones destacadas. */
   --color-accent: #f59e0b;
+  /* Hover de acciones destacadas. */
   --color-accent-hover: #ea580c;
+
+  /* Estados */
+  /* Texto e indicadores de éxito. */
   --color-success: #16a34a;
+  /* Fondos suaves de éxito. */
   --color-success-soft: #dcfce7;
+  /* Texto e indicadores de advertencia. */
   --color-warning: #d97706;
+  /* Fondos suaves de advertencia. */
   --color-warning-soft: #fef3c7;
+  /* Texto e indicadores de error. */
   --color-error: #dc2626;
+  /* Fondos suaves de error. */
   --color-error-soft: #fee2e2;
+
+  /* Superficies y fondos */
+  /* Tarjetas, campos y encabezados. */
   --color-surface: #ffffff;
+  /* Paneles y campos de fondo suave. */
   --color-surface-soft: #fafaf9;
+  /* Superficies atenuadas y controles secundarios. */
   --color-surface-muted: #f5f5f4;
-  --color-border: #e7e5e4;
-  --color-border-strong: #d6d3d1;
-  --color-text-strong: #111827;
-  --color-text-body: #374151;
-  --color-text-muted: #6b7280;
-  --color-text-inverse: #ffffff;
+  /* Fondo base del documento. */
   --color-bg-base: #ffffff;
+  /* Fondo cálido de encabezados. */
   --color-bg-warm: #faf6f0;
+  /* Fondo cálido de páginas. */
   --color-bg-warm-strong: #f5efe6;
+
+  /* Bordes */
+  /* Bordes y separadores estándar. */
+  --color-border: #e7e5e4;
+  /* Bordes destacados. */
+  --color-border-strong: #d6d3d1;
+
+  /* Texto */
+  /* Títulos y contenido de mayor énfasis. */
+  --color-text-strong: #111827;
+  /* Texto principal de lectura. */
+  --color-text-body: #374151;
+  /* Texto secundario y placeholders. */
+  --color-text-muted: #6b7280;
+  /* Texto sobre fondos oscuros o de color. */
+  --color-text-inverse: #ffffff;
+
   --font-sans: 'Inter', sans-serif;
   --font-serif: 'Lora', serif;
 }
 
 .dark {
-  --color-primary: #3b82f6;
-  --color-primary-hover: #2563eb;
+  /* Marca */
+  /* Color de acciones principales y enlaces. */
+  --color-primary: #4f8ff7;
+  /* Hover de acciones principales. */
+  --color-primary-hover: #3b82f6;
+  /* Color de acciones secundarias. */
   --color-secondary: #22c55e;
+  /* Hover de acciones secundarias. */
   --color-secondary-hover: #16a34a;
+  /* Color de acciones destacadas. */
   --color-accent: #fbbf24;
+  /* Hover de acciones destacadas. */
   --color-accent-hover: #f59e0b;
+
+  /* Estados */
+  /* Texto e indicadores de éxito. */
   --color-success: #4ade80;
-  --color-success-soft: rgba(34, 197, 94, 0.16);
+  /* Fondos suaves de éxito. */
+  --color-success-soft: rgba(34, 197, 94, 0.18);
+  /* Texto e indicadores de advertencia. */
   --color-warning: #fbbf24;
-  --color-warning-soft: rgba(251, 191, 36, 0.18);
+  /* Fondos suaves de advertencia. */
+  --color-warning-soft: rgba(251, 191, 36, 0.20);
+  /* Texto e indicadores de error. */
   --color-error: #f87171;
-  --color-error-soft: rgba(248, 113, 113, 0.16);
-  --color-surface: #111827;
-  --color-surface-soft: #0f172a;
-  --color-surface-muted: #1f2937;
-  --color-border: #374151;
-  --color-border-strong: #4b5563;
+  /* Fondos suaves de error. */
+  --color-error-soft: rgba(248, 113, 113, 0.18);
+
+  /* Superficies y fondos */
+  /* Tarjetas, campos y encabezados. */
+  --color-surface: #1e293b;
+  /* Paneles y campos de fondo suave. */
+  --color-surface-soft: #172033;
+  /* Superficies atenuadas y controles secundarios. */
+  --color-surface-muted: #2a384e;
+  /* Fondo base del documento. */
+  --color-bg-base: #172033;
+  /* Fondo cálido de encabezados. */
+  --color-bg-warm: #1b2639;
+  /* Fondo cálido de páginas. */
+  --color-bg-warm-strong: #212e45;
+
+  /* Bordes */
+  /* Bordes y separadores estándar. */
+  --color-border: #475569;
+  /* Bordes destacados. */
+  --color-border-strong: #64748b;
+
+  /* Texto */
+  /* Títulos y contenido de mayor énfasis. */
   --color-text-strong: #f8fafc;
-  --color-text-body: #d1d5db;
-  --color-text-muted: #94a3b8;
+  /* Texto principal de lectura. */
+  --color-text-body: #e2e8f0;
+  /* Texto secundario y placeholders. */
+  --color-text-muted: #a9b8cc;
+  /* Texto sobre fondos oscuros o de color. */
   --color-text-inverse: #0f172a;
-  --color-bg-base: #0f172a;
-  --color-bg-warm: #111827;
-  --color-bg-warm-strong: #1f2937;
+
+  /* Ajusta la apariencia nativa de controles y barras del navegador. */
   color-scheme: dark;
 }
 
