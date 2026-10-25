@@ -71,7 +71,7 @@ export const Layout = () => {
 
         {user ? (
           <div className="shrink-0 px-4 pb-2">
-            <div className="profile-card-glow mb-2 flex items-center gap-3 rounded-xl border border-border bg-surface-soft p-2 shadow-sm dark:border-border dark:bg-surface-muted dark:shadow-none">
+            <div className="profile-card-glow flex items-center gap-3 rounded-xl border border-border bg-surface-soft p-2 shadow-sm dark:border-border dark:bg-surface-muted dark:shadow-none">
               <div className="profile-avatar-glow flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-border bg-primary/10 text-sm font-bold text-primary dark:border-border dark:bg-primary/20 dark:text-text-strong">
                 {profileInitial}
               </div>
@@ -80,14 +80,6 @@ export const Layout = () => {
                 <p className="truncate text-xs font-medium text-text-muted dark:text-text-body">{role}</p>
               </div>
             </div>
-            <button
-              onClick={handleLogout}
-              aria-label="Cerrar sesión"
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-error/10 px-4 py-2 text-sm font-medium text-error transition-colors hover:bg-error/20"
-            >
-              <LogOut className="h-4 w-4" />
-              Cerrar Sesión
-            </button>
           </div>
         ) : (
           <div className="shrink-0 space-y-2 px-4 pb-2">
@@ -100,7 +92,7 @@ export const Layout = () => {
           </div>
         )}
 
-        <nav className="mt-2 min-h-0 flex-1 space-y-1 overflow-y-auto px-4">
+        <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto px-4 pt-2">
           {role !== 'Desactivado' && <NavLink to="/" icon={<LayoutDashboard className="w-5 h-5" />} label="Catálogo" />}
 
           {user && (
@@ -126,6 +118,19 @@ export const Layout = () => {
             </>
           )}
         </nav>
+
+        {user && (
+          <div className="mt-auto shrink-0 border-t border-border p-4">
+            <button
+              onClick={handleLogout}
+              aria-label="Cerrar sesión"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-error/10 px-4 py-2 text-sm font-medium text-error transition-colors hover:bg-error/20"
+            >
+              <LogOut className="h-4 w-4" />
+              Cerrar Sesión
+            </button>
+          </div>
+        )}
 
       </aside>
 
