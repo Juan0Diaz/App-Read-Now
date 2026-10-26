@@ -9,7 +9,7 @@ public interface IPublicacionesServices
 {
     Task<IReadOnlyList<Publicacion>> ObtenerTodasAsync();
     Task<IReadOnlyList<Publicacion>> ObtenerMiasAsync(Guid idUsuario);
-    Task<Publicacion> CrearAsync(Guid idUsuario, PublicacionCreateDto dto);
+    Task<PublicacionCreacionResultado> CrearAsync(Guid idUsuario, bool esAdmin, PublicacionCreateDto dto);
     Task<PublicacionOperacionResultado> ActualizarAsync(Guid idPublicacion, Guid idUsuario, bool esAdmin, PublicacionUpdateDto dto);
     Task<PublicacionOperacionResultado> EliminarAsync(Guid idPublicacion, Guid idUsuario, bool esAdmin);
     Task<PublicacionOperacionResultado> EliminarConLibroAsync(Guid idPublicacion, Guid idUsuario, bool esAdmin);
@@ -23,6 +23,7 @@ public enum PublicacionOperacionEstado
 }
 
 public sealed record PublicacionOperacionResultado(PublicacionOperacionEstado Estado);
+public sealed record PublicacionCreacionResultado(PublicacionOperacionEstado Estado, Publicacion? Publicacion = null);
 
 public sealed class PublicacionesServices : IPublicacionesServices
 {
@@ -51,8 +52,23 @@ public sealed class PublicacionesServices : IPublicacionesServices
             .ToListAsync();
     }
 
-    public async Task<Publicacion> CrearAsync(Guid idUsuario, PublicacionCreateDto dto)
+    public async Task<PublicacionCreacionResultado> CrearAsync(Guid idUsuario, bool esAdmin, PublicacionCreateDto dto)
     {
+        if (dto.IdLibro is Guid idLibro)
+        {
+            var libroExiste = await _db.Libros.AnyAsync(libro => libro.IdLibro == idLibro);
+            if (!libroExiste)
+            {
+                return new(PublicacionOperacionEstado.NotFound);
+            }
+
+            if (!esAdmin && !await _db.Publicaciones.AnyAsync(publicacion =>
+                    publicacion.IdLibro == idLibro && publicacion.IdUsuario == idUsuario))
+            {
+                return new(PublicacionOperacionEstado.Forbidden);
+            }
+        }
+
         var publicacion = new Publicacion
         {
             IdPublicacion = Guid.NewGuid(),
@@ -65,7 +81,7 @@ public sealed class PublicacionesServices : IPublicacionesServices
 
         _db.Publicaciones.Add(publicacion);
         await _db.SaveChangesAsync();
-        return publicacion;
+        return new(PublicacionOperacionEstado.Ok, publicacion);
     }
 
     public async Task<PublicacionOperacionResultado> ActualizarAsync(Guid idPublicacion, Guid idUsuario, bool esAdmin, PublicacionUpdateDto dto)
@@ -137,36 +153,40 @@ public sealed class PublicacionesServices : IPublicacionesServices
         await using var transaction = await _db.Database.BeginTransactionAsync();
         try
         {
-            if (idLibro is not null)
-            {
-                _db.Favoritos.RemoveRange(_db.Favoritos.Where(f => f.IdLibro == idLibro));
-            }
-
             _db.Publicaciones.Remove(publicacion);
             await _db.SaveChangesAsync();
 
             if (idLibro is not null)
             {
-                var libro = await _db.Libros.FindAsync(idLibro.Value);
-                if (libro is not null)
-                {
-                    await transaction.CreateSavepointAsync("antes_de_borrar_libro");
-                    try
-                    {
-                        _db.Libros.Remove(libro);
-                        await _db.SaveChangesAsync();
-                    }
-                    catch (DbUpdateException)
-                    {
-                        await transaction.RollbackToSavepointAsync("antes_de_borrar_libro");
-                        _db.ChangeTracker.Clear();
+                var tieneOtrasPublicaciones = await _db.Publicaciones
+                    .AnyAsync(otra => otra.IdLibro == idLibro.Value);
 
-                        var libroParaOcultar = await _db.Libros.FindAsync(idLibro.Value);
-                        if (libroParaOcultar is not null)
+                if (!tieneOtrasPublicaciones)
+                {
+                    _db.Favoritos.RemoveRange(_db.Favoritos.Where(f => f.IdLibro == idLibro));
+                    await _db.SaveChangesAsync();
+
+                    var libro = await _db.Libros.FindAsync(idLibro.Value);
+                    if (libro is not null)
+                    {
+                        await transaction.CreateSavepointAsync("antes_de_borrar_libro");
+                        try
                         {
-                            libroParaOcultar.Disponible = false;
-                            libroParaOcultar.Estado = "Eliminado";
+                            _db.Libros.Remove(libro);
                             await _db.SaveChangesAsync();
+                        }
+                        catch (DbUpdateException)
+                        {
+                            await transaction.RollbackToSavepointAsync("antes_de_borrar_libro");
+                            _db.ChangeTracker.Clear();
+
+                            var libroParaOcultar = await _db.Libros.FindAsync(idLibro.Value);
+                            if (libroParaOcultar is not null)
+                            {
+                                libroParaOcultar.Disponible = false;
+                                libroParaOcultar.Estado = "Eliminado";
+                                await _db.SaveChangesAsync();
+                            }
                         }
                     }
                 }

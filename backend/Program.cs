@@ -47,16 +47,11 @@ builder.Services
 
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("Administrador", p => p.RequireAssertion(ctx =>
-        ctx.User.Identity?.IsAuthenticated == true &&
-        (ctx.User.IsInRole("Administrador") || ctx.User.IsInRole("Publicador") || ctx.User.IsInRole("Visualizador") || ctx.User.IsInRole("authenticated"))));
+    options.AddPolicy("Administrador", p => p.RequireRole("Administrador"));
 
-    options.AddPolicy("Publicador", p => p.RequireAssertion(ctx =>
-        ctx.User.Identity?.IsAuthenticated == true &&
-        (ctx.User.IsInRole("Publicador") || ctx.User.IsInRole("Administrador") || ctx.User.IsInRole("Visualizador") || ctx.User.IsInRole("authenticated"))));
+    options.AddPolicy("Publicador", p => p.RequireRole("Publicador", "Administrador"));
 
-    options.AddPolicy("Visualizador", p => p.RequireAssertion(ctx =>
-        ctx.User.Identity?.IsAuthenticated == true));
+    options.AddPolicy("Visualizador", p => p.RequireAuthenticatedUser());
 });
 
 // CORS: en Codespaces, el frontend se sirve desde una URL dinámica tipo

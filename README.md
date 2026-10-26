@@ -117,3 +117,6 @@ Instalar los tipos de React (La causa más común)
 Abre tu terminal en la raíz del proyecto y ejecuta:
 
 npm install -D @types/react @types/react-dom
+
+## Si el contenedor llega a fallar, hay que mandarle este a la IA de GitHub para que lo arregle: 
+## Ayudame con este problema: Este codespace se está ejecutando actualmente en modo de recuperación debido a un error de configuración. Revisa los registros de creación, actualiza la configuración de tu contenedor de desarrollo según sea necesario y ejecuta el comando «Rebuild Container» (Reconstruir contenedor) para solucionar el problema. Dice que revise los Logs y que vuelva a reconstruir el contenedor 
