@@ -35,8 +35,16 @@ public class PublicacionesController : ControllerBase
     [Authorize(Policy = "Publicador")]
     public async Task<ActionResult<Publicacion>> Create(PublicacionCreateDto dto)
     {
-        var publicacion = await _publicacionesServices.CrearAsync(CurrentUserId, dto);
-        return CreatedAtAction(nameof(GetAll), new { id = publicacion.IdPublicacion }, publicacion);
+        var resultado = await _publicacionesServices.CrearAsync(CurrentUserId, IsAdmin, dto);
+
+        return resultado.Estado switch
+        {
+            PublicacionOperacionEstado.NotFound => NotFound("Libro no encontrado"),
+            PublicacionOperacionEstado.Forbidden => Forbid(),
+            PublicacionOperacionEstado.Ok when resultado.Publicacion is { } publicacion =>
+                CreatedAtAction(nameof(GetAll), new { id = publicacion.IdPublicacion }, publicacion),
+            _ => throw new InvalidOperationException("No se pudo crear la publicación.")
+        };
     }
 
     [HttpPut("{id:guid}")]
