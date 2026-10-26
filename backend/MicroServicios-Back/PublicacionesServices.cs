@@ -39,6 +39,7 @@ public sealed class PublicacionesServices : IPublicacionesServices
         return await _db.Publicaciones
             .Include(publicacion => publicacion.Libro)
             .Include(publicacion => publicacion.Usuario)
+            .Where(publicacion => publicacion.Libro != null && publicacion.Libro.EstadoRevision == Libro.RevisionAprobado)
             .AsNoTracking()
             .ToListAsync();
     }

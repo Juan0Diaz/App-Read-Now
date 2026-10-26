@@ -30,8 +30,8 @@ public class FavoritosController : ControllerBase
     [HttpPost("{idLibro:guid}")]
     public async Task<IActionResult> Add(Guid idLibro)
     {
-        await _favoritosServices.AgregarAsync(CurrentUserId, idLibro);
-        return NoContent();
+        var agregado = await _favoritosServices.AgregarAsync(CurrentUserId, idLibro);
+        return agregado ? NoContent() : Conflict("Solo puedes agregar libros aprobados a favoritos.");
     }
 
     [HttpDelete("{idLibro:guid}")]

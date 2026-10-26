@@ -18,11 +18,25 @@ public class LibrosController : ControllerBase
         _librosServices = librosServices;
     }
 
-    // Catálogo público: cualquiera puede ver los libros (visualizador incluido).
+    // Catálogo público: solo libros aprobados.
     [HttpGet]
     [AllowAnonymous]
     public async Task<ActionResult<IEnumerable<Libro>>> GetAll()
         => Ok(await _librosServices.ObtenerTodosAsync());
+
+    [HttpGet("gestion/{id:guid}")]
+    [Authorize(Policy = "Publicador")]
+    public async Task<ActionResult<Libro>> GetForManagement(Guid id)
+    {
+        var userId = Guid.Parse(User.FindFirstValue("id_usuario")!);
+        var libro = await _librosServices.ObtenerGestionAsync(id, userId, User.IsInRole("Administrador"));
+        return libro is null ? NotFound() : Ok(libro);
+    }
+
+    [HttpGet("revision-solicitudes")]
+    [Authorize(Policy = "Administrador")]
+    public async Task<ActionResult<IEnumerable<Libro>>> GetRevisionSolicitudes()
+        => Ok(await _librosServices.ObtenerSolicitudesRevisionAsync());
 
     [HttpGet("{id:guid}")]
     [AllowAnonymous]
@@ -61,8 +75,51 @@ public class LibrosController : ControllerBase
     [Authorize(Policy = "Publicador")]
     public async Task<IActionResult> Update(Guid id, LibroUpdateDto dto)
     {
-        var actualizado = await _librosServices.ActualizarAsync(id, dto);
-        return actualizado ? NoContent() : NotFound();
+        var userId = Guid.Parse(User.FindFirstValue("id_usuario")!);
+        var resultado = await _librosServices.ActualizarAsync(
+            id,
+            userId,
+            User.IsInRole("Administrador"),
+            dto);
+
+        return resultado.Estado switch
+        {
+            OperacionLibroEstado.NotFound => NotFound(),
+            OperacionLibroEstado.Forbidden => Forbid(),
+            _ => NoContent()
+        };
+    }
+
+    [HttpPatch("{id:guid}/revision")]
+    [Authorize(Policy = "Administrador")]
+    public async Task<IActionResult> Revisar(Guid id, LibroRevisionDto dto)
+    {
+        if (dto.Estado == Libro.RevisionCorreccion && string.IsNullOrWhiteSpace(dto.Comentario))
+        {
+            return BadRequest("Una solicitud de corrección requiere un comentario.");
+        }
+
+        var resultado = await _librosServices.RevisarAsync(id, dto);
+        return resultado.Estado switch
+        {
+            OperacionLibroEstado.NotFound => NotFound(),
+            _ => NoContent()
+        };
+    }
+
+    [HttpPost("{id:guid}/resubmitir")]
+    [Authorize(Policy = "Publicador")]
+    public async Task<IActionResult> Resubmitir(Guid id, LibroResubmitirDto dto)
+    {
+        var userId = Guid.Parse(User.FindFirstValue("id_usuario")!);
+        var resultado = await _librosServices.ResubmitirAsync(id, userId, dto);
+
+        return resultado.Estado switch
+        {
+            OperacionLibroEstado.NotFound => NotFound(),
+            OperacionLibroEstado.Forbidden => Forbid(),
+            _ => NoContent()
+        };
     }
 
     // Eliminar libro: solo Administrador.

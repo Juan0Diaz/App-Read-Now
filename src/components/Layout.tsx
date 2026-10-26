@@ -1,13 +1,15 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Outlet, Link, useNavigate, useLocation, Navigate } from 'react-router-dom';
-import { Library, User, LogOut, Settings, LayoutDashboard, Search, UploadCloud, Users, Heart, BookOpen, Menu, ShieldAlert, Clock } from 'lucide-react';
+import { Library, User, LogOut, Settings, LayoutDashboard, Search, UploadCloud, Users, Heart, BookOpen, Menu, ShieldAlert, Clock, ClipboardCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Button, buttonVariants } from './ui/Button';
+import { getSolicitudesRevision } from '../microservicios/Libros';
 
 export const Layout = () => {
   const { user, role, signOut, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [pendingReviews, setPendingReviews] = useState(0);
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center bg-surface-soft text-text-muted">Cargando...</div>;
@@ -17,6 +19,13 @@ export const Layout = () => {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  useEffect(() => {
+    if (!user || role !== 'Administrador') return;
+    getSolicitudesRevision()
+      .then((libros) => setPendingReviews(libros.length))
+      .catch(() => setPendingReviews(0));
+  }, [location.pathname, role, user]);
+
   const profileInitial = (user?.nombre || user?.correo || 'U').charAt(0).toUpperCase();
 
   const handleLogout = async () => {
@@ -24,7 +33,7 @@ export const Layout = () => {
     navigate('/login');
   };
 
-  const NavLink = ({ to, icon, label, mobileHide = false }: { to: string, icon: React.ReactNode, label: string, mobileHide?: boolean }) => {
+  const NavLink = ({ to, icon, label, mobileHide = false, badge }: { to: string, icon: React.ReactNode, label: string, mobileHide?: boolean, badge?: number }) => {
     const isActive = location.pathname === to || (to !== '/' && location.pathname.startsWith(to));
     return (
       <Link 
@@ -37,6 +46,7 @@ export const Layout = () => {
       >
         {icon}
         <span className="hidden md:inline">{label}</span>
+        {badge ? <span className="ml-auto rounded-full bg-warning px-2 py-0.5 text-[10px] font-bold text-slate-950">{badge}</span> : null}
       </Link>
     );
   };
@@ -112,6 +122,7 @@ export const Layout = () => {
                 <>
                   <div className="px-4 pb-2 pt-8 text-xs font-semibold uppercase tracking-[0.2em] text-text-muted">ADMIN</div>
                   <NavLink to="/publicador/libros" icon={<BookOpen className="w-5 h-5" />} label="Gestión de Catálogo" />
+                  <NavLink to="/admin/revision-libros" icon={<ClipboardCheck className="w-5 h-5" />} label="Revisión de libros" badge={pendingReviews} />
                   <NavLink to="/admin" icon={<Users className="w-5 h-5" />} label="Gestión de Usuarios" />
                 </>
               )}

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getLibro, actualizarLibro } from '../microservicios/Libros';
+import { getLibroGestion, actualizarLibro } from '../microservicios/Libros';
 import { useGeneros } from '../hooks/useGeneros';
 import { useAuth } from '../context/AuthContext';
 import { useLibroForm, createEmptyLibroForm } from '../hooks/useLibroForm';
@@ -34,7 +34,7 @@ export const EditBook = () => {
       return;
     }
 
-    getLibro(id)
+    getLibroGestion(id)
       .then((data) => {
         setFormData({
           titulo: data.titulo || '',

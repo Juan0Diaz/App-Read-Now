@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace Backend.Api.Dtos;
@@ -43,4 +44,19 @@ public record LibroConPublicacionCreateDto(
     [property: JsonPropertyName("id_genero_2")] Guid? IdGenero2,
     [property: JsonPropertyName("descripcion")] string? Descripcion,
     [property: JsonPropertyName("portada_url")] string? PortadaUrl
+);
+
+public record LibroRevisionDto(
+    [property: JsonPropertyName("estado")]
+    [RegularExpression("^(Aprobado|Corrección)$", ErrorMessage = "El estado debe ser Aprobado o Corrección.")]
+    string Estado,
+    [property: JsonPropertyName("comentario")]
+    [StringLength(1000, ErrorMessage = "El comentario no puede exceder 1000 caracteres.")]
+    string? Comentario = null
+);
+
+public record LibroResubmitirDto(
+    [property: JsonPropertyName("comentario")]
+    [StringLength(1000, ErrorMessage = "El comentario no puede exceder 1000 caracteres.")]
+    string? Comentario = null
 );
