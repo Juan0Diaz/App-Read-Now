@@ -83,6 +83,8 @@ public class AppDbContext : DbContext
             e.Property(x => x.IdGenero1).HasColumnName("id_genero_1");
             e.Property(x => x.IdGenero2).HasColumnName("id_genero_2");
             e.Property(x => x.PortadaUrl).HasColumnName("portada_url");
+            e.Property(x => x.EstadoRevision).HasColumnName("estado_revision");
+            e.Property(x => x.ComentarioRevision).HasColumnName("comentario_revision");
 
             e.HasOne(x => x.Genero).WithMany().HasForeignKey(x => x.IdGenero).OnDelete(DeleteBehavior.SetNull);
             e.HasOne(x => x.Genero1).WithMany().HasForeignKey(x => x.IdGenero1).OnDelete(DeleteBehavior.SetNull);
