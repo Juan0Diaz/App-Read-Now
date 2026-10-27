@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { ShieldCheck, Lock } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { sendPasswordReset, updatePassword } from '../microservicios/Login';
 
 export const UpdatePassword = () => {
   const [password, setPassword] = useState('');
@@ -12,19 +12,61 @@ export const UpdatePassword = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [sessionError, setSessionError] = useState('');
+  const [sessionReady, setSessionReady] = useState(false);
   const [recoveryEmail, setRecoveryEmail] = useState('');
   const [recoverySent, setRecoverySent] = useState(false);
   
   const navigate = useNavigate();
-  const { user } = useAuth(); // Permite mantener la sesión del usuario que quiere cambiar la contraseña
 
   useEffect(() => {
-    // Supabase passes error in hash fragment if token is invalid or expired
-    const hashParams = new URLSearchParams(window.location.hash.substring(1));
-    const errorDescription = hashParams.get('error_description');
-    if (errorDescription) {
-      setSessionError(errorDescription.replace(/\+/g, ' '));
+    if (isDemoMode) {
+      setSessionReady(true);
+      return;
     }
+
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const queryParams = new URLSearchParams(window.location.search);
+    if (
+      hashParams.get('error') ||
+      hashParams.get('error_description') ||
+      queryParams.get('error') ||
+      queryParams.get('error_description')
+    ) {
+      setSessionError('El enlace de recuperación no es válido o ha expirado. Solicita uno nuevo.');
+      return;
+    }
+
+    let active = true;
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!active) return;
+      if (session && (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN' || event === 'INITIAL_SESSION')) {
+        setSessionReady(true);
+        setSessionError('');
+      } else if (event === 'SIGNED_OUT') {
+        setSessionReady(false);
+      }
+    });
+
+    void supabase.auth.getSession().then(({ data, error: authError }) => {
+      if (!active) return;
+      if (authError) {
+        setSessionError('No se pudo verificar el enlace de recuperación. Solicita uno nuevo.');
+      } else if (data.session) {
+        setSessionReady(true);
+      } else {
+        setSessionError('No hay una sesión de recuperación activa. Solicita un nuevo enlace desde el inicio de sesión.');
+      }
+    }).catch((authError: unknown) => {
+      if (active) {
+        console.error('Error al verificar la sesión de recuperación:', authError);
+        setSessionError('No se pudo verificar el enlace de recuperación. Solicita uno nuevo.');
+      }
+    });
+
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const handleResendRecovery = async (e: React.FormEvent) => {
@@ -34,8 +76,7 @@ export const UpdatePassword = () => {
     setRecoverySent(false);
     try {
       if (!recoveryEmail) throw new Error('Ingresa un correo electrónico.');
-      const { error: resetError } = await supabase.auth.resetPasswordForEmail(recoveryEmail);
-      if (resetError) throw resetError;
+      await sendPasswordReset(recoveryEmail);
       setRecoverySent(true);
     } catch (err: any) {
       setError(err.message || 'Error al enviar recuperación.');
@@ -61,22 +102,7 @@ export const UpdatePassword = () => {
         return;
       }
 
-      // Actualizar contraseña en Supabase Auth
-      const { error: updateError } = await supabase.auth.updateUser({ password });
-      if (updateError) throw updateError;
-
-      // Actualizar la contraseña en tabla de usuario si el contexto del usuario está disponible.
-      if (user?.id_usuario) {
-        const { error: dbError } = await supabase
-          .from('Usuario')
-          .update({ contrasena: password })
-          .eq('id_usuario', user.id_usuario);
-        
-        if (dbError) {
-          console.error("No se pudo actualizar la contraseña en la tabla Usuario:", dbError);
-          
-        }
-      }
+      await updatePassword(password);
 
       setSuccess(true);
       setTimeout(() => {
@@ -108,7 +134,7 @@ export const UpdatePassword = () => {
         {sessionError ? (
           <div className="space-y-5 text-center">
             <div className="mb-4 rounded-xl border border-error/20 bg-error-soft p-4 text-sm font-medium text-error">
-              El enlace es inválido o ha expirado. Ha sido utilizado o se superó el tiempo límite.
+              {sessionError}
             </div>
             
             {recoverySent ? (
@@ -142,6 +168,10 @@ export const UpdatePassword = () => {
             <p className="mb-1 text-lg font-bold tracking-tight text-success">¡Contraseña actualizada!</p>
             <p className="text-sm text-success/80">Serás redirigido al inicio en unos segundos...</p>
           </div>
+        ) : !sessionReady ? (
+          <p className="rounded-xl border border-border bg-surface-soft p-4 text-center text-sm text-text-muted">
+            Verificando el enlace de recuperación...
+          </p>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
