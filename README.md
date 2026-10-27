@@ -46,6 +46,19 @@ al repo), y `Program.cs` los lee con `builder.Configuration["..."]`.
 ⚠️ **No pongas estos valores en `appsettings.json` ni los subas al repo.** El connection
 string tiene tu contraseña de base de datos, y el JWT Secret permite falsificar tokens.
 
+## Recuperación de contraseña
+
+El enlace de recuperación redirige al origen donde se solicitó, a la ruta
+`/reset-password` de esta aplicación. En Supabase, agrega las URLs que realmente uses
+en **Authentication → URL Configuration → Redirect URLs**; por ejemplo:
+
+- `http://localhost:3000/reset-password` para desarrollo local.
+- `https://<tu-dominio>/reset-password` para producción.
+- `https://*-3000.app.github.dev/reset-password` para Codespaces.
+
+Supabase solo permite redirigir a URLs incluidas en esa lista. La nueva contraseña se
+actualiza en Supabase Auth; no se guarda en la tabla de perfil de la aplicación.
+
 ## 3. El `.env` del frontend ahora se genera solo — nadie tiene que copiarlo a mano
 
 Antes, cada persona tenía que hacer `cp .env.example .env` y llenarlo manualmente, lo

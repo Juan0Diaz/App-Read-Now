@@ -120,7 +120,20 @@ export async function signUp(
 }
 
 export async function sendPasswordReset(email: string): Promise<void> {
-	const { error } = await supabase.auth.resetPasswordForEmail(email);
+	const { error } = await supabase.auth.resetPasswordForEmail(email, {
+		redirectTo: `${window.location.origin}/reset-password`,
+	});
+	if (error) throw error;
+}
+
+export async function updatePassword(password: string): Promise<void> {
+	const { data, error: sessionError } = await supabase.auth.getSession();
+	if (sessionError) throw sessionError;
+	if (!data.session) {
+		throw new Error('El enlace de recuperación no es válido o ha expirado. Solicita uno nuevo.');
+	}
+
+	const { error } = await supabase.auth.updateUser({ password });
 	if (error) throw error;
 }
 
