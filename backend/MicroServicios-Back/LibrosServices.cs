@@ -8,7 +8,7 @@ namespace Backend.Api.Services;
 public interface ILibrosServices
 {
 	Task<IReadOnlyList<Libro>> ObtenerTodosAsync();
-	Task<IReadOnlyList<Libro>> ObtenerSolicitudesRevisionAsync();
+	Task<IReadOnlyList<LibroRevisionSolicitudDto>> ObtenerSolicitudesRevisionAsync();
 	Task<Libro?> ObtenerPorIdAsync(Guid idLibro);
 	Task<Libro?> ObtenerGestionAsync(Guid idLibro, Guid idUsuario, bool esAdmin);
 	Task<Libro> CrearAsync(LibroCreateDto dto);
@@ -48,14 +48,22 @@ public sealed class LibrosServices : ILibrosServices
 			.ToListAsync();
 	}
 
-	public async Task<IReadOnlyList<Libro>> ObtenerSolicitudesRevisionAsync()
+	public async Task<IReadOnlyList<LibroRevisionSolicitudDto>> ObtenerSolicitudesRevisionAsync()
 	{
-		return await _db.Libros
-			.Include(libro => libro.Genero)
-			.Include(libro => libro.Genero1)
-			.Include(libro => libro.Genero2)
-			.Where(libro => libro.EstadoRevision != Libro.RevisionAprobado)
-			.OrderByDescending(libro => libro.IdLibro)
+		return await (
+			from libro in _db.Libros
+			where libro.EstadoRevision == Libro.RevisionPendiente
+			join publicacion in _db.Publicaciones on libro.IdLibro equals publicacion.IdLibro into publicaciones
+			from publicacion in publicaciones.DefaultIfEmpty()
+			join usuario in _db.Usuarios on publicacion.IdUsuario equals usuario.IdUsuario into usuarios
+			from usuario in usuarios.DefaultIfEmpty()
+			orderby libro.IdLibro descending
+			select new LibroRevisionSolicitudDto(
+				libro,
+				usuario == null
+					? null
+					: new PublicadorResumenDto(usuario.IdUsuario, usuario.Nombre, usuario.Correo, usuario.NumeroTel)
+			))
 			.AsNoTracking()
 			.ToListAsync();
 	}

@@ -4,7 +4,7 @@ import { AlertCircle, Check, Edit2, MessageSquareText, RotateCcw } from 'lucide-
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/Button';
 import { actualizarLibro, getSolicitudesRevision, revisarLibro } from '../microservicios/Libros';
-import { Libro } from '../types';
+import { Libro, SolicitudRevision } from '../types';
 
 const revisionLabel: Record<string, string> = {
   Pendiente: 'Pendiente de revisión',
@@ -14,7 +14,7 @@ const revisionLabel: Record<string, string> = {
 
 export const AdminBookReviews = () => {
   const { user, role } = useAuth();
-  const [libros, setLibros] = useState<Libro[]>([]);
+  const [libros, setLibros] = useState<SolicitudRevision[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [draft, setDraft] = useState<Partial<Libro>>({});
   const [comment, setComment] = useState('');
@@ -140,6 +140,11 @@ export const AdminBookReviews = () => {
                 >
                   <span className="block font-bold text-text-strong">{libro.titulo}</span>
                   <span className="mt-1 block text-xs text-text-muted">{libro.autor}</span>
+                  {libro.publicador && (
+                    <span className="mt-1 block truncate text-xs text-text-muted">
+                      Publicador: {libro.publicador.nombre || libro.publicador.correo}
+                    </span>
+                  )}
                   <span className="mt-2 inline-block rounded-full bg-warning/15 px-2 py-0.5 text-[10px] font-bold uppercase text-warning">
                     {revisionLabel[libro.estado_revision ?? 'Pendiente']}
                   </span>
@@ -154,6 +159,30 @@ export const AdminBookReviews = () => {
             <div className="mb-6 flex items-center gap-2">
               <Edit2 className="h-5 w-5 text-primary" />
               <h2 className="text-xl font-bold text-text-strong">Editar antes de decidir</h2>
+            </div>
+
+            <div className="mb-6 rounded-xl border border-border bg-surface-soft p-4">
+              <h3 className="text-sm font-bold text-text-strong">Datos del publicador</h3>
+              {selected.publicador ? (
+                <dl className="mt-2 grid gap-2 text-sm sm:grid-cols-2">
+                  <div>
+                    <dt className="font-semibold text-text-muted">Nombre</dt>
+                    <dd className="text-text-body">{selected.publicador.nombre || 'Sin nombre'}</dd>
+                  </div>
+                  <div>
+                    <dt className="font-semibold text-text-muted">Correo</dt>
+                    <dd className="break-all text-text-body">{selected.publicador.correo}</dd>
+                  </div>
+                  {selected.publicador.numero_tel && (
+                    <div>
+                      <dt className="font-semibold text-text-muted">Teléfono</dt>
+                      <dd className="text-text-body">{selected.publicador.numero_tel}</dd>
+                    </div>
+                  )}
+                </dl>
+              ) : (
+                <p className="mt-2 text-sm text-text-muted">No se encontró información del publicador asociado.</p>
+              )}
             </div>
 
             <div className="grid gap-5 md:grid-cols-2">
