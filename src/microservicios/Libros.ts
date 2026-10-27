@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase';
-import { Libro } from '../types';
+import { Libro, SolicitudRevision, User } from '../types';
 
 const API_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:5080/gateway').replace(/\/+$/, '');
 
@@ -51,8 +51,14 @@ async function request<T>(path: string, options: RequestInit = {}, requiredAuth 
 export const getLibros = () => request<Libro[]>('/api/libros', {}, false);
 export const getLibro = (id: string) => request<Libro>(`/api/libros/${id}`, {}, false);
 export const getLibroGestion = (id: string) => request<Libro>(`/api/libros/gestion/${id}`, {}, true);
-export const getSolicitudesRevision = () =>
-  request<Libro[]>('/api/libros/revision-solicitudes', {}, true);
+export const getSolicitudesRevision = async (): Promise<SolicitudRevision[]> => {
+  const solicitudes = await request<Array<{ libro: Libro; publicador: User | null }>>(
+    '/api/libros/revision-solicitudes',
+    {},
+    true,
+  );
+  return solicitudes.map(({ libro, publicador }) => ({ ...libro, publicador: publicador ?? undefined }));
+};
 export const revisarLibro = (id: string, estado: 'Aprobado' | 'Corrección', comentario?: string) =>
   request<void>(`/api/libros/${id}/revision`, {
     method: 'PATCH',

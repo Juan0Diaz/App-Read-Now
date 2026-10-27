@@ -35,7 +35,7 @@ public class LibrosController : ControllerBase
 
     [HttpGet("revision-solicitudes")]
     [Authorize(Policy = "Administrador")]
-    public async Task<ActionResult<IEnumerable<Libro>>> GetRevisionSolicitudes()
+    public async Task<ActionResult<IEnumerable<LibroRevisionSolicitudDto>>> GetRevisionSolicitudes()
         => Ok(await _librosServices.ObtenerSolicitudesRevisionAsync());
 
     [HttpGet("{id:guid}")]

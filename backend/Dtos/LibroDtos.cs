@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using Backend.Api.Models;
 
 namespace Backend.Api.Dtos;
 
@@ -59,4 +60,16 @@ public record LibroResubmitirDto(
     [property: JsonPropertyName("comentario")]
     [StringLength(1000, ErrorMessage = "El comentario no puede exceder 1000 caracteres.")]
     string? Comentario = null
+);
+
+public record PublicadorResumenDto(
+    [property: JsonPropertyName("id_usuario")] Guid IdUsuario,
+    [property: JsonPropertyName("nombre")] string? Nombre,
+    [property: JsonPropertyName("correo")] string Correo,
+    [property: JsonPropertyName("numero_tel")] string? NumeroTel
+);
+
+public record LibroRevisionSolicitudDto(
+    [property: JsonPropertyName("libro")] Libro Libro,
+    [property: JsonPropertyName("publicador")] PublicadorResumenDto? Publicador
 );

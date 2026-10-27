@@ -46,6 +46,10 @@ export interface Libro {
 
 }
 
+export interface SolicitudRevision extends Libro {
+  publicador?: User;
+}
+
 export interface Publicacion {
   id_publicacion: string;
   id_usuario: string;
