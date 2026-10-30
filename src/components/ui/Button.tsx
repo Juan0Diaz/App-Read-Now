@@ -48,6 +48,7 @@ const shimmerColors: Record<NonNullable<ButtonProps["variant"]>, string> = {
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, shimmer = false, style, children, ...props }, ref) => {
+    const shimmerRef = React.useRef<HTMLSpanElement>(null);
     const buttonStyle = shimmer
       ? { ...style, "--button-shimmer-color": shimmerColors[variant ?? "primary"] } as React.CSSProperties
       : style;
@@ -61,6 +62,37 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         )
       : children;
 
+    React.useEffect(() => {
+      if (!shimmer || !shimmerRef.current) return;
+
+      const shimmerBand = shimmerRef.current;
+      const duration = 2500;
+      const usesAnimationFrame = typeof window.requestAnimationFrame === "function";
+      let frameId: number;
+      let startTime: number | undefined;
+
+      const animate = (timestamp: number) => {
+        startTime ??= timestamp;
+        const progress = ((timestamp - startTime) % duration) / duration;
+        shimmerBand.style.transform = `translateX(${-400 + progress * 850}%)`;
+        frameId = usesAnimationFrame
+          ? window.requestAnimationFrame(animate)
+          : window.setTimeout(() => animate(Date.now()), 16);
+      };
+
+      frameId = usesAnimationFrame
+        ? window.requestAnimationFrame(animate)
+        : window.setTimeout(() => animate(Date.now()), 16);
+
+      return () => {
+        if (usesAnimationFrame) {
+          window.cancelAnimationFrame(frameId);
+        } else {
+          window.clearTimeout(frameId);
+        }
+      };
+    }, [shimmer]);
+
     return (
       <button
         className={cn(buttonVariants({ variant, size, className }), shimmer && "button-shimmer")}
@@ -68,6 +100,13 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         style={buttonStyle}
         {...props}
       >
+        {shimmer && (
+          <span
+            ref={shimmerRef}
+            aria-hidden="true"
+            className="button-shimmer-band"
+          />
+        )}
         {buttonChildren}
       </button>
     );
