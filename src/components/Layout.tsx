@@ -135,7 +135,7 @@ export const Layout = () => {
             <button
               onClick={handleLogout}
               aria-label="Cerrar sesión"
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-error/10 px-4 py-2 text-sm font-medium text-red-700 transition-colors hover:bg-error/20 dark:text-red-300"
+              className="flex w-full items-center justify-center gap-2 rounded-lg border border-red-700 bg-red-700 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-red-900/20 transition-colors hover:border-red-800 hover:bg-red-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error focus-visible:ring-offset-2 dark:border-red-600 dark:bg-red-700 dark:hover:border-red-500 dark:hover:bg-red-600"
             >
               <LogOut className="h-4 w-4" />
               Cerrar Sesión
