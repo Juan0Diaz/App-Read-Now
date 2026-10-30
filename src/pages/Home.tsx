@@ -4,7 +4,7 @@ import { useLibros } from '../hooks/useLibros';
 import { useGeneros } from '../hooks/useGeneros';
 import { useFavoritos } from '../hooks/useFavoritos';
 import { useAuth } from '../context/AuthContext';
-import { Search, Book, Heart, SlidersHorizontal, Plus } from 'lucide-react';
+import { Search, Book, Heart, SlidersHorizontal, Plus, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { BookCover } from '../components/ui/BookCover';
@@ -21,6 +21,8 @@ export const Home = () => {
   const [filterDisponibilidad, setFilterDisponibilidad] = useState<string>('todos');
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
   const [selectedAutor, setSelectedAutor] = useState<string | null>(null);
+  const [showAllGeneros, setShowAllGeneros] = useState(false);
+  const [showAllAutores, setShowAllAutores] = useState(false);
   const filtersRef = useRef<HTMLDivElement>(null);
   const filtersButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -53,6 +55,20 @@ export const Home = () => {
   };
 
   const autores = Array.from(new Set(libros.map(l => l.autor))).filter(Boolean);
+  const collapsedGeneros = generos.slice(0, 5);
+  const visibleGeneros = showAllGeneros
+    ? generos
+    : [
+        ...collapsedGeneros,
+        ...generos.slice(5).filter(g => g.id_genero === selectedGenero),
+      ];
+  const collapsedAutores = autores.slice(0, 5);
+  const visibleAutores = showAllAutores
+    ? autores
+    : [
+        ...collapsedAutores,
+        ...autores.slice(5).filter(autor => autor === selectedAutor),
+      ];
 
   const filteredLibros = libros.filter(libro => {
     const matchesSearch = libro.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -121,7 +137,7 @@ export const Home = () => {
       </header>
 
       <section className="flex-1 overflow-y-auto p-4 md:p-8">
-        <div className="relative z-10 mb-6" ref={filtersRef}>
+        <div className="relative z-20 mb-6" ref={filtersRef}>
           <Button
             ref={filtersButtonRef}
             type="button"
@@ -162,7 +178,7 @@ export const Home = () => {
               <div className="space-y-5">
                 <div>
                   <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-muted">Géneros</h3>
-                  <div className="flex flex-wrap gap-2">
+                  <div id="catalog-genres-options" className="flex flex-wrap gap-2">
                     <button
                       type="button"
                       aria-pressed={selectedGenero === null}
@@ -171,7 +187,7 @@ export const Home = () => {
                     >
                       Todos
                     </button>
-                    {generos.map(g => (
+                    {visibleGeneros.map(g => (
                       <button
                         key={g.id_genero}
                         type="button"
@@ -183,11 +199,25 @@ export const Home = () => {
                       </button>
                     ))}
                   </div>
+                  {generos.length > 5 && (
+                    <button
+                      type="button"
+                      aria-expanded={showAllGeneros}
+                      aria-controls="catalog-genres-options"
+                      className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                      onClick={() => setShowAllGeneros(show => !show)}
+                    >
+                      {showAllGeneros ? 'Mostrar menos' : `Ver todos (${generos.length - visibleGeneros.length})`}
+                      {showAllGeneros
+                        ? <ChevronUp aria-hidden="true" className="h-3.5 w-3.5" />
+                        : <ChevronDown aria-hidden="true" className="h-3.5 w-3.5" />}
+                    </button>
+                  )}
                 </div>
 
                 <div>
                   <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-muted">Autores</h3>
-                  <div className="flex flex-wrap gap-2">
+                  <div id="catalog-authors-options" className="flex flex-wrap gap-2">
                     <button
                       type="button"
                       aria-pressed={selectedAutor === null}
@@ -196,7 +226,7 @@ export const Home = () => {
                     >
                       Todos
                     </button>
-                    {autores.map(autor => (
+                    {visibleAutores.map(autor => (
                       <button
                         key={autor}
                         type="button"
@@ -208,6 +238,20 @@ export const Home = () => {
                       </button>
                     ))}
                   </div>
+                  {autores.length > 5 && (
+                    <button
+                      type="button"
+                      aria-expanded={showAllAutores}
+                      aria-controls="catalog-authors-options"
+                      className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                      onClick={() => setShowAllAutores(show => !show)}
+                    >
+                      {showAllAutores ? 'Mostrar menos' : `Ver todos (${autores.length - visibleAutores.length})`}
+                      {showAllAutores
+                        ? <ChevronUp aria-hidden="true" className="h-3.5 w-3.5" />
+                        : <ChevronDown aria-hidden="true" className="h-3.5 w-3.5" />}
+                    </button>
+                  )}
                 </div>
 
                 <div>
