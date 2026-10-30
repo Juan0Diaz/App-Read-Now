@@ -183,7 +183,7 @@
     content: '';
     opacity: 0.45;
     pointer-events: none;
-    transform: translateX(-120%);
+    transform: translateX(110%);
     animation: button-shimmer-sweep 2.5s linear infinite;
   }
 
@@ -225,7 +225,8 @@
   @media (prefers-reduced-motion: reduce) {
     .button-shimmer::before {
       animation: none;
-      opacity: 0;
+      opacity: 0.45;
+      transform: translateX(110%);
     }
   }
 
