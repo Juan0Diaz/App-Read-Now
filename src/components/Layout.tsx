@@ -147,54 +147,84 @@ export const Layout = () => {
 
       {/* Main Content Area */}
       <main className="relative flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto bg-surface-soft dark:bg-surface-soft">
-        <div className="min-h-full">
-          {role === 'Desactivado' && location.pathname !== '/perfil' ? (
-            <div className="flex min-h-full flex-col items-center justify-center p-8 text-center animate-in fade-in zoom-in-95 duration-500">
-              <div className="w-20 h-20 bg-error/10 text-error rounded-full flex items-center justify-center mb-6 shadow-sm border border-surface">
-                <ShieldAlert className="w-10 h-10" />
-              </div>
-              <h2 className="text-3xl font-extrabold text-text-strong mb-2">Cuenta Desactivada</h2>
-              <p className="text-text-muted max-w-md mx-auto mb-8">
-                Tu cuenta ha sido desactivada por un administrador. No puedes acceder al catálogo ni realizar acciones.
-              </p>
-              <Link to="/perfil" className="bg-primary hover:bg-primary-hover text-white shadow-md shadow-primary/20 px-6 py-3 rounded-xl font-bold transition-colors">
-                Ir a mi perfil
-              </Link>
-            </div>
-          ) : (
-            <Outlet />
-          )}
-        </div>
-
-        <footer className="layout-divider-top mt-auto bg-surface px-6 py-4 md:px-8" aria-label="Información de READNOW">
-          <div className="mx-auto grid w-full gap-4 text-sm text-text-muted sm:grid-cols-2 lg:grid-cols-[1.6fr_1.2fr_1.2fr]">
-            <div>
-              <div className="mb-2 flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-white shadow-md shadow-primary/20">
-                  <Library className="h-4 w-4" aria-hidden="true" />
+        <div className="flex min-h-full flex-col">
+          <div className="flex-1">
+            {role === 'Desactivado' && location.pathname !== '/perfil' ? (
+              <div className="flex min-h-full flex-col items-center justify-center p-8 text-center animate-in fade-in zoom-in-95 duration-500">
+                <div className="w-20 h-20 bg-error/10 text-error rounded-full flex items-center justify-center mb-6 shadow-sm border border-surface">
+                  <ShieldAlert className="w-10 h-10" />
                 </div>
-                <p className="font-bold tracking-tight text-text-strong">READNOW</p>
+                <h2 className="text-3xl font-extrabold text-text-strong mb-2">Cuenta Desactivada</h2>
+                <p className="text-text-muted max-w-md mx-auto mb-8">
+                  Tu cuenta ha sido desactivada por un administrador. No puedes acceder al catálogo ni realizar acciones.
+                </p>
+                <Link to="/perfil" className="bg-primary hover:bg-primary-hover text-white shadow-md shadow-primary/20 px-6 py-3 rounded-xl font-bold transition-colors">
+                  Ir a mi perfil
+                </Link>
               </div>
-              <p className="max-w-xs text-xs leading-5 text-text-muted">Tu biblioteca digital para descubrir, guardar y compartir libros.</p>
-              <p className="mt-3 text-xs text-text-muted">© {new Date().getFullYear()} READNOW · Lecturas para cada momento.</p>
-            </div>
-
-            <nav className="flex flex-col gap-1.5" aria-label="Explorar READNOW">
-              <p className="mb-1 text-xs font-bold uppercase tracking-[0.16em] text-text-strong">Explorar</p>
-              {role !== 'Desactivado' && <Link to="/" className="w-fit text-text-body transition-colors hover:text-primary">Catálogo de libros</Link>}
-              {role !== 'Desactivado' && <Link to="/favoritos" className="w-fit text-text-body transition-colors hover:text-primary">Mis favoritos</Link>}
-              {role !== 'Desactivado' && <Link to="/prestamos" className="w-fit text-text-body transition-colors hover:text-primary">Mis préstamos</Link>}
-            </nav>
-
-            <nav className="flex flex-col gap-1.5" aria-label="Cuenta de READNOW">
-              <p className="mb-1 text-xs font-bold uppercase tracking-[0.16em] text-text-strong">Tu cuenta</p>
-              <Link to="/perfil" className="w-fit text-text-body transition-colors hover:text-primary">Mi perfil</Link>
-              {role === 'Publicador' && <Link to="/publicador/libros" className="w-fit text-text-body transition-colors hover:text-primary">Mis publicaciones</Link>}
-              {role === 'Administrador' && <Link to="/admin" className="w-fit text-text-body transition-colors hover:text-primary">Gestión de usuarios</Link>}
-              <span className="mt-1 inline-flex w-fit items-center rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">Sesión: {role}</span>
-            </nav>
+            ) : (
+              <Outlet />
+            )}
           </div>
-        </footer>
+
+          <footer className="layout-divider-top mt-auto bg-surface px-6 py-4 md:px-8" aria-label="Información de READNOW">
+            <div className="mx-auto grid w-full gap-4 text-sm text-text-muted sm:grid-cols-2 lg:grid-cols-[1.6fr_1.2fr_1.2fr]">
+              <div>
+                <div className="mb-2 flex items-center gap-2">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-white shadow-md shadow-primary/20">
+                    <Library className="h-4 w-4" aria-hidden="true" />
+                  </div>
+                  <p className="font-bold tracking-tight text-text-strong">READNOW</p>
+                </div>
+                <p className="max-w-xs text-xs leading-5 text-text-muted">Tu biblioteca digital para descubrir, guardar y compartir libros.</p>
+                <p className="mt-3 text-xs text-text-muted">© {new Date().getFullYear()} READNOW · Lecturas para cada momento.</p>
+              </div>
+
+              <nav className="flex flex-col gap-1.5" aria-label="Explorar READNOW">
+                <p className="mb-1 text-xs font-bold uppercase tracking-[0.16em] text-text-strong">Explorar</p>
+                {role !== 'Desactivado' && (
+                  <Link to="/" className="flex w-fit items-center gap-2 text-text-body transition-colors hover:text-primary">
+                    <LayoutDashboard className="h-4 w-4" aria-hidden="true" />
+                    Catálogo de libros
+                  </Link>
+                )}
+                {role !== 'Desactivado' && (
+                  <Link to="/favoritos" className="flex w-fit items-center gap-2 text-text-body transition-colors hover:text-primary">
+                    <Heart className="h-4 w-4" aria-hidden="true" />
+                    Mis favoritos
+                  </Link>
+                )}
+                {role !== 'Desactivado' && (
+                  <Link to="/prestamos" className="flex w-fit items-center gap-2 text-text-body transition-colors hover:text-primary">
+                    <Clock className="h-4 w-4" aria-hidden="true" />
+                    Mis préstamos
+                  </Link>
+                )}
+              </nav>
+
+              <nav className="flex flex-col gap-1.5" aria-label="Cuenta de READNOW">
+                <p className="mb-1 text-xs font-bold uppercase tracking-[0.16em] text-text-strong">Tu cuenta</p>
+                <Link to="/perfil" className="flex w-fit items-center gap-2 text-text-body transition-colors hover:text-primary">
+                  <User className="h-4 w-4" aria-hidden="true" />
+                  Mi perfil
+                </Link>
+                {role === 'Publicador' && (
+                  <Link to="/publicador/libros" className="flex w-fit items-center gap-2 text-text-body transition-colors hover:text-primary">
+                    <BookOpen className="h-4 w-4" aria-hidden="true" />
+                    Mis publicaciones
+                  </Link>
+                )}
+                {role === 'Administrador' && (
+                  <Link to="/admin" className="flex w-fit items-center gap-2 text-text-body transition-colors hover:text-primary">
+                    <Users className="h-4 w-4" aria-hidden="true" />
+                    Gestión de usuarios
+                  </Link>
+                )}
+                <span className="mt-1 inline-flex w-fit items-center rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">Sesión: {role}</span>
+              </nav>
+            </div>
+          </footer>
+        </div>
       </main>
 
       {/* Mobile Bottom Navigation */}
