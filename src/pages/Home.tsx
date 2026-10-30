@@ -94,7 +94,7 @@ export const Home = () => {
 
   return (
     <div className="flex h-full flex-col animate-in fade-in duration-500 bg-bg-warm-strong dark:bg-surface-soft">
-      <header className="sticky top-0 z-20 flex w-full flex-col gap-4 border-b border-border bg-surface px-4 py-4 shadow-sm dark:border-border dark:bg-surface sm:flex-row sm:items-center sm:justify-between sm:gap-6 md:px-8">
+      <header className="sticky top-0 z-30 flex w-full flex-col gap-4 border-b border-border bg-surface px-4 py-4 shadow-sm dark:border-border dark:bg-surface sm:flex-row sm:items-center sm:justify-between sm:gap-6 md:px-8">
         <div className="relative w-full max-w-md">
           <span className="absolute inset-y-0 left-3 flex items-center text-text-muted">
             <Search className="w-5 h-5" />
@@ -121,7 +121,7 @@ export const Home = () => {
       </header>
 
       <section className="flex-1 overflow-y-auto p-4 md:p-8">
-        <div className="relative z-20 mb-6" ref={filtersRef}>
+        <div className="relative z-10 mb-6" ref={filtersRef}>
           <Button
             ref={filtersButtonRef}
             type="button"
