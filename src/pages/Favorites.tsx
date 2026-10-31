@@ -71,13 +71,13 @@ export const Favorites = () => {
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
             {favoritos.map(fav => {
               const libro = fav.libro;
               if (!libro) return null;
               return (
                 <div key={fav.id_favorito} className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition-all duration-300 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/10">
-                  <Link to={`/libro/${libro.id_libro}`} className="relative block aspect-[4/3] overflow-hidden bg-surface-soft">
+                  <Link to={`/libro/${libro.id_libro}`} className="relative block aspect-[2/3] overflow-hidden bg-surface-soft sm:aspect-[4/3]">
                     {libro.portada_url ? (
                       <div className="h-full w-full p-2 transition-transform duration-500 group-hover:scale-105">
                         <img
@@ -110,9 +110,9 @@ export const Favorites = () => {
                     </div>
                   </Link>
 
-                  <div className="flex flex-1 flex-col p-5">
-                    <h3 className="mb-1 line-clamp-1 text-lg font-bold leading-tight text-text-strong">{libro.titulo}</h3>
-                    <p className="mb-4 line-clamp-1 text-sm font-medium text-text-muted">{libro.autor}</p>
+                  <div className="flex flex-1 flex-col p-3 sm:p-5">
+                    <h3 className="mb-1 line-clamp-1 text-sm font-bold leading-tight text-text-strong sm:text-lg">{libro.titulo}</h3>
+                    <p className="mb-4 line-clamp-1 text-xs font-medium text-text-muted sm:text-sm">{libro.autor}</p>
 
                     <div className="mt-auto flex items-center justify-between">
                       <Button
