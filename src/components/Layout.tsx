@@ -27,6 +27,13 @@ export const Layout = () => {
   }, [location.pathname, role, user]);
 
   const profileInitial = (user?.nombre || user?.correo || 'U').charAt(0).toUpperCase();
+  const isRouteActive = (to: string) => to === '/'
+    ? location.pathname === '/' || location.pathname.startsWith('/libro/')
+    : location.pathname === to || location.pathname.startsWith(`${to}/`);
+  const mobileNavItemClasses = (active: boolean) =>
+    `flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 py-1 transition-colors ${
+      active ? 'bg-primary/10 text-primary' : 'text-text-muted hover:bg-surface-soft'
+    }`;
 
   const handleLogout = async () => {
     await signOut();
@@ -62,7 +69,7 @@ export const Layout = () => {
           <span className="font-bold text-lg tracking-tight text-text-strong">READNOW</span>
         </div>
         {user ? (
-          <Link to="/perfil" className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold border border-primary/20 dark:bg-primary/20 dark:text-white">
+          <Link to="/perfil" aria-label="Mi perfil" className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold border border-primary/20 dark:bg-primary/20 dark:text-white">
             {profileInitial}
           </Link>
         ) : (
@@ -228,57 +235,57 @@ export const Layout = () => {
       </main>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden bg-surface border-t border-border h-16 flex items-center justify-around shrink-0 z-20 px-2 pb-safe dark:bg-surface dark:border-border">
+      <nav aria-label="Navegación principal" className="md:hidden bg-surface border-t border-border h-16 flex items-center justify-around shrink-0 z-20 gap-1 px-2 pb-safe dark:bg-surface dark:border-border">
         {role !== 'Desactivado' && (
-          <Link to="/" className={`p-3 rounded-full flex flex-col items-center gap-1 max-[376px]:flex-1 max-[376px]:min-w-0 max-[376px]:gap-0.5 max-[376px]:px-0.5 max-[376px]:py-1 ${location.pathname === '/' ? 'text-primary' : 'text-text-muted'}`}>
-            <LayoutDashboard className="w-5 h-5" />
-            <span className="text-xs font-bold max-[376px]:max-w-full max-[376px]:truncate max-[360px]:text-[10px]">Inicio</span>
+          <Link to="/" aria-current={isRouteActive('/') ? 'page' : undefined} className={mobileNavItemClasses(isRouteActive('/'))}>
+            <LayoutDashboard className="h-5 w-5 shrink-0" />
+            <span className="max-w-full truncate text-[10px] font-bold sm:text-xs">Inicio</span>
           </Link>
         )}
         
         {role === 'Publicador' && (
-          <Link to="/publicador/libros" className={`p-3 rounded-full flex flex-col items-center gap-1 max-[376px]:flex-1 max-[376px]:min-w-0 max-[376px]:gap-0.5 max-[376px]:px-0.5 max-[376px]:py-1 ${location.pathname.startsWith('/publicador') ? 'text-primary' : 'text-text-muted'}`}>
-            <BookOpen className="w-5 h-5" />
-            <span className="text-xs font-bold max-[376px]:max-w-full max-[376px]:truncate max-[360px]:text-[10px]">Mis Libros</span>
+          <Link to="/publicador/libros" aria-current={isRouteActive('/publicador/libros') ? 'page' : undefined} className={mobileNavItemClasses(isRouteActive('/publicador/libros'))}>
+            <BookOpen className="h-5 w-5 shrink-0" />
+            <span className="max-w-full truncate text-[10px] font-bold sm:text-xs">Mis Libros</span>
           </Link>
         )}
         
         {role === 'Administrador' && (
           <>
-            <Link to="/publicador/libros" className={`p-3 rounded-full flex flex-col items-center gap-1 max-[376px]:flex-1 max-[376px]:min-w-0 max-[376px]:gap-0.5 max-[376px]:px-0.5 max-[376px]:py-1 ${location.pathname.startsWith('/publicador') ? 'text-primary' : 'text-text-muted'}`}>
-              <BookOpen className="w-5 h-5" />
-              <span className="text-xs font-bold max-[376px]:max-w-full max-[376px]:truncate max-[360px]:text-[10px]">Catálogo</span>
+            <Link to="/publicador/libros" aria-current={isRouteActive('/publicador/libros') ? 'page' : undefined} className={mobileNavItemClasses(isRouteActive('/publicador/libros'))}>
+              <BookOpen className="h-5 w-5 shrink-0" />
+              <span className="max-w-full truncate text-[10px] font-bold sm:text-xs">Catálogo</span>
             </Link>
-            <Link to="/admin" className={`p-3 rounded-full flex flex-col items-center gap-1 max-[376px]:flex-1 max-[376px]:min-w-0 max-[376px]:gap-0.5 max-[376px]:px-0.5 max-[376px]:py-1 ${location.pathname.startsWith('/admin') ? 'text-primary' : 'text-text-muted'}`}>
-              <Users className="w-5 h-5" />
-              <span className="text-xs font-bold max-[376px]:max-w-full max-[376px]:truncate max-[360px]:text-[10px]">Usuarios</span>
+            <Link to="/admin" aria-current={isRouteActive('/admin') ? 'page' : undefined} className={mobileNavItemClasses(isRouteActive('/admin'))}>
+              <Users className="h-5 w-5 shrink-0" />
+              <span className="max-w-full truncate text-[10px] font-bold sm:text-xs">Usuarios</span>
             </Link>
           </>
         )}
 
         {user && role !== 'Desactivado' && (
-          <Link to="/favoritos" className={`p-3 rounded-full flex flex-col items-center gap-1 max-[376px]:flex-1 max-[376px]:min-w-0 max-[376px]:gap-0.5 max-[376px]:px-0.5 max-[376px]:py-1 ${location.pathname === '/favoritos' ? 'text-primary' : 'text-text-muted'}`}>
-            <Heart className="w-5 h-5" />
-            <span className="text-xs font-bold max-[376px]:max-w-full max-[376px]:truncate max-[360px]:text-[10px]">Favoritos</span>
+          <Link to="/favoritos" aria-current={isRouteActive('/favoritos') ? 'page' : undefined} className={mobileNavItemClasses(isRouteActive('/favoritos'))}>
+            <Heart className="h-5 w-5 shrink-0" />
+            <span className="max-w-full truncate text-[10px] font-bold sm:text-xs">Favoritos</span>
           </Link>
         )}
 
         {user && role !== 'Desactivado' && (
-          <Link to="/prestamos" className={`p-3 rounded-full flex flex-col items-center gap-1 max-[376px]:flex-1 max-[376px]:min-w-0 max-[376px]:gap-0.5 max-[376px]:px-0.5 max-[376px]:py-1 ${location.pathname === '/prestamos' ? 'text-primary' : 'text-text-muted'}`}>
-            <Clock className="w-5 h-5" />
-            <span className="text-xs font-bold max-[376px]:max-w-full max-[376px]:truncate max-[360px]:text-[10px]">Préstamos</span>
+          <Link to="/prestamos" aria-current={isRouteActive('/prestamos') ? 'page' : undefined} className={mobileNavItemClasses(isRouteActive('/prestamos'))}>
+            <Clock className="h-5 w-5 shrink-0" />
+            <span className="max-w-full truncate text-[10px] font-bold sm:text-xs">Préstamos</span>
           </Link>
         )}
 
         {user ? (
-          <Link to="/perfil" className={`p-3 rounded-full flex flex-col items-center gap-1 max-[376px]:flex-1 max-[376px]:min-w-0 max-[376px]:gap-0.5 max-[376px]:px-0.5 max-[376px]:py-1 ${location.pathname === '/perfil' ? 'text-primary' : 'text-text-muted'}`}>
-            <User className="w-5 h-5" />
-            <span className="text-xs font-bold max-[376px]:max-w-full max-[376px]:truncate max-[360px]:text-[10px]">Perfil</span>
+          <Link to="/perfil" aria-current={isRouteActive('/perfil') ? 'page' : undefined} className={mobileNavItemClasses(isRouteActive('/perfil'))}>
+            <User className="h-5 w-5 shrink-0" />
+            <span className="max-w-full truncate text-[10px] font-bold sm:text-xs">Perfil</span>
           </Link>
         ) : (
-          <Link to="/login" className="p-3 rounded-full flex flex-col items-center gap-1 max-[376px]:flex-1 max-[376px]:min-w-0 max-[376px]:gap-0.5 max-[376px]:px-0.5 max-[376px]:py-1 text-text-muted">
-            <User className="w-5 h-5" />
-            <span className="text-xs font-bold max-[376px]:max-w-full max-[376px]:truncate max-[360px]:text-[10px]">Entrar</span>
+          <Link to="/login" aria-current={location.pathname === '/login' ? 'page' : undefined} className={mobileNavItemClasses(location.pathname === '/login')}>
+            <User className="h-5 w-5 shrink-0" />
+            <span className="max-w-full truncate text-[10px] font-bold sm:text-xs">Entrar</span>
           </Link>
         )}
       </nav>

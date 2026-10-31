@@ -289,10 +289,10 @@ export const Home = () => {
             </Button>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
             {filteredLibros.map((libro, index) => (
-              <Link to={`/libro/${libro.id_libro}`} key={libro.id_libro} className="group flex flex-col rounded-xl border border-border bg-surface p-4 shadow-sm transition-shadow hover:shadow-md">
-                <div className="relative mb-4 overflow-hidden rounded-xl bg-surface-soft">
+              <Link to={`/libro/${libro.id_libro}`} key={libro.id_libro} className="group flex flex-col rounded-xl border border-border bg-surface p-2.5 shadow-sm transition-shadow hover:shadow-md sm:p-4">
+                <div className="relative mb-2 overflow-hidden rounded-xl bg-surface-soft sm:mb-4">
                   <div className="absolute right-2 top-2 z-10">
                     <button
                       type="button"
@@ -327,10 +327,10 @@ export const Home = () => {
                   </div>
                 </div>
 
-                <h3 className="mb-1 truncate font-bold text-text-strong">{libro.titulo}</h3>
-                <p className="truncate text-sm text-text-muted">{libro.autor}</p>
-                <div className="mt-auto flex items-center justify-between pt-3">
-                  <span className="text-sm font-semibold text-primary">Libro {libro.estado}</span>
+                <h3 className="mb-1 truncate text-sm font-bold text-text-strong sm:text-base">{libro.titulo}</h3>
+                <p className="truncate text-xs text-text-muted sm:text-sm">{libro.autor}</p>
+                <div className="mt-auto flex flex-col items-start justify-between gap-2 pt-3 sm:flex-row sm:items-center">
+                  <span className="max-w-full truncate text-xs font-semibold text-primary sm:text-sm">Libro {libro.estado}</span>
                   <Badge variant={libro.disponible ? 'success' : 'secondary'}>
                     {libro.disponible ? 'Disponible' : 'Reservado'}
                   </Badge>
