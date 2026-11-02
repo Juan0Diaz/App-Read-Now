@@ -106,7 +106,6 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
            { 
              id_usuario: uid, 
              correo: safeEmail, 
-             contrasena: 'N/A: OAUTH',
              nombre: safeName, 
              fecha_date: new Date().toISOString().split('T')[0] // Default
            }

@@ -15,7 +15,6 @@ export const UpdatePassword = () => {
   const [sessionReady, setSessionReady] = useState(false);
   const [recoveryEmail, setRecoveryEmail] = useState('');
   const [recoverySent, setRecoverySent] = useState(false);
-  
   const navigate = useNavigate();
 
   useEffect(() => {
