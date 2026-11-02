@@ -26,7 +26,6 @@ public class AppDbContext : DbContext
             e.Property(x => x.IdUsuario).HasColumnName("id_usuario");
             e.Property(x => x.Nombre).HasColumnName("nombre");
             e.Property(x => x.Correo).HasColumnName("correo");
-            e.Property(x => x.Contrasena).HasColumnName("contrasena");
             e.Property(x => x.FechaDate).HasColumnName("fecha_date");
             e.Property(x => x.NumeroTel).HasColumnName("numero_tel");
         });

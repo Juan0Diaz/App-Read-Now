@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { ShieldCheck, Lock } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
 
 export const UpdatePassword = () => {
   const [password, setPassword] = useState('');
@@ -14,9 +13,7 @@ export const UpdatePassword = () => {
   const [sessionError, setSessionError] = useState('');
   const [recoveryEmail, setRecoveryEmail] = useState('');
   const [recoverySent, setRecoverySent] = useState(false);
-  
   const navigate = useNavigate();
-  const { user } = useAuth(); // Permite mantener la sesión del usuario que quiere cambiar la contraseña
 
   useEffect(() => {
     // Supabase passes error in hash fragment if token is invalid or expired
@@ -64,19 +61,6 @@ export const UpdatePassword = () => {
       // Actualizar contraseña en Supabase Auth
       const { error: updateError } = await supabase.auth.updateUser({ password });
       if (updateError) throw updateError;
-
-      // Actualizar la contraseña en tabla de usuario si el contexto del usuario está disponible.
-      if (user?.id_usuario) {
-        const { error: dbError } = await supabase
-          .from('Usuario')
-          .update({ contrasena: password })
-          .eq('id_usuario', user.id_usuario);
-        
-        if (dbError) {
-          console.error("No se pudo actualizar la contraseña en la tabla Usuario:", dbError);
-          
-        }
-      }
 
       setSuccess(true);
       setTimeout(() => {

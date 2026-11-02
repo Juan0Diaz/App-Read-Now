@@ -124,7 +124,7 @@ export const Login = () => {
 
         if (authData.user) {
           const { error: dbError } = await supabase.from('Usuario').insert([
-            { id_usuario: authData.user.id, correo: email, contrasena: password, fecha_date: birthDate }
+            { id_usuario: authData.user.id, correo: email, fecha_date: birthDate }
           ]);
           if (dbError) {
             console.error("Error db:", dbError);
@@ -173,67 +173,19 @@ export const Login = () => {
       setLoading(true);
       setError('');
       
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const { error } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: window.location.origin + '/auth/callback',
-          skipBrowserRedirect: true,
+          redirectTo: `${window.location.origin}${import.meta.env.BASE_URL}auth/callback`,
+          ...(provider === 'google' && {
+            queryParams: { prompt: 'select_account' },
+          }),
         }
       });
       
       if (error) throw error;
-      
-      if (data?.url) {
-        const popupWidth = 500;
-        const popupHeight = 600;
-        const left = window.screen.width / 2 - popupWidth / 2;
-        const top = window.screen.height / 2 - popupHeight / 2;
-        
-        const popup = window.open(
-          data.url, 
-          'oauthPopup', 
-          `width=${popupWidth},height=${popupHeight},left=${left},top=${top}`
-        );
-        
-        if (!popup) {
-          setError('Habilita las ventanas emergentes (popups) en tu navegador para continuar.');
-          setLoading(false);
-          return;
-        }
-        
-        // Espera del mensaje de éxito de la ventana emergente.
-        const handleMessage = (event: MessageEvent) => {
-          
-          if (event.origin !== window.location.origin) return;
-          
-          if (event.data?.type === 'OAUTH_AUTH_SUCCESS') {
-            window.removeEventListener('message', handleMessage);
-            clearInterval(popupTimer);
-            
-            // Esperar a que AuthContext detecte los cambios en la sesión y luego redirigir
-            // Si el usuario navega demasiado pronto, es posible que el cambio no se refleje, pero AuthContext escucha el almacenamiento
-            // Simplemente navegaremos a la página de inicio y la página detectará el cambio
-
-            navigate('/');
-          } else if (event.data?.type === 'OAUTH_AUTH_ERROR') {
-            window.removeEventListener('message', handleMessage);
-            clearInterval(popupTimer);
-            setError(event.data.payload || 'Ocurrió un error en la autenticación.');
-            setLoading(false);
-          }
-        };
-        window.addEventListener('message', handleMessage);
-        
-        const popupTimer = setInterval(() => {
-          if (popup.closed) {
-            clearInterval(popupTimer);
-            window.removeEventListener('message', handleMessage);
-            setLoading(false);
-          }
-        }, 500);
-      }
-    } catch (err: any) {
-      setError(err.message || `Error al conectar con ${provider}`);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : `Error al conectar con ${provider}`);
       setLoading(false);
     }
   };

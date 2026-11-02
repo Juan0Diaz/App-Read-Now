@@ -14,8 +14,39 @@ Backend (ASP.NET Core, puerto 5080)
 Supabase Postgres (tus tablas: Usuario, Libro, Publicacion, etc.)
 ```
 
-El login (correo/contraseña y Google) **no cambia**: lo sigue manejando Supabase Auth
-directamente desde el frontend. El backend en C# solo protege y sirve los datos de negocio.
+El login (correo/contraseña, Google y GitHub) lo maneja Supabase Auth directamente desde
+el frontend. El backend en C# solo protege y sirve los datos de negocio. Las contraseñas
+no se guardan en la tabla `public."Usuario"`.
+
+## Proveedores OAuth y columna de contraseña
+
+En Supabase, habilita Google y GitHub en **Authentication → Sign In / Providers**. En
+cada proveedor configura como callback la URL indicada por Supabase, normalmente
+`https://<project-ref>.supabase.co/auth/v1/callback`. En **Authentication → URL
+Configuration**, permite como URL de retorno la dirección de la aplicación terminada en
+`/auth/callback` para cada entorno (local, Codespaces y producción).
+
+Google recibe `prompt=select_account` para mostrar el selector de cuentas incluso si ya
+hay una sesión Google activa en el navegador. La URL canónica para GitHub Pages de este
+repositorio es `https://juan0diaz.github.io/App-Read-Now/`; el callback es
+`https://juan0diaz.github.io/App-Read-Now/auth/callback`. Inicia el login desde esa URL:
+si comienzas desde el despliegue de Cloud Run (`run.app`), el callback vuelve a ese dominio
+y seguirá mostrando lo que esté publicado allí. No hay service worker que gestione las
+actualizaciones.
+
+El workflow de GitHub Actions publica automáticamente `main` en Pages. Habilita **Settings
+→ Pages → Build and deployment → GitHub Actions** y configura `VITE_SUPABASE_URL` y
+`VITE_SUPABASE_ANON_KEY` como Actions secrets y la variable `VITE_API_URL` con la URL del
+backend de producción. En Supabase, añade la URL del callback de Pages a **Authentication → URL
+Configuration → Redirect URLs**. En Google Cloud y GitHub OAuth conserva como callback la
+URL de Supabase (`https://<project-ref>.supabase.co/auth/v1/callback`); esos proveedores
+no deben usar la URL de Pages directamente.
+
+Antes de desplegar esta versión, ejecuta una vez
+[`backend/Migrations/20261102_RemoveUsuarioPassword.sql`](./backend/Migrations/20261102_RemoveUsuarioPassword.sql)
+en el SQL Editor de Supabase. El script elimina la columna heredada `contrasena` de
+`public."Usuario"` y sus valores existentes; la autenticación y los cambios de contraseña
+continúan gestionándose exclusivamente en Supabase Auth.
 
 ## 1. Datos que necesitas de tu proyecto Supabase
 

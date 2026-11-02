@@ -164,9 +164,9 @@ Formulario:
 
 ## Callback OAuth
 
-**Ruta y roles:** `/auth/callback`; ruta temporal para Google/GitHub, independiente del shell. Archivo: [src/pages/AuthCallback.tsx](../src/pages/AuthCallback.tsx).
+**Ruta y roles:** `/auth/callback`; ruta temporal para Google/GitHub, independiente del shell. En GitHub Pages se sirve bajo `/App-Read-Now/auth/callback`. Archivo: [src/pages/AuthCallback.tsx](../src/pages/AuthCallback.tsx).
 
-**Único estado visual:** pantalla de viewport completo, fondo `surface-soft`, tarjeta centrada blanca con radio 16 px y sombra. Título **Autenticando...** y texto **Por favor espera un momento.** con pulso. Al finalizar en popup, informa a la ventana inicial y se cierra; si no hay popup navega a `/`. En error con popup lo devuelve a login a través del flujo principal; en ventana independiente, navega a login. No hay ilustración o formulario visible en esta ruta.
+**Estados visuales:** pantalla de viewport completo, fondo `surface-soft`, tarjeta centrada con radio 16 px y sombra. Durante el intercambio OAuth muestra **Autenticando...** y **Por favor espera un momento.**; al obtener una sesión navega a `/`. Si Supabase devuelve un error o no se obtiene sesión, muestra el mensaje y un botón para volver al inicio de sesión. El flujo usa redirección de la pestaña actual, no una ventana emergente.
 
 ## Catálogo / Inicio
 

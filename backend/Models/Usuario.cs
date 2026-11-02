@@ -16,11 +16,6 @@ public class Usuario
     [JsonPropertyName("correo")]
     public string Correo { get; set; } = string.Empty;
 
-    // Se mantiene por compatibilidad con el esquema existente, pero el backend
-    // NUNCA debe usar esta columna para autenticar: eso lo hace Supabase Auth.
-    [JsonIgnore]
-    public string Contrasena { get; set; } = string.Empty;
-
     [JsonPropertyName("fecha_date")]
     public DateOnly? FechaDate { get; set; }
 
