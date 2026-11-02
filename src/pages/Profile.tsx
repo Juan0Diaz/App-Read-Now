@@ -7,6 +7,7 @@ import { Role } from '../types';
 import { useNavigate } from 'react-router-dom';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { useProfile } from '../hooks/useProfile';
+import { formatDisplayDate } from '../lib/dateUtils';
 
 export const Profile = () => {
   const { user, role, signOut, fetchUserData } = useAuth();
@@ -54,6 +55,14 @@ export const Profile = () => {
     setSelectedRole(role === 'Publicador' ? 'Publicador' : 'Visualizador');
   }, [role]);
 
+  useEffect(() => {
+    setNombre(user?.nombre || '');
+    setFechaDate(user?.fecha_date || '');
+    const phone = parseInitialPhone(user?.numero_tel || null);
+    setCountryCode(phone.code);
+    setPhoneNumber(phone.num);
+  }, [parseInitialPhone, user]);
+
   const profileInitial = (user?.nombre || user?.correo || 'U').charAt(0).toUpperCase();
 
   const handleLogout = async () => {
@@ -67,8 +76,8 @@ export const Profile = () => {
   };
 
   const saveProfile = async () => {
-    await saveProfileAction(nombre, fechaDate, countryCode, phoneNumber);
-    setIsEditingProfile(false);
+    const saved = await saveProfileAction(nombre, fechaDate, countryCode, phoneNumber);
+    if (saved) setIsEditingProfile(false);
   };
 
   const savePassword = async () => {
@@ -279,7 +288,7 @@ export const Profile = () => {
                     <div>
                       <label htmlFor="profile-date-display" className="mb-1 block text-sm font-bold text-text-body">Fecha de Nacimiento</label>
                       <div id="profile-date-display" className="rounded-xl border border-border bg-surface-soft p-3 text-text-strong">
-                        {user?.fecha_date ? new Date(user.fecha_date).toLocaleDateString() : 'No especificada'}
+                        {user?.fecha_date ? formatDisplayDate(user.fecha_date) : 'No especificada'}
                       </div>
                     </div>
                     {role === 'Publicador' && (
