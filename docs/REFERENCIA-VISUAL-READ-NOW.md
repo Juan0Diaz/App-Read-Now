@@ -242,7 +242,7 @@ Solicitud exitosa genera confirmación del navegador “Préstamo solicitado con
 
 Al editar, panel inset con campos Nombre (placeholder **Tu nombre completo**, máximo 50 caracteres), Fecha de Nacimiento y, solo Publicador, **Número de Teléfono (Contacto)** con selector de prefijo (CO +57, US +1, MX +52, ES +34, AR +54, CL +56, PE +51, EC +593) y ejemplo **Ej: 3001234567**. Error inline con AlertTriangle. Acciones **Cancelar** y accent **Guardar Cambios**; durante guardado **Guardando...**.
 
-**Seguridad:** sección **Seguridad** con botón **Cambiar Contraseña**. Al abrir, panel con **Contraseña Actual** y **Nueva Contraseña**, botones **Cancelar** y **Cambiar Contraseña** (durante guardado **Guardando...**). La acción depende de las reglas del hook; no hay otra ruta para este formulario.
+**Seguridad:** tarjeta inset con icono Shield, título **Seguridad**, texto breve sobre mantener protegida la cuenta y botón outline **Cambiar Contraseña**. Al abrir, panel con el texto “Ingresa tu contraseña actual y elige una nueva para tu cuenta.”, campos **Contraseña Actual** y **Nueva Contraseña**, botones **Cancelar** y **Cambiar Contraseña** (durante guardado **Guardando...**). La acción depende de las reglas del hook; no hay otra ruta para este formulario.
 
 **Eliminar cuenta:** no se muestra a Administrador; para otros roles, botón outline rojo **Eliminar Mi Cuenta**. Abre modal fijo con AlertTriangle, título **¿Eliminar tu cuenta?**, explicación de que se borrarán usuario y datos asociados permanentemente, botones **Sí, eliminar permanentemente** (durante operación **Eliminando...**) y **Cancelar**.
 
