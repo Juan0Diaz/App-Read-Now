@@ -11,6 +11,13 @@ export const Layout = () => {
   const location = useLocation();
   const [pendingReviews, setPendingReviews] = useState(0);
 
+  useEffect(() => {
+    if (!user || role !== 'Administrador') return;
+    getSolicitudesRevision()
+      .then((libros) => setPendingReviews(libros.length))
+      .catch(() => setPendingReviews(0));
+  }, [location.pathname, role, user]);
+
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center bg-surface-soft text-text-muted">Cargando...</div>;
   }
@@ -18,13 +25,6 @@ export const Layout = () => {
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
-
-  useEffect(() => {
-    if (!user || role !== 'Administrador') return;
-    getSolicitudesRevision()
-      .then((libros) => setPendingReviews(libros.length))
-      .catch(() => setPendingReviews(0));
-  }, [location.pathname, role, user]);
 
   const profileInitial = (user?.nombre || user?.correo || 'U').charAt(0).toUpperCase();
   const isRouteActive = (to: string) => to === '/'
