@@ -34,6 +34,12 @@ si comienzas desde el despliegue de Cloud Run (`run.app`), el callback vuelve a 
 y seguirá mostrando lo que esté publicado allí. No hay service worker que gestione las
 actualizaciones.
 
+Google y GitHub se autentican en la pestaña actual. El callback respeta la base del
+despliegue (por ejemplo, `/App-Read-Now/` en GitHub Pages). Añade a **Authentication → URL
+Configuration → Redirect URLs** el callback completo de cada entorno que uses. Si el
+retorno solicitado no está permitido, Supabase puede usar el **Site URL** del proyecto,
+lo que puede enviar al usuario a otro despliegue.
+
 El workflow de GitHub Actions publica automáticamente `main` en Pages. Habilita **Settings
 → Pages → Build and deployment → GitHub Actions** y configura `VITE_SUPABASE_URL` y
 `VITE_SUPABASE_ANON_KEY` como Actions secrets y la variable `VITE_API_URL` con la URL del
