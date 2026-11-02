@@ -3,7 +3,8 @@ import { useAuth } from '../context/AuthContext';
 import { Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { isDemoMode, supabase } from '../lib/supabase';
+import { isDemoMode } from '../lib/supabase';
+import { useLogin } from '../hooks/useLogin';
 import { ShieldAlert, BookOpen, Eye, EyeOff } from 'lucide-react';
 
 export const Login = () => {
@@ -15,180 +16,30 @@ export const Login = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [birthDate, setBirthDate] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [resetMessage, setResetMessage] = useState('');
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
+  const { loading, error, resetMessage, submit, resetPassword, loginWithOAuth } = useLogin();
 
   if (user) {
     return <Navigate to="/" />;
   }
 
-  const handleResetPassword = async () => {
-    if (!email) {
-      setError('Ingresa tu correo electrónico para recuperar la contraseña.');
-      return;
-    }
-    setLoading(true);
-    setError('');
-    setResetMessage('');
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email);
-      if (error) throw error;
-      setResetMessage('Revisa tu correo electrónico para el enlace de recuperación.');
-    } catch (err: any) {
-      setError(err.message || 'Error al enviar recuperación.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const handleResetPassword = () => resetPassword(email);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    setResetMessage('');
-
-    try {
-      const blockKey = `login_block_${email.toLowerCase()}`;
-      const attemptsKey = `login_attempts_${email.toLowerCase()}`;
-      
-      if (!isRegister) {
-        const blockUntil = localStorage.getItem(blockKey);
-        if (blockUntil && Date.now() < parseInt(blockUntil, 10)) {
-          const remainingMinutes = Math.ceil((parseInt(blockUntil, 10) - Date.now()) / 60000);
-          setError(`Demasiados intentos fallidos. Cuenta bloqueada temporalmente. Intenta en ${remainingMinutes} minuto(s).`);
-          setLoading(false);
-          return;
-        }
-      }
-
-      if (isRegister) {
-        if (!acceptTerms) {
-          throw new Error('Debes aceptar los Términos y Condiciones y la Política de Privacidad.');
-        }
-        
-        const emailRegex = /^[a-zA-Z0-9._%+-]+@(gmail\.com|outlook\.com)$/i;
-        if (!emailRegex.test(email)) {
-          throw new Error('Por favor, ingresa un correo con dominio @gmail.com o @outlook.com (sin caracteres especiales extra).');
-        }
-
-        const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[^a-zA-Z\d\s])[^\s]+$/;
-        if (!passwordRegex.test(password)) {
-          throw new Error('La contraseña debe contener letras, números y signos/caracteres especiales, y no debe contener espacios.');
-        }
-
-        if (!birthDate) {
-          setError('Por favor, ingresa tu fecha de nacimiento.');
-          setLoading(false);
-          return;
-        }
-
-        const bd = new Date(birthDate);
-        const today = new Date();
-        if (bd > today) {
-          setError('La fecha de nacimiento no puede ser una fecha futura.');
-          setLoading(false);
-          return;
-        }
-        
-        let age = today.getFullYear() - bd.getFullYear();
-        const m = today.getMonth() - bd.getMonth();
-        if (m < 0 || (m === 0 && today.getDate() < bd.getDate())) {
-          age--;
-        }
-        
-        if (age < 18) {
-          setError('Debes ser mayor de 18 años para registrarte.');
-          setLoading(false);
-          return;
-        }
-      }
-
-      if (isDemoMode) {
-        // En modo demostración de AI Studio sin Credenciales, mockeamos login
-        simulateLogin('Visualizador');
-        navigate('/');
-        return;
-      }
-
-      if (isRegister) {
-        const { data: authData, error: signUpError } = await supabase.auth.signUp({ email, password });
-        if (signUpError) {
-          if (signUpError.message.toLowerCase().includes('already registered')) {
-            throw new Error('Este correo ya está registrado en el sistema (incluso si fue borrado previamente de la app). Por favor, intenta "Iniciar Sesión" con tus credenciales. La aplicación restaurará tu perfil automáticamente.');
-          }
-          throw signUpError;
-        }
-
-        if (authData.user) {
-          const { error: dbError } = await supabase.from('Usuario').insert([
-            { id_usuario: authData.user.id, correo: email, fecha_date: birthDate }
-          ]);
-          if (dbError) {
-            console.error("Error db:", dbError);
-            throw new Error(`Error al insertar en tabla usuario: ${dbError.message}`);
-          }
-          
-          let roleName = 'Visualizador';
-          if (email.toLowerCase() === 'admin@gmail.com' || email.toLowerCase() === 'admin1@gmail.com') {
-            roleName = 'Administrador';
-          }
-          
-          const { data: roleAssigned } = await supabase.from('Rol').select('*').eq('nombre_Rol', roleName).maybeSingle();
-          if (roleAssigned) {
-            await supabase.from('Usuario-Rol').insert({ id_usuario: authData.user.id, id_Rol: roleAssigned.id_Rol });
-          }
-        }
-
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    void submit(
+      { isRegister, email, password, birthDate, acceptedTerms: acceptTerms },
+      () => navigate('/'),
+      () => {
         alert('Registro exitoso. Revisa tu correo o inicia sesión.');
         setIsRegister(false);
-      } else {
-        const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-        if (signInError) {
-          const attempts = parseInt(localStorage.getItem(attemptsKey) || '0', 10) + 1;
-          if (attempts >= 5) {
-            localStorage.setItem(blockKey, (Date.now() + 5 * 60 * 1000).toString());
-            localStorage.removeItem(attemptsKey);
-            throw new Error('Demasiados intentos fallidos. Cuenta bloqueada temporalmente. Intenta en 5 minutos.');
-          } else {
-            localStorage.setItem(attemptsKey, attempts.toString());
-            throw new Error(`Credenciales inválidas. Intento ${attempts} de 5.`);
-          }
-        }
-        // Exito, borrar intentos
-        localStorage.removeItem(attemptsKey);
-        navigate('/');
-      }
-    } catch (err: any) {
-      setError(err.message || 'Ocurrió un error');
-    } finally {
-      setLoading(false);
-    }
+      },
+    );
   };
 
-  const handleOAuthLogin = async (provider: 'google' | 'github') => {
-    try {
-      setLoading(true);
-      setError('');
-      
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider,
-        options: {
-          redirectTo: `${window.location.origin}${import.meta.env.BASE_URL}auth/callback`,
-          ...(provider === 'google' && {
-            queryParams: { prompt: 'select_account' },
-          }),
-        }
-      });
-      
-      if (error) throw error;
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : `Error al conectar con ${provider}`);
-      setLoading(false);
-    }
-  };
+  const handleOAuthLogin = (provider: 'google' | 'github') =>
+    loginWithOAuth(provider, () => navigate('/'));
 
   return (
     <div className="flex h-full w-full flex-col items-center justify-center py-10 animate-in fade-in duration-500 dark:bg-surface-soft">

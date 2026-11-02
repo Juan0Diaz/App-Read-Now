@@ -14,6 +14,7 @@ const Login = React.lazy(() => import('./pages/Login').then(({ Login }) => ({ de
 const BookDetail = React.lazy(() => import('./pages/BookDetail').then(({ BookDetail }) => ({ default: BookDetail })));
 const PublisherDashboard = React.lazy(() => import('./pages/PublisherDashboard').then(({ PublisherDashboard }) => ({ default: PublisherDashboard })));
 const AdminDashboard = React.lazy(() => import('./pages/AdminDashboard').then(({ AdminDashboard }) => ({ default: AdminDashboard })));
+const AdminBookReviews = React.lazy(() => import('./pages/AdminBookReviews').then(({ AdminBookReviews }) => ({ default: AdminBookReviews })));
 const Profile = React.lazy(() => import('./pages/Profile').then(({ Profile }) => ({ default: Profile })));
 const NewBook = React.lazy(() => import('./pages/NewBook').then(({ NewBook }) => ({ default: NewBook })));
 const EditBook = React.lazy(() => import('./pages/EditBook').then(({ EditBook }) => ({ default: EditBook })));
@@ -56,6 +57,7 @@ export default function App() {
             <Route path="publicador/libros/editar/:id" element={withPageLoading(<EditBook />)} />
             <Route path="publicador/perfil/:id" element={withPageLoading(<PublicProfile />)} />
             <Route path="admin" element={withPageLoading(<AdminDashboard />)} />
+            <Route path="admin/revision-libros" element={withPageLoading(<AdminBookReviews />)} />
             {/* Catch-all */}
             <Route path="*" element={<div className="text-center py-20">404 No Encontrado</div>} />
           </Route>

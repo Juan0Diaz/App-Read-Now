@@ -22,4 +22,11 @@ public class Libro
 
     public string? Descripcion { get; set; }
     public string? PortadaUrl { get; set; }
+
+    public const string RevisionPendiente = "Pendiente";
+    public const string RevisionAprobado = "Aprobado";
+    public const string RevisionCorreccion = "Corrección";
+
+    public string EstadoRevision { get; set; } = RevisionPendiente;
+    public string? ComentarioRevision { get; set; }
 }

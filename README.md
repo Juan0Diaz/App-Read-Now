@@ -77,6 +77,19 @@ al repo), y `Program.cs` los lee con `builder.Configuration["..."]`.
 ⚠️ **No pongas estos valores en `appsettings.json` ni los subas al repo.** El connection
 string tiene tu contraseña de base de datos, y el JWT Secret permite falsificar tokens.
 
+## Recuperación de contraseña
+
+El enlace de recuperación redirige al origen donde se solicitó, a la ruta
+`/reset-password` de esta aplicación. En Supabase, agrega las URLs que realmente uses
+en **Authentication → URL Configuration → Redirect URLs**; por ejemplo:
+
+- `http://localhost:3000/reset-password` para desarrollo local.
+- `https://<tu-dominio>/reset-password` para producción.
+- `https://*-3000.app.github.dev/reset-password` para Codespaces.
+
+Supabase solo permite redirigir a URLs incluidas en esa lista. La nueva contraseña se
+actualiza en Supabase Auth; no se guarda en la tabla de perfil de la aplicación.
+
 ## 3. El `.env` del frontend ahora se genera solo — nadie tiene que copiarlo a mano
 
 Antes, cada persona tenía que hacer `cp .env.example .env` y llenarlo manualmente, lo
@@ -112,6 +125,10 @@ npm run dev
 # Terminal 2 — Backend
 cd backend
 dotnet run
+
+# Terminal 3 - el api upstream
+cd backend
+dotnet run --launch-profile Backend.Api.Upstream
 ```
 
 Codespaces reenviará (forward) los puertos 3000 y 5080 automáticamente. Copia la URL
@@ -144,3 +161,6 @@ Instalar los tipos de React (La causa más común)
 Abre tu terminal en la raíz del proyecto y ejecuta:
 
 npm install -D @types/react @types/react-dom
+
+## Si el contenedor llega a fallar, hay que mandarle este a la IA de GitHub para que lo arregle: 
+## Ayudame con este problema: Este codespace se está ejecutando actualmente en modo de recuperación debido a un error de configuración. Revisa los registros de creación, actualiza la configuración de tu contenedor de desarrollo según sea necesario y ejecuta el comando «Rebuild Container» (Reconstruir contenedor) para solucionar el problema. Dice que revise los Logs y que vuelva a reconstruir el contenedor 

@@ -7,6 +7,9 @@ import { Role } from '../types';
 import { useNavigate } from 'react-router-dom';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { useProfile } from '../hooks/useProfile';
+import { getMisPublicaciones } from '../microservicios/Publicaciones';
+import { resubmitirLibro } from '../microservicios/Libros';
+import { Publicacion } from '../types';
 
 export const Profile = () => {
   const { user, role, signOut, fetchUserData } = useAuth();
@@ -20,6 +23,9 @@ export const Profile = () => {
   const [newPassword, setNewPassword] = useState('');
   const [nombre, setNombre] = useState(user?.nombre || '');
   const [fechaDate, setFechaDate] = useState(user?.fecha_date || '');
+  const [publicacionesRevision, setPublicacionesRevision] = useState<Publicacion[]>([]);
+  const [revisionLoading, setRevisionLoading] = useState(false);
+  const [revisionError, setRevisionError] = useState('');
 
   const {
     loading,
@@ -53,6 +59,16 @@ export const Profile = () => {
   useEffect(() => {
     setSelectedRole(role === 'Publicador' ? 'Publicador' : 'Visualizador');
   }, [role]);
+
+  useEffect(() => {
+    if (role !== 'Publicador' || !user) return;
+
+    setRevisionLoading(true);
+    getMisPublicaciones()
+      .then(setPublicacionesRevision)
+      .catch((err: any) => setRevisionError(err.message || 'No se pudo consultar el estado de revisión.'))
+      .finally(() => setRevisionLoading(false));
+  }, [role, user]);
 
   const profileInitial = (user?.nombre || user?.correo || 'U').charAt(0).toUpperCase();
 
@@ -89,6 +105,24 @@ export const Profile = () => {
     await executeRoleChangeAction(selectedRole);
     setIsEditingRole(false);
     setShowRoleChangeConfirm(false);
+  };
+
+  const reenviarRevision = async (publicacion: Publicacion) => {
+    if (!publicacion.libro) return;
+    try {
+      setRevisionLoading(true);
+      setRevisionError('');
+      await resubmitirLibro(publicacion.libro.id_libro);
+      setPublicacionesRevision((current) => current.map((item) =>
+        item.id_publicacion === publicacion.id_publicacion
+          ? { ...item, libro: { ...item.libro!, estado_revision: 'Pendiente', comentario_revision: undefined } }
+          : item,
+      ));
+    } catch (err: any) {
+      setRevisionError(err.message || 'No se pudo reenviar el libro.');
+    } finally {
+      setRevisionLoading(false);
+    }
   };
 
   return (
@@ -293,6 +327,64 @@ export const Profile = () => {
                   </div>
                 )}
               </div>
+
+              {role === 'Publicador' && (
+                <div className="mt-8 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xl font-bold text-text-strong">Estado de revisión</h3>
+                    {revisionLoading && <span className="text-xs font-semibold text-text-muted">Actualizando...</span>}
+                  </div>
+
+                  {revisionError && (
+                    <div className="rounded-xl border border-error/20 bg-error-soft p-3 text-sm font-semibold text-error">
+                      {revisionError}
+                    </div>
+                  )}
+
+                  {!revisionLoading && publicacionesRevision.length === 0 && (
+                    <p className="rounded-xl border border-border bg-surface-soft p-4 text-sm text-text-muted">
+                      Aún no has enviado libros a revisión.
+                    </p>
+                  )}
+
+                  {publicacionesRevision.map((publicacion) => {
+                    const libro = publicacion.libro;
+                    if (!libro) return null;
+                    const estado = libro.estado_revision ?? 'Pendiente';
+                    const estilo = estado === 'Aprobado'
+                      ? 'border-success/20 bg-success-soft text-success'
+                      : estado === 'Corrección'
+                        ? 'border-warning/30 bg-warning/10 text-warning'
+                        : 'border-primary/20 bg-primary/5 text-primary';
+
+                    return (
+                      <div key={publicacion.id_publicacion} className={`rounded-xl border p-4 ${estilo}`}>
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                          <div>
+                            <h4 className="font-bold text-text-strong">{libro.titulo}</h4>
+                            <p className="mt-1 text-xs font-bold uppercase">{estado}</p>
+                            {libro.comentario_revision && (
+                              <p className="mt-3 text-sm font-medium text-text-body">
+                                Corrección solicitada: {libro.comentario_revision}
+                              </p>
+                            )}
+                          </div>
+                          {estado === 'Corrección' && (
+                            <div className="flex shrink-0 gap-2">
+                              <Button size="sm" variant="outline" onClick={() => navigate(`/publicador/libros/editar/${libro.id_libro}`)}>
+                                Editar
+                              </Button>
+                              <Button size="sm" onClick={() => reenviarRevision(publicacion)} disabled={revisionLoading}>
+                                Reenviar
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
 
               <div className="mt-8 space-y-4">
                 <div className="flex items-center justify-between">

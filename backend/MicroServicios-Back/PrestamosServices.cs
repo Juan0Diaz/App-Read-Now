@@ -45,7 +45,7 @@ public sealed class PrestamosServices : IPrestamosServices
 			return new(PrestamoSolicitudEstado.LibroNoEncontrado);
 		}
 
-		if (!libro.Disponible)
+		if (libro.EstadoRevision != Libro.RevisionAprobado || !libro.Disponible)
 		{
 			return new(PrestamoSolicitudEstado.LibroNoDisponible);
 		}

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase, isDemoMode } from '../lib/supabase';
+import { getAuthenticatedProfile } from '../microservicios/Login';
 import { User, Role } from '../types';
 
 interface AuthContextType {
@@ -50,7 +51,9 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (event, session) => {
         if (event === 'SIGNED_IN' && session?.user) {
-          fetchUserData(session.user.id, session.user.email || '');
+          window.setTimeout(() => {
+            void fetchUserData(session.user.id, session.user.email || '');
+          }, 0);
         } else if (event === 'PASSWORD_RECOVERY') {
           if (window.location.pathname !== '/reset-password') {
             window.location.href = '/reset-password';
@@ -71,6 +74,17 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }
   const fetchUserData = async (uid: string, email: string) => {
     try {
       if (isDemoMode) return;
+
+      try {
+        const profile = await getAuthenticatedProfile();
+        if (profile) {
+          setUser(profile);
+          setRole(profile.rol);
+          return;
+        }
+      } catch (apiError) {
+        console.error('Error al consultar el perfil autenticado en el backend:', apiError);
+      }
       
       // Obtener el registro del usuario
       let { data: userData, error: userError } = await supabase

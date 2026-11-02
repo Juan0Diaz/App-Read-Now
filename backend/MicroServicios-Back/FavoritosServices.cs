@@ -7,7 +7,7 @@ namespace Backend.Api.Services;
 public interface IFavoritosServices
 {
 	Task<IReadOnlyList<Favorito>> ObtenerMisFavoritosAsync(Guid idUsuario);
-	Task AgregarAsync(Guid idUsuario, Guid idLibro);
+	Task<bool> AgregarAsync(Guid idUsuario, Guid idLibro);
 	Task<bool> QuitarAsync(Guid idUsuario, Guid idLibro);
 }
 
@@ -30,14 +30,21 @@ public sealed class FavoritosServices : IFavoritosServices
 			.ToListAsync();
 	}
 
-	public async Task AgregarAsync(Guid idUsuario, Guid idLibro)
+	public async Task<bool> AgregarAsync(Guid idUsuario, Guid idLibro)
 	{
+		var disponible = await _db.Libros
+			.AnyAsync(libro => libro.IdLibro == idLibro && libro.EstadoRevision == Libro.RevisionAprobado);
+		if (!disponible)
+		{
+			return false;
+		}
+
 		var yaExiste = await _db.Favoritos
 			.AnyAsync(favorito => favorito.IdUsuario == idUsuario && favorito.IdLibro == idLibro);
 
 		if (yaExiste)
 		{
-			return;
+			return true;
 		}
 
 		_db.Favoritos.Add(new Favorito
@@ -48,6 +55,7 @@ public sealed class FavoritosServices : IFavoritosServices
 		});
 
 		await _db.SaveChangesAsync();
+		return true;
 	}
 
 	public async Task<bool> QuitarAsync(Guid idUsuario, Guid idLibro)

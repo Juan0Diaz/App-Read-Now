@@ -9,6 +9,12 @@ import { Publicacion } from '../types';
 
 const publicationsCache = new Map<string, Publicacion[]>();
 
+const reviewStatusClasses: Record<string, string> = {
+  Pendiente: 'bg-warning/15 text-warning',
+  'Corrección': 'bg-error/10 text-error',
+  Aprobado: 'bg-success-soft text-success',
+};
+
 export const PublisherDashboard = () => {
   const { user, role } = useAuth();
   const navigate = useNavigate();
@@ -188,10 +194,9 @@ export const PublisherDashboard = () => {
                   <div className="p-8 text-center text-text-muted dark:text-text-body">No tienes publicaciones aún.</div>
                 ) : (
                   <div className="w-full">
-                    <div className="hidden w-full min-w-0 gap-4 border-b border-border bg-surface-soft/80 px-6 py-4 text-xs font-bold uppercase tracking-wider text-text-muted dark:border-border dark:bg-surface-muted dark:text-text-body lg:grid lg:grid-cols-[minmax(0,2.6fr)_minmax(110px,1fr)_minmax(120px,0.9fr)_110px]">
+                    <div className="hidden w-full min-w-0 gap-4 border-b border-border bg-surface-soft/80 px-6 py-4 text-xs font-bold uppercase tracking-wider text-text-muted dark:border-border dark:bg-surface-muted dark:text-text-body lg:grid lg:grid-cols-[minmax(0,2.4fr)_minmax(0,1.8fr)_80px]">
                       <div className="min-w-0">Título</div>
-                      <div className="min-w-0">Estado</div>
-                      <div className="min-w-0">Fecha</div>
+                      <div className="min-w-0">Revisión</div>
                       <div className="min-w-0 text-right">Acciones</div>
                     </div>
                     <div className="divide-y divide-border dark:divide-border">
@@ -200,24 +205,36 @@ export const PublisherDashboard = () => {
                         if (!libro) return null;
                         const isSelected = selectedPublicacionId === pub.id_publicacion;
                         const estadoClasses = libro.disponible ? 'bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary' : 'bg-surface-muted text-text-muted dark:bg-slate-700 dark:text-slate-200';
+                        const reviewStatus = libro.estado_revision ?? 'Pendiente';
+                        const reviewClasses = reviewStatusClasses[reviewStatus] ?? 'bg-surface-muted text-text-muted';
                         return (
                           <div
                             key={pub.id_publicacion}
                             onClick={() => setSelectedPublicacionId(pub.id_publicacion)}
-                            className={`grid w-full cursor-pointer gap-3 p-4 transition-colors lg:grid-cols-[minmax(0,2.6fr)_minmax(110px,1fr)_minmax(120px,0.9fr)_110px] lg:items-center lg:gap-4 lg:px-6 ${isSelected ? 'bg-primary/5 dark:bg-surface-muted' : 'hover:bg-surface-soft dark:hover:bg-surface-muted'}`}
+                            className={`grid w-full cursor-pointer grid-cols-[minmax(0,1fr)_auto] gap-3 p-4 transition-colors lg:grid-cols-[minmax(0,2.4fr)_minmax(0,1.8fr)_80px] lg:items-start lg:gap-4 lg:px-6 ${isSelected ? 'bg-primary/5 dark:bg-surface-muted' : 'hover:bg-surface-soft dark:hover:bg-surface-muted'}`}
                           >
-                            <div className="min-w-0">
-                              <span className="block min-w-0 truncate font-bold text-text-strong dark:text-text-strong">{libro.titulo}</span>
+                            <div className="col-span-2 min-w-0 lg:col-span-1">
+                              <span className="block whitespace-normal break-words font-bold leading-snug text-text-strong dark:text-text-strong">{libro.titulo}</span>
+                              <div className="mt-2 flex flex-wrap items-center gap-2">
+                                <span className={`inline-flex items-center rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-wider ${estadoClasses}`}>
+                                  {libro.estado}
+                                </span>
+                                <span className="text-xs text-text-muted dark:text-text-body">
+                                  {getDisplayPublicationDate(pub) ? formatDisplayDate(getDisplayPublicationDate(pub)) : '—'}
+                                </span>
+                              </div>
                             </div>
-                            <div className="min-w-0">
-                              <span className={`inline-flex items-center rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-wider ${estadoClasses}`}>
-                                {libro.estado}
+                            <div className="col-span-2 min-w-0 lg:col-span-1">
+                              <span className={`inline-flex items-center rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-wider ${reviewClasses}`}>
+                                {reviewStatus}
                               </span>
+                              {reviewStatus === 'Corrección' && libro.comentario_revision && (
+                                <p className="mt-2 whitespace-pre-wrap break-words rounded-lg border border-warning/20 bg-warning/5 p-3 text-sm leading-relaxed text-text-body [overflow-wrap:anywhere]">
+                                  {libro.comentario_revision}
+                                </p>
+                              )}
                             </div>
-                            <div className="min-w-0 text-sm text-text-muted dark:text-text-body">
-                              {getDisplayPublicationDate(pub) ? formatDisplayDate(getDisplayPublicationDate(pub)) : '—'}
-                            </div>
-                            <div className="flex min-w-0 items-center justify-end gap-2 md:justify-self-end" onClick={e => e.stopPropagation()}>
+                            <div className="col-span-2 flex min-w-0 items-center justify-end gap-2 lg:col-span-1" onClick={e => e.stopPropagation()}>
                               <Button onClick={() => navigate(`/publicador/libros/editar/${libro.id_libro}`)} variant="ghost" size="icon" className="h-8 w-8 border border-border text-text-muted hover:text-indigo-600 dark:border-border dark:text-text-body dark:hover:text-indigo-400 md:border-transparent">
                                 <Edit className="h-4 w-4"/>
                               </Button>
