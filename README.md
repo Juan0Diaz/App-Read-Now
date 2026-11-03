@@ -106,8 +106,9 @@ Ahora, `.devcontainer/scripts/generate-env.sh` corre automáticamente cada vez q
 Codespace arranca (`postCreateCommand` y `postStartCommand`), y:
 
 1. Lee `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` de los secretos del paso 2.
-2. Calcula `VITE_API_URL` solo, usando `$CODESPACE_NAME` (variable que Codespaces ya
-   trae integrada) — nadie tiene que copiar la URL del puerto 5080 a mano nunca más.
+2. Calcula `VITE_API_URL` y `VITE_LIBROS_API_URL` usando `$CODESPACE_NAME`. Ambas usan
+        el gateway del puerto 5080; YARP envía `/gateway/api/libros` al microservicio de
+        Kubernetes por el puerto local 5083.
 3. Escribe el `.env` real en la raíz del proyecto.
 
 Si alguien abre un Codespace y ve la app en "Modo Demostración", el 99% de las veces
@@ -120,31 +121,33 @@ mensaje del script se lo advierte en la terminal al arrancar.
 2. En GitHub, botón **Code → Codespaces → Create codespace on main**.
 3. El `postCreateCommand` corre automáticamente `npm install` y `dotnet restore`.
 
-## 4. Correr los dos servicios
+## 4. Ejecutar el frontend y las APIs
 
-Abre dos terminales dentro del Codespace:
+Abre cuatro terminales dentro del Codespace. El clúster Minikube y el despliegue de
+`libros-api` deben estar activos.
 
 ```bash
 # Terminal 1 — Frontend
 npm run dev
 
-# Terminal 2 — Backend
+# Terminal 2 — Backend gateway (puerto 5080)
 cd backend
-dotnet run
+dotnet run --launch-profile Backend.Api
 
-# Terminal 3 - el api upstream
+# Terminal 3 — Backend upstream (puerto 5081)
 cd backend
 dotnet run --launch-profile Backend.Api.Upstream
+
+# Terminal 4 — Reenvío al microservicio Libros (puerto 5083) - UTILIZAR ESTE SIEMPRE Y CUANDO SE REINICIE EL CODESPACE
+# PRIMERA VEZ EJECUTADO EN LA TERMINAL, YA NO ES NECESARIO VOLVER A EJECUTARLO. QUEDA ACTIVO
+# ESTE COMANDO PERMITE VER SI EL SERVICIO ESTA OPERANDO curl http://localhost:5083/health -> DEBE MOSTRAR {"status":"ok"}
+kubectl port-forward service/libros-api 5083:80
 ```
 
-Codespaces reenviará (forward) los puertos 3000 y 5080 automáticamente. Copia la URL
-pública del puerto 5080 (pestaña "Ports") y ponla en un `.env` en la raíz del proyecto:
-
-```
-VITE_SUPABASE_URL=https://klkkxwmtkfkwxevkzjeh.supabase.co
-VITE_SUPABASE_ANON_KEY=tu_anon_key
-VITE_API_URL=https://<tu-codespace>-5080.app.github.dev
-```
+Codespaces reenvía los puertos 3000, 5080 y 5083. Mantén activo el terminal 4; el
+frontend llama a Libros por `VITE_LIBROS_API_URL` y el gateway lo dirige al servicio
+de Kubernetes. El script de generación configura las URLs automáticamente, no hace falta
+copiarlas manualmente al `.env`.
 
 ## 5. ⚠️ Importante: revisa `src/types.ts`
 

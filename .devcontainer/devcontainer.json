@@ -8,10 +8,16 @@
     },
     "ghcr.io/devcontainers/features/dotnet:2": {
       "version": "8.0.408"
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest",
+      "moby": true,
+      "installDockerBuildx": true,
+      "installDockerComposeSwitch": true
     }
   },
 
-  "forwardPorts": [3000, 5080],
+  "forwardPorts": [3000, 5080, 5083],
   "portsAttributes": {
     "3000": {
       "label": "Frontend (Vite)",
@@ -19,6 +25,11 @@
     },
     "5080": {
       "label": "Backend API (ASP.NET Core)",
+      "onAutoForward": "notify",
+      "visibility": "public"
+    },
+    "5083": {
+      "label": "Libros API (Kubernetes)",
       "onAutoForward": "notify",
       "visibility": "public"
     }
