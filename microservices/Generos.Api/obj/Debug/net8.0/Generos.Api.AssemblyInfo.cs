@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Generos.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e214c1241eef2dd43ad69cb18857acd6e0ab2e2b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c4a69c643cb9dcf5e01aa859fa0003a93af4db35")]
 [assembly: System.Reflection.AssemblyProductAttribute("Generos.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Generos.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
