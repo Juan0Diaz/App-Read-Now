@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Favoritos.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c4a69c643cb9dcf5e01aa859fa0003a93af4db35")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3f56e1e04a5c6b4251ef032d9c95629359b4882b")]
 [assembly: System.Reflection.AssemblyProductAttribute("Favoritos.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Favoritos.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
