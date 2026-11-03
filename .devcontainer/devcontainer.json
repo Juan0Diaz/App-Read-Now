@@ -8,10 +8,19 @@
     },
     "ghcr.io/devcontainers/features/dotnet:2": {
       "version": "8.0.408"
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "moby": true
+    },
+    "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
+      "version": "latest",
+      "helm": "none",
+      "minikube": "latest"
     }
   },
 
-  "forwardPorts": [3000, 5080],
+  "privileged": true,
+  "forwardPorts": [3000, 5080, 5081],
   "portsAttributes": {
     "3000": {
       "label": "Frontend (Vite)",
@@ -21,10 +30,15 @@
       "label": "Backend API (ASP.NET Core)",
       "onAutoForward": "notify",
       "visibility": "public"
+    },
+    "5081": {
+      "label": "Favoritos API (ASP.NET Core)",
+      "onAutoForward": "notify",
+      "visibility": "public"
     }
   },
 
-  "postCreateCommand": "chmod +x .devcontainer/scripts/generate-env.sh && npm install && dotnet restore backend/Backend.Api.csproj && bash .devcontainer/scripts/generate-env.sh",
+  "postCreateCommand": "chmod +x .devcontainer/scripts/generate-env.sh && npm install && dotnet restore backend/Backend.Api.csproj && dotnet restore microservices/Favoritos.Api/Favoritos.Api.csproj && bash .devcontainer/scripts/generate-env.sh",
   "postStartCommand": "bash .devcontainer/scripts/generate-env.sh",
 
   "customizations": {
