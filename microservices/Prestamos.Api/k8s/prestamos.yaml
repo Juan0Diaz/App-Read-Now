@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prestamos-api
+  labels:
+    app: prestamos-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prestamos-api
+  template:
+    metadata:
+      labels:
+        app: prestamos-api
+    spec:
+      containers:
+        - name: prestamos-api
+          image: prestamos-api:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: prestamos-secrets
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prestamos-api
+spec:
+  type: ClusterIP
+  selector:
+    app: prestamos-api
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

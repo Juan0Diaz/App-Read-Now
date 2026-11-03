@@ -1,6 +1,7 @@
 {
   "name": "App-Read-Now (React + ASP.NET Core + Supabase)",
   "image": "mcr.microsoft.com/devcontainers/base:bookworm",
+  "privileged": true,
 
   "features": {
     "ghcr.io/devcontainers/features/node:1": {
@@ -8,7 +9,11 @@
     },
     "ghcr.io/devcontainers/features/dotnet:2": {
       "version": "8.0.408"
-    }
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest"
+    },
+    "ghcr.io/devcontainers-contrib/features/kubectl-helm-minikube:1": {}
   },
 
   "forwardPorts": [3000, 5080],
