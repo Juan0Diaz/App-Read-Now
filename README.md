@@ -142,6 +142,14 @@ dotnet run --launch-profile Backend.Api.Upstream
 # PRIMERA VEZ EJECUTADO EN LA TERMINAL, YA NO ES NECESARIO VOLVER A EJECUTARLO. QUEDA ACTIVO
 # ESTE COMANDO PERMITE VER SI EL SERVICIO ESTA OPERANDO curl http://localhost:5083/health -> DEBE MOSTRAR {"status":"ok"}
 kubectl port-forward service/libros-api 5083:80
+
+#Iniciar el Clúster:
+minikube start -p minikube
+kubectl get nodes
+
+#Cuando el nodo esté Ready, comprueba que el servicio exista y cuál es su puerto:
+kubectl get svc libros-api
+kubectl port-forward svc/libros-api 5083:80
 ```
 
 Codespaces reenvía los puertos 3000, 5080 y 5083. Mantén activo el terminal 4; el
