@@ -4,7 +4,25 @@ Esta guía sirve para arrancar el microservicio de Favoritos en Kubernetes cada 
 
 Si no se ejecuta este proceso, el servicio de Favoritos no quedará activo y al iniciar la aplicación no aparecerán los favoritos.
 
-## 1. Ejecutar el arranque completo del microservicio
+## 1. Preparar el Codespace
+
+La rama `main` incluye el feature `kubectl-helm-minikube` en `.devcontainer/devcontainer.json`, pero hacer `git pull` o cambiar de rama no instala herramientas dentro de un contenedor ya creado. Después de traer esta configuración a un Codespace existente, reconstruye el contenedor desde VS Code:
+
+1. Abre la paleta con `Ctrl+Shift+P`.
+2. Ejecuta **Dev Containers: Rebuild Container** y espera a que termine.
+3. Abre una terminal nueva y verifica que las herramientas estén instaladas:
+
+```bash
+command -v minikube
+command -v kubectl
+docker --version
+minikube version
+kubectl version --client
+```
+
+`command -v minikube` debe mostrar una ruta, por ejemplo `/usr/local/bin/minikube`. Si indica que no se encuentra el comando, no ejecutes todavía el bloque de arranque: vuelve a reconstruir el Codespace y revisa **Dev Containers: Show Container Log** si el feature falla.
+
+## 2. Ejecutar el arranque completo del microservicio
 
 Abre una terminal en la raíz del proyecto y ejecuta este bloque:
 
@@ -30,7 +48,7 @@ kubectl wait --for=condition=Ready pod -l app=favoritos-api --timeout=120s
 
 Si todo va bien, el microservicio queda levantado en Kubernetes.
 
-## 2. Mantener el puerto del servicio accesible
+## 3. Mantener el puerto del servicio accesible
 
 En otra terminal, ejecuta esto para dejar expuesto el servicio en localhost:5081:
 
@@ -44,7 +62,7 @@ kubectl port-forward service/favoritos-api 5081:80
 - Si se cierra el `port-forward`, la app ya no podrá consultar al microservicio.
 - En ese caso, los favoritos no aparecerán en la aplicación.
 
-## 3. Verificación rápida
+## 4. Verificación rápida
 
 Comprueba que el servicio responda:
 
@@ -59,7 +77,7 @@ HTTP/1.1 200 OK
 {"status":"ok"}
 ```
 
-## 4. Variable del frontend
+## 5. Variable del frontend
 
 Asegúrate de que el frontend tenga esta variable activa:
 
@@ -69,7 +87,7 @@ VITE_FAVORITOS_API_URL=http://localhost:5081
 
 Si esta URL no está disponible porque el microservicio no arrancó o el port-forward no está activo, no se mostrarán los Favoritos en la aplicación.
 
-## 5. Sugerencia para arrancarlo en cada sesión
+## 6. Sugerencia para arrancarlo en cada sesión
 
 Si quieres dejarlo preparado cada vez que abras el Codespace, puedes guardar este bloque en un script y ejecutarlo con una sola línea:
 

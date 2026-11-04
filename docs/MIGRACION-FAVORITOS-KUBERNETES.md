@@ -15,7 +15,7 @@ El servicio conserva la ruta `GET /api/favoritos`, junto con las operaciones `PO
 | Supabase PostgreSQL | Fuente de datos para Favoritos, Libros y Géneros, usando el esquema existente. |
 | Docker | Imagen multi-stage `favoritos-api:local`; el contexto del build es la raíz del repositorio. |
 | Kubernetes/Minikube | Deployment de una réplica, probes HTTP, Secret para configuración y Service interno. |
-| Frontend | Usa `VITE_FAVORITOS_API_URL`; si no se configura, conserva el fallback al gateway anterior. |
+| Frontend | Usa exclusivamente `VITE_FAVORITOS_API_URL`; no consulta el gateway del backend monolítico. |
 
 El flujo de petición queda así:
 
@@ -52,7 +52,7 @@ Resultado: `Build succeeded`, cero advertencias y cero errores.
 
 ## 2. Integrar el frontend
 
-El cliente `src/microservicios/favorites.ts` prioriza `VITE_FAVORITOS_API_URL`, después conserva `VITE_API_URL` como fallback. Así se puede mover Favoritos sin cambiar la ruta base de los demás servicios.
+El cliente `src/microservicios/favorites.ts` usa exclusivamente `VITE_FAVORITOS_API_URL` y no hace fallback a `VITE_API_URL`. Así Favoritos solo se carga cuando el microservicio independiente está disponible; si falta la configuración o falla la petición, la interfaz deja la lista vacía.
 
 En entorno local, el valor es:
 

@@ -16,13 +16,18 @@ export const Favorites = () => {
   }, [user]);
 
   const fetchFavorites = async () => {
-    if (!user) return;
+    setFavoritos([]);
+    if (!user) {
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
       const data = await getFavoritos();
       setFavoritos(data);
     } catch (err) {
       console.error('Error fetching favorites:', err);
+      setFavoritos([]);
     } finally {
       setLoading(false);
     }
