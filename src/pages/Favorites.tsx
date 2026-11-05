@@ -43,7 +43,7 @@ export const Favorites = () => {
 
   return (
     <div className="flex h-full min-h-0 w-full flex-1 flex-col animate-in fade-in bg-bg-warm text-text-strong duration-500 dark:bg-surface-soft">
-      <header className="sticky top-0 z-10 flex h-20 w-full shrink-0 items-center gap-3 border-b border-border bg-bg-warm px-4 shadow-sm dark:border-border dark:bg-surface md:px-8">
+      <header className="md:sticky md:top-0 z-10 flex h-20 w-full shrink-0 items-center gap-3 border-b border-border bg-bg-warm px-4 shadow-sm dark:border-border dark:bg-surface md:px-8">
         <Heart className="h-7 w-7 text-error fill-error" />
         <h1 className="text-2xl font-bold tracking-tight text-text-strong">Mis Favoritos</h1>
       </header>
