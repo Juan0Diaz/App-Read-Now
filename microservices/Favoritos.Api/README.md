@@ -4,23 +4,23 @@ La API conserva el contrato de `/api/favoritos` y consulta las tablas existentes
 
 ## Ejecutar localmente
 
-Configura `SUPABASE_URL` y `SUPABASE_DB_CONNECTION_STRING` en el entorno y arranca en el puerto `5081`:
+Configura `SUPABASE_URL` y `SUPABASE_DB_CONNECTION_STRING` en el entorno y arranca en el puerto `5084`:
 
 ```bash
 export SUPABASE_URL='https://<project-ref>.supabase.co'
 read -rsp 'Cadena de conexión de Supabase: ' SUPABASE_DB_CONNECTION_STRING
 echo
 export SUPABASE_DB_CONNECTION_STRING
-ASPNETCORE_URLS=http://0.0.0.0:5081 dotnet run --project microservices/Favoritos.Api
+ASPNETCORE_URLS=http://0.0.0.0:5084 dotnet run --project microservices/Favoritos.Api
 ```
 
-La comprobación de salud local es `curl -i http://localhost:5081/health`. Para el frontend, define `VITE_FAVORITOS_API_URL=http://localhost:5081` en `.env.local` y reinicia Vite. El generador de `.env` del devcontainer configura automáticamente la URL del puerto reenviado en Codespaces.
+La comprobación de salud local es `curl -i http://localhost:5084/health`. Para acceso directo local, define `VITE_FAVORITOS_API_URL=http://localhost:5084` en `.env.local` y reinicia Vite. En Codespaces, el generador apunta al gateway `5080/gateway`, que reenvía `/api/favoritos` al port-forward local `5084`; el navegador no necesita acceder directamente a ese puerto.
 
 ## Docker
 
 ```bash
 docker build -f microservices/Favoritos.Api/Dockerfile -t favoritos-api:local .
-docker run --rm -p 5081:8080 \
+docker run --rm -p 5084:8080 \
   -e SUPABASE_URL="$SUPABASE_URL" \
   -e SUPABASE_DB_CONNECTION_STRING="$SUPABASE_DB_CONNECTION_STRING" \
   favoritos-api:local
@@ -61,13 +61,13 @@ kubectl get nodes
 kubectl get secret favoritos-secrets
 kubectl get service favoritos-api
 kubectl get pods -l app=favoritos-api -o wide
-kubectl port-forward service/favoritos-api 5081:80
+kubectl port-forward service/favoritos-api 5084:80
 ```
 
-El port-forward debe permanecer activo en esa terminal. Si se detiene, vuelve a ejecutar `kubectl port-forward service/favoritos-api 5081:80`. En otra terminal, comprueba que Kubernetes enruta a la API:
+El port-forward debe permanecer activo en esa terminal. Si se detiene, vuelve a ejecutar `kubectl port-forward service/favoritos-api 5084:80`. En otra terminal, comprueba que Kubernetes enruta a la API:
 
 ```bash
-curl -i http://localhost:5081/health
+curl -i http://localhost:5084/health
 ```
 
 Para verificar la consulta real a Supabase, usa un `access_token` vigente de una sesión autenticada de la aplicación. La respuesta debe ser un arreglo JSON con los favoritos de ese usuario (vacío si aún no tiene):
@@ -75,7 +75,7 @@ Para verificar la consulta real a Supabase, usa un `access_token` vigente de una
 ```bash
 read -rsp 'Access token de Supabase: ' SUPABASE_ACCESS_TOKEN
 echo
-curl -fsS http://localhost:5081/api/favoritos \
+curl -fsS http://localhost:5084/api/favoritos \
   -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN"
 unset SUPABASE_ACCESS_TOKEN
 ```

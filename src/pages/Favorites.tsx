@@ -3,13 +3,14 @@ import { useAuth } from '../context/AuthContext';
 import { getFavoritos, quitarFavorito } from '../microservicios/favorites';
 import { Favorito } from '../types';
 import { Link } from 'react-router-dom';
-import { Heart, Search, BookOpen } from 'lucide-react';
+import { Heart, Search, BookOpen, RefreshCw } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 
 export const Favorites = () => {
   const { user } = useAuth();
   const [favoritos, setFavoritos] = useState<Favorito[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
     fetchFavorites();
@@ -17,6 +18,7 @@ export const Favorites = () => {
 
   const fetchFavorites = async () => {
     setFavoritos([]);
+    setLoadError(false);
     if (!user) {
       setLoading(false);
       return;
@@ -28,6 +30,7 @@ export const Favorites = () => {
     } catch (err) {
       console.error('Error fetching favorites:', err);
       setFavoritos([]);
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -60,7 +63,15 @@ export const Favorites = () => {
           </div>
         </div>
 
-        {favoritos.length === 0 ? (
+        {loadError ? (
+          <div role="alert" className="rounded-2xl border border-error/30 bg-surface p-12 text-center shadow-sm">
+            <h3 className="mb-2 text-xl font-bold text-text-strong">No se pudieron cargar tus favoritos</h3>
+            <p className="mx-auto mb-6 max-w-md text-text-muted">Comprueba tu conexión e inténtalo de nuevo.</p>
+            <Button onClick={() => void fetchFavorites()}>
+              <RefreshCw className="mr-2 h-4 w-4" /> Reintentar
+            </Button>
+          </div>
+        ) : favoritos.length === 0 ? (
           <div className="rounded-2xl border border-border bg-surface p-12 text-center shadow-sm">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-surface-soft text-text-muted">
               <Heart className="h-8 w-8" />

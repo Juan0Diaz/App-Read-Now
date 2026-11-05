@@ -1,7 +1,7 @@
 import { supabase } from '../lib/supabase';
 import { Favorito } from '../types';
 
-const API_URL = import.meta.env.VITE_FAVORITOS_API_URL?.replace(/\/+$/, '');
+const API_URL = (import.meta.env.VITE_FAVORITOS_API_URL ?? import.meta.env.VITE_API_URL)?.replace(/\/+$/, '');
 
 async function authHeader(): Promise<HeadersInit> {
   const { data: { session }, error } = await supabase.auth.getSession();

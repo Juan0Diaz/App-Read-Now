@@ -4,7 +4,7 @@
 
 Esta guía registra el proceso completo para separar Favoritos del backend monolítico, ejecutarlo como una API .NET independiente, construir su imagen Docker y desplegarla en Kubernetes local mediante Minikube. También documenta cómo configurar el frontend y verificar que una petición autenticada devuelve los favoritos existentes en Supabase.
 
-El servicio conserva la ruta `GET /api/favoritos`, junto con las operaciones `POST` y `DELETE`, y consulta las tablas ya existentes de Supabase mediante PostgreSQL. No crea ni migra tablas. La API local escucha en el puerto `5081`; dentro del contenedor escucha en `8080`, expuesto por un Service Kubernetes `ClusterIP` en el puerto `80`.
+El servicio conserva la ruta `GET /api/favoritos`, junto con las operaciones `POST` y `DELETE`, y consulta las tablas ya existentes de Supabase mediante PostgreSQL. No crea ni migra tablas. En Codespaces el port-forward local usa `5084` para no colisionar con el backend upstream en `5081`; el navegador llega por el gateway dinámico en `5080`, que YARP reenvía al servicio. Dentro del contenedor escucha en `8080`, expuesto por un Service Kubernetes `ClusterIP` en el puerto `80`.
 
 ## Arquitectura resultante
 
@@ -15,12 +15,12 @@ El servicio conserva la ruta `GET /api/favoritos`, junto con las operaciones `PO
 | Supabase PostgreSQL | Fuente de datos para Favoritos, Libros y Géneros, usando el esquema existente. |
 | Docker | Imagen multi-stage `favoritos-api:local`; el contexto del build es la raíz del repositorio. |
 | Kubernetes/Minikube | Deployment de una réplica, probes HTTP, Secret para configuración y Service interno. |
-| Frontend | Usa exclusivamente `VITE_FAVORITOS_API_URL`; no consulta el gateway del backend monolítico. |
+| Frontend | Usa `VITE_FAVORITOS_API_URL`; en Codespaces apunta al gateway para no depender de publicar el port-forward de Kubernetes. |
 
 El flujo de petición queda así:
 
 ```text
-Frontend -> JWT Supabase -> port-forward :5081 -> Service :80 -> Pod :8080
+Frontend -> JWT Supabase -> gateway :5080 -> port-forward local :5084 -> Service :80 -> Pod :8080
                                                                |
                                                                +-> Supabase PostgreSQL
 ```
@@ -52,15 +52,15 @@ Resultado: `Build succeeded`, cero advertencias y cero errores.
 
 ## 2. Integrar el frontend
 
-El cliente `src/microservicios/favorites.ts` usa exclusivamente `VITE_FAVORITOS_API_URL` y no hace fallback a `VITE_API_URL`. Así Favoritos solo se carga cuando el microservicio independiente está disponible; si falta la configuración o falla la petición, la interfaz deja la lista vacía.
+El cliente `src/microservicios/favorites.ts` prioriza `VITE_FAVORITOS_API_URL` y usa `VITE_API_URL` como fallback. En Codespaces, `generate-env.sh` configura el gateway `5080/gateway`, cuya ruta YARP reenvía a Favoritos en `5084`. Si la solicitud falla, la interfaz muestra un error y permite reintentar en lugar de simular una lista vacía.
 
 En entorno local, el valor es:
 
 ```dotenv
-VITE_FAVORITOS_API_URL=http://localhost:5081
+VITE_FAVORITOS_API_URL=http://localhost:5080/gateway
 ```
 
-El script `.devcontainer/scripts/generate-env.sh` genera automáticamente la URL `5081` reenviada por Codespaces, o usa `localhost` fuera de Codespaces. Tras cambiar variables Vite, hay que reiniciar el servidor frontend.
+El script `.devcontainer/scripts/generate-env.sh` genera automáticamente la URL dinámica del gateway `5080/gateway` en Codespaces, que reenvía Favoritos al puerto local `5084`. Fuera de Codespaces puede usarse el acceso directo a `localhost:5084`. Tras cambiar variables Vite, hay que reiniciar el servidor frontend.
 
 Validaciones realizadas:
 
@@ -86,7 +86,7 @@ Resultado observado: build terminado correctamente y tag `favoritos-api:local` c
 Prueba opcional de la imagen fuera de Kubernetes:
 
 ```bash
-docker run --rm -p 5081:8080 \
+docker run --rm -p 5084:8080 \
   -e SUPABASE_URL="$SUPABASE_URL" \
   -e SUPABASE_DB_CONNECTION_STRING="$SUPABASE_DB_CONNECTION_STRING" \
   favoritos-api:local
@@ -95,14 +95,14 @@ docker run --rm -p 5081:8080 \
 Desde otra terminal se comprobó:
 
 ```bash
-curl -i http://localhost:5081/health
+curl -i http://localhost:5084/health
 ```
 
 Resultado: `HTTP/1.1 200 OK` y `{"status":"ok"}`. La prueba de salud no confirma la conexión a la base; esa validación se realiza más adelante con el GET autenticado.
 
 ## 4. Preparar el devcontainer
 
-`.devcontainer/devcontainer.json` declara Docker-in-Docker, `privileged: true`, reenvío del puerto `5081`, y el feature `kubectl-helm-minikube`. También restaura el nuevo proyecto .NET al crear el contenedor. Estas herramientas solo se incorporan al entorno después de reconstruirlo.
+`.devcontainer/devcontainer.json` declara Docker-in-Docker, `privileged: true`, reenvío de los puertos de las APIs y el feature `kubectl-helm-minikube`. También restaura los proyectos .NET al crear el contenedor. Estas herramientas solo se incorporan al entorno después de reconstruirlo.
 
 En VS Code/Codespaces:
 
@@ -212,22 +212,22 @@ Resultados esperados: nodo `Ready`, Pod `1/1 Running`, Secret con dos claves, Se
 El Service es `ClusterIP`, por lo tanto solo es accesible dentro del clúster. Para probarlo desde Codespaces se usa `kubectl port-forward` en una terminal dedicada:
 
 ```bash
-kubectl port-forward service/favoritos-api 5081:80
+kubectl port-forward service/favoritos-api 5084:80
 ```
 
 La terminal debe permanecer abierta. Salida esperada:
 
 ```text
-Forwarding from 127.0.0.1:5081 -> 8080
-Forwarding from [::1]:5081 -> 8080
+Forwarding from 127.0.0.1:5084 -> 8080
+Forwarding from [::1]:5084 -> 8080
 ```
 
-Si el comando termina o se cierra esa terminal, los `curl` a `localhost:5081` devolverán `curl: (7) Failed to connect`. Volver a ejecutar el comando. Se comprobó que el Service tenía endpoint y que el túnel, una vez activo, respondía correctamente.
+Si el comando termina o se cierra esa terminal, los `curl` a `localhost:5084` devolverán `curl: (7) Failed to connect`. Volver a ejecutar el comando. En el Codespace, el script de arranque mantiene este reenvío en segundo plano.
 
 Probar salud desde otra terminal:
 
 ```bash
-curl -i http://localhost:5081/health
+curl -i http://localhost:5084/health
 ```
 
 Resultado observado: `HTTP/1.1 200 OK` y `{"status":"ok"}`.
@@ -258,7 +258,7 @@ En una terminal aparte, pegar el token solo cuando el prompt lo solicite:
 ```bash
 read -rsp 'Pega el access token y presiona Enter: ' SUPABASE_ACCESS_TOKEN
 printf '\n'
-curl -i http://localhost:5081/api/favoritos \
+curl -i http://localhost:5084/api/favoritos \
   -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN"
 unset SUPABASE_ACCESS_TOKEN
 ```
@@ -280,7 +280,7 @@ Un arreglo `[]` con `200 OK` también significa que autenticación y consulta fu
 | Síntoma | Causa probable | Comprobación o solución |
 | --- | --- | --- |
 | `kubectl: command not found` o `minikube: command not found` | No se reconstruyó el devcontainer con el feature Kubernetes. | Ejecutar **Dev Containers: Rebuild Container** y abrir una terminal nueva. |
-| `curl: (7) Failed to connect` a `localhost:5081` | Port-forward detenido o ausente. | Mantener abierta `kubectl port-forward service/favoritos-api 5081:80`. |
+| `curl: (7) Failed to connect` a `localhost:5084` | Port-forward detenido o ausente. | Ejecutar `bash .devcontainer/scripts/start-kubernetes-apis.sh`. |
 | `/health` da `200`, pero GET da `500` | La salud del proceso no comprueba PostgreSQL; revisar logs. | `kubectl logs deployment/favoritos-api --since=5m --tail=80`. |
 | `The ConnectionString property has not been initialized` | `SUPABASE_DB_CONNECTION_STRING` ausente o vacía. | Comprobar la longitud decodificada del Secret, nunca imprimir su contenido; volver a introducir la cadena y reiniciar el Deployment. |
 | GET devuelve `401` | Token no enviado, vencido o de otra sesión. | Iniciar sesión en frontend y copiar un token vigente. |
@@ -300,7 +300,7 @@ kubectl logs deployment/favoritos-api --since=5m --tail=80
 | `npm run lint` | Correcto. |
 | `npm run build` | Correcto. |
 | `docker build -f microservices/Favoritos.Api/Dockerfile -t favoritos-api:local .` | Correcto; imagen creada. |
-| `curl -i http://localhost:5081/health` | `200 OK` local, en contenedor y desde Kubernetes vía port-forward. |
+| `curl -i http://localhost:5084/health` | `200 OK` local, en contenedor y desde Kubernetes vía port-forward. |
 | Kubernetes | Nodo `Ready`, Pod `1/1 Running`, Service con endpoint, Secret con dos claves. |
 | GET autenticado `/api/favoritos` | `200 OK`, cuatro favoritos existentes devueltos desde Supabase. |
 
@@ -314,7 +314,7 @@ kubectl logs deployment/favoritos-api --since=5m --tail=80
 | `microservices/Favoritos.Api/Dockerfile` | Build multi-stage de la imagen. |
 | `microservices/Favoritos.Api/k8s/favoritos.yaml` | Deployment y Service Kubernetes. |
 | `src/microservicios/favorites.ts` | Selección de la URL independiente del servicio. |
-| `.devcontainer/devcontainer.json` | Docker privilegiado, tooling Kubernetes y puerto 5081. |
+| `.devcontainer/devcontainer.json` | Docker privilegiado, tooling Kubernetes y reenvío de puertos para las APIs. |
 | `.devcontainer/scripts/generate-env.sh` | Generación de `VITE_FAVORITOS_API_URL`. |
 
 No se incluyen aquí contraseñas, cadenas de conexión ni tokens. La contraseña divulgada durante el diagnóstico debe haberse restablecido en Supabase y el Secret actualizado.
