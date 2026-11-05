@@ -14,8 +14,8 @@ export function useFavoritos(user: User | null) {
 
   const cargarFavoritos = useCallback(async () => {
     setLoading(true);
+    setFavoritos([]);
     if (!user || isDemoMode) {
-      setFavoritos([]);
       setLoading(false);
       return;
     }
@@ -24,6 +24,7 @@ export function useFavoritos(user: User | null) {
       setFavoritos(data.map(f => f.id_libro));
     } catch (err) {
       console.error('Error al cargar favoritos', err);
+      setFavoritos([]);
     } finally {
       setLoading(false);
     }

@@ -8,10 +8,22 @@
     },
     "ghcr.io/devcontainers/features/dotnet:2": {
       "version": "8.0.408"
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest",
+      "moby": true,
+      "installDockerBuildx": true,
+      "installDockerComposeSwitch": true
+    },
+    "ghcr.io/devcontainers/features/kubectl-helm-minikube:1": {
+      "version": "latest",
+      "helm": "none",
+      "minikube": "latest"
     }
   },
 
-  "forwardPorts": [3000, 5080],
+  "privileged": true,
+  "forwardPorts": [3000, 5080, 5081, 5082, 5083, 5084],
   "portsAttributes": {
     "3000": {
       "label": "Frontend (Vite)",
@@ -21,11 +33,31 @@
       "label": "Backend API (ASP.NET Core)",
       "onAutoForward": "notify",
       "visibility": "public"
+    },
+    "5081": {
+      "label": "Backend upstream (ASP.NET Core)",
+      "onAutoForward": "notify",
+      "visibility": "public"
+    },
+    "5082": {
+      "label": "Géneros API (Kubernetes)",
+      "onAutoForward": "notify",
+      "visibility": "public"
+    },
+    "5083": {
+      "label": "Libros API (Kubernetes)",
+      "onAutoForward": "notify",
+      "visibility": "public"
+    },
+    "5084": {
+      "label": "Favoritos API (Kubernetes)",
+      "onAutoForward": "notify",
+      "visibility": "public"
     }
   },
 
-  "postCreateCommand": "chmod +x .devcontainer/scripts/generate-env.sh && npm install && dotnet restore backend/Backend.Api.csproj && bash .devcontainer/scripts/generate-env.sh",
-  "postStartCommand": "bash .devcontainer/scripts/generate-env.sh",
+  "postCreateCommand": "chmod +x .devcontainer/scripts/generate-env.sh && npm install && dotnet restore backend/Backend.Api.csproj && dotnet restore microservices/Favoritos.Api/Favoritos.Api.csproj && dotnet restore microservices/Generos.Api/Generos.Api.csproj && bash .devcontainer/scripts/generate-env.sh",
+  "postStartCommand": "bash .devcontainer/scripts/generate-env.sh && bash .devcontainer/scripts/start-kubernetes-apis.sh",
 
   "customizations": {
     "vscode": {

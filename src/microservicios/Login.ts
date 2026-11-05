@@ -137,15 +137,16 @@ export async function updatePassword(password: string): Promise<void> {
 	if (error) throw error;
 }
 
-export async function startOAuth(provider: 'google' | 'github'): Promise<string | null> {
-	const { data, error } = await supabase.auth.signInWithOAuth({
+export async function startOAuth(provider: 'google' | 'github'): Promise<void> {
+	const callbackBase = new URL(import.meta.env.BASE_URL, window.location.origin);
+	const redirectTo = new URL('auth/callback', callbackBase).toString();
+	const { error } = await supabase.auth.signInWithOAuth({
 		provider,
 		options: {
-			redirectTo: `${window.location.origin}/auth/callback`,
-			skipBrowserRedirect: true,
+			redirectTo,
+			...(provider === 'google' ? { queryParams: { prompt: 'select_account' } } : {}),
 		},
 	});
 
 	if (error) throw error;
-	return data.url;
 }

@@ -7,9 +7,7 @@ import { Role } from '../types';
 import { useNavigate } from 'react-router-dom';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { useProfile } from '../hooks/useProfile';
-import { getMisPublicaciones } from '../microservicios/Publicaciones';
-import { resubmitirLibro } from '../microservicios/Libros';
-import { Publicacion } from '../types';
+import { formatDisplayDate } from '../lib/dateUtils';
 
 export const Profile = () => {
   const { user, role, signOut, fetchUserData } = useAuth();
@@ -23,9 +21,6 @@ export const Profile = () => {
   const [newPassword, setNewPassword] = useState('');
   const [nombre, setNombre] = useState(user?.nombre || '');
   const [fechaDate, setFechaDate] = useState(user?.fecha_date || '');
-  const [publicacionesRevision, setPublicacionesRevision] = useState<Publicacion[]>([]);
-  const [revisionLoading, setRevisionLoading] = useState(false);
-  const [revisionError, setRevisionError] = useState('');
 
   const {
     loading,
@@ -61,14 +56,12 @@ export const Profile = () => {
   }, [role]);
 
   useEffect(() => {
-    if (role !== 'Publicador' || !user) return;
-
-    setRevisionLoading(true);
-    getMisPublicaciones()
-      .then(setPublicacionesRevision)
-      .catch((err: any) => setRevisionError(err.message || 'No se pudo consultar el estado de revisión.'))
-      .finally(() => setRevisionLoading(false));
-  }, [role, user]);
+    setNombre(user?.nombre || '');
+    setFechaDate(user?.fecha_date || '');
+    const phone = parseInitialPhone(user?.numero_tel || null);
+    setCountryCode(phone.code);
+    setPhoneNumber(phone.num);
+  }, [parseInitialPhone, user]);
 
   const profileInitial = (user?.nombre || user?.correo || 'U').charAt(0).toUpperCase();
 
@@ -83,8 +76,8 @@ export const Profile = () => {
   };
 
   const saveProfile = async () => {
-    await saveProfileAction(nombre, fechaDate, countryCode, phoneNumber);
-    setIsEditingProfile(false);
+    const saved = await saveProfileAction(nombre, fechaDate, countryCode, phoneNumber);
+    if (saved) setIsEditingProfile(false);
   };
 
   const savePassword = async () => {
@@ -107,27 +100,9 @@ export const Profile = () => {
     setShowRoleChangeConfirm(false);
   };
 
-  const reenviarRevision = async (publicacion: Publicacion) => {
-    if (!publicacion.libro) return;
-    try {
-      setRevisionLoading(true);
-      setRevisionError('');
-      await resubmitirLibro(publicacion.libro.id_libro);
-      setPublicacionesRevision((current) => current.map((item) =>
-        item.id_publicacion === publicacion.id_publicacion
-          ? { ...item, libro: { ...item.libro!, estado_revision: 'Pendiente', comentario_revision: undefined } }
-          : item,
-      ));
-    } catch (err: any) {
-      setRevisionError(err.message || 'No se pudo reenviar el libro.');
-    } finally {
-      setRevisionLoading(false);
-    }
-  };
-
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col bg-surface-soft text-text-strong animate-in fade-in duration-500">
-      <header className="page-header-surface sticky top-0 z-10 h-20 w-full shrink-0 px-8 shadow-sm">
+      <header className="page-header-surface md:sticky md:top-0 z-10 h-20 w-full shrink-0 px-8 shadow-sm">
         <h1 className="flex h-full items-center text-2xl font-bold tracking-tight text-text-strong dark:text-white">Perfil de Usuario</h1>
       </header>
 
@@ -313,7 +288,7 @@ export const Profile = () => {
                     <div>
                       <label htmlFor="profile-date-display" className="mb-1 block text-sm font-bold text-text-body">Fecha de Nacimiento</label>
                       <div id="profile-date-display" className="rounded-xl border border-border bg-surface-soft p-3 text-text-strong">
-                        {user?.fecha_date ? new Date(user.fecha_date).toLocaleDateString() : 'No especificada'}
+                        {user?.fecha_date ? formatDisplayDate(user.fecha_date) : 'No especificada'}
                       </div>
                     </div>
                     {role === 'Publicador' && (
@@ -328,76 +303,31 @@ export const Profile = () => {
                 )}
               </div>
 
-              {role === 'Publicador' && (
-                <div className="mt-8 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-xl font-bold text-text-strong">Estado de revisión</h3>
-                    {revisionLoading && <span className="text-xs font-semibold text-text-muted">Actualizando...</span>}
-                  </div>
-
-                  {revisionError && (
-                    <div className="rounded-xl border border-error/20 bg-error-soft p-3 text-sm font-semibold text-error">
-                      {revisionError}
+              <div className="mt-8 rounded-2xl border border-border bg-surface-soft p-5 md:p-6">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                      <Shield className="h-6 w-6" />
                     </div>
-                  )}
-
-                  {!revisionLoading && publicacionesRevision.length === 0 && (
-                    <p className="rounded-xl border border-border bg-surface-soft p-4 text-sm text-text-muted">
-                      Aún no has enviado libros a revisión.
-                    </p>
-                  )}
-
-                  {publicacionesRevision.map((publicacion) => {
-                    const libro = publicacion.libro;
-                    if (!libro) return null;
-                    const estado = libro.estado_revision ?? 'Pendiente';
-                    const estilo = estado === 'Aprobado'
-                      ? 'border-success/20 bg-success-soft text-success'
-                      : estado === 'Corrección'
-                        ? 'border-warning/30 bg-warning/10 text-warning'
-                        : 'border-primary/20 bg-primary/5 text-primary';
-
-                    return (
-                      <div key={publicacion.id_publicacion} className={`rounded-xl border p-4 ${estilo}`}>
-                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                          <div>
-                            <h4 className="font-bold text-text-strong">{libro.titulo}</h4>
-                            <p className="mt-1 text-xs font-bold uppercase">{estado}</p>
-                            {libro.comentario_revision && (
-                              <p className="mt-3 text-sm font-medium text-text-body">
-                                Corrección solicitada: {libro.comentario_revision}
-                              </p>
-                            )}
-                          </div>
-                          {estado === 'Corrección' && (
-                            <div className="flex shrink-0 gap-2">
-                              <Button size="sm" variant="outline" onClick={() => navigate(`/publicador/libros/editar/${libro.id_libro}`)}>
-                                Editar
-                              </Button>
-                              <Button size="sm" onClick={() => reenviarRevision(publicacion)} disabled={revisionLoading}>
-                                Reenviar
-                              </Button>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              <div className="mt-8 space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-bold text-text-strong">Seguridad</h3>
+                    <div>
+                      <h3 className="text-xl font-bold text-text-strong">Seguridad</h3>
+                      <p className="mt-1 text-sm text-text-muted">
+                        Mantén tu cuenta protegida actualizando tu contraseña.
+                      </p>
+                    </div>
+                  </div>
                   {!isEditingPassword && (
-                    <Button onClick={() => setIsEditingPassword(true)} aria-label="Cambiar contraseña" variant="ghost" size="sm" className="text-primary hover:text-primary-hover">
-                      <Edit2 className="mr-1 h-4 w-4" /> Cambiar Contraseña
+                    <Button onClick={() => setIsEditingPassword(true)} aria-label="Cambiar contraseña" variant="outline" className="shrink-0 border-primary/20 text-primary hover:bg-primary/5 hover:text-primary">
+                      <Edit2 className="mr-2 h-4 w-4" /> Cambiar Contraseña
                     </Button>
                   )}
                 </div>
 
                 {isEditingPassword && (
-                  <div className="space-y-4 rounded-2xl border border-border bg-surface-soft p-6">
+                  <div className="mt-5 space-y-4 rounded-xl border border-border bg-surface p-4 md:p-5">
+                    <p className="text-sm text-text-muted">
+                      Ingresa tu contraseña actual y elige una nueva para tu cuenta.
+                    </p>
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                       <div>
                         <label htmlFor="current-password" className="mb-1 block text-sm font-bold text-text-body">Contraseña Actual</label>

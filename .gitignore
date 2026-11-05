@@ -9,3 +9,5 @@ coverage/
 .vs/
 backend/bin/
 backend/obj/
+microservices/Libros.Api/bin/
+microservices/Libros.Api/obj/

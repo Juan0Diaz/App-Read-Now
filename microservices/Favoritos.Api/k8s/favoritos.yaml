@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: favoritos-api
+  labels:
+    app: favoritos-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: favoritos-api
+  template:
+    metadata:
+      labels:
+        app: favoritos-api
+    spec:
+      containers:
+        - name: favoritos-api
+          image: favoritos-api:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: favoritos-secrets
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: favoritos-api
+spec:
+  type: ClusterIP
+  selector:
+    app: favoritos-api
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

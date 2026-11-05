@@ -34,6 +34,12 @@ si comienzas desde el despliegue de Cloud Run (`run.app`), el callback vuelve a 
 y seguirá mostrando lo que esté publicado allí. No hay service worker que gestione las
 actualizaciones.
 
+Google y GitHub se autentican en la pestaña actual. El callback respeta la base del
+despliegue (por ejemplo, `/App-Read-Now/` en GitHub Pages). Añade a **Authentication → URL
+Configuration → Redirect URLs** el callback completo de cada entorno que uses. Si el
+retorno solicitado no está permitido, Supabase puede usar el **Site URL** del proyecto,
+lo que puede enviar al usuario a otro despliegue.
+
 El workflow de GitHub Actions publica automáticamente `main` en Pages. Habilita **Settings
 → Pages → Build and deployment → GitHub Actions** y configura `VITE_SUPABASE_URL` y
 `VITE_SUPABASE_ANON_KEY` como Actions secrets y la variable `VITE_API_URL` con la URL del
@@ -41,6 +47,10 @@ backend de producción. En Supabase, añade la URL del callback de Pages a **Aut
 Configuration → Redirect URLs**. En Google Cloud y GitHub OAuth conserva como callback la
 URL de Supabase (`https://<project-ref>.supabase.co/auth/v1/callback`); esos proveedores
 no deben usar la URL de Pages directamente.
+
+Para Pages, `VITE_FAVORITOS_API_URL` es opcional: si no se define como Actions variable,
+el workflow usa `VITE_API_URL`. El backend debe permitir el origen `https://juan0diaz.github.io`
+en CORS; al cambiar esa política, vuelve a desplegar el backend además del frontend.
 
 Antes de desplegar esta versión, ejecuta una vez
 [`backend/Migrations/20261102_RemoveUsuarioPassword.sql`](./backend/Migrations/20261102_RemoveUsuarioPassword.sql)
@@ -100,8 +110,9 @@ Ahora, `.devcontainer/scripts/generate-env.sh` corre automáticamente cada vez q
 Codespace arranca (`postCreateCommand` y `postStartCommand`), y:
 
 1. Lee `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` de los secretos del paso 2.
-2. Calcula `VITE_API_URL` solo, usando `$CODESPACE_NAME` (variable que Codespaces ya
-   trae integrada) — nadie tiene que copiar la URL del puerto 5080 a mano nunca más.
+2. Calcula las URLs de las APIs usando `$CODESPACE_NAME`. Favoritos y Libros pasan por
+        el gateway del puerto 5080; YARP los envía a sus port-forwards locales en 5084 y
+        5083. El navegador no necesita acceder directamente a esos puertos.
 3. Escribe el `.env` real en la raíz del proyecto.
 
 Si alguien abre un Codespace y ve la app en "Modo Demostración", el 99% de las veces
@@ -114,30 +125,41 @@ mensaje del script se lo advierte en la terminal al arrancar.
 2. En GitHub, botón **Code → Codespaces → Create codespace on main**.
 3. El `postCreateCommand` corre automáticamente `npm install` y `dotnet restore`.
 
-## 4. Correr los dos servicios
+## 4. Ejecutar el frontend y las APIs
 
-Abre dos terminales dentro del Codespace:
+Al abrir o reanudar el Codespace, `postStartCommand` inicia Minikube, construye y carga
+las imágenes de Favoritos, Géneros y Libros, actualiza sus Secrets de Kubernetes,
+despliega los servicios y deja activos los port-forwards en `localhost:5084`, `5082` y
+`5083`, respectivamente. Favoritos y Libros se consumen por el gateway del puerto 5080;
+Géneros conserva su URL directa en 5082. Para ello deben estar configurados los secretos
+`SUPABASE_DB_CONNECTION_STRING` y `VITE_SUPABASE_URL` (o `SUPABASE_URL`). Los logs y PID
+de los reenvíos quedan en `~/.cache/app-read-now/`.
+
+Abre tres terminales para iniciar el frontend y las APIs principales:
 
 ```bash
 # Terminal 1 — Frontend
 npm run dev
 
-# Terminal 2 — Backend
+# Terminal 2 — Backend gateway (puerto 5080)
 cd backend
-dotnet run
+dotnet run --launch-profile Backend.Api
 
-# Terminal 3 - el api upstream
+# Terminal 3 — Backend upstream (puerto 5081)
 cd backend
 dotnet run --launch-profile Backend.Api.Upstream
-```
-
-Codespaces reenviará (forward) los puertos 3000 y 5080 automáticamente. Copia la URL
-pública del puerto 5080 (pestaña "Ports") y ponla en un `.env` en la raíz del proyecto:
 
 ```
-VITE_SUPABASE_URL=https://klkkxwmtkfkwxevkzjeh.supabase.co
-VITE_SUPABASE_ANON_KEY=tu_anon_key
-VITE_API_URL=https://<tu-codespace>-5080.app.github.dev
+
+Codespaces reenvía los puertos 3000, 5080, 5081, 5082, 5083 y 5084. El upstream del
+backend conserva el puerto 5081; Favoritos usa 5084 internamente para evitar el conflicto,
+Géneros usa 5082 y Libros 5083. Puedes comprobar el arranque con `kubectl --context=minikube
+get svc favoritos-api generos-api libros-api` y consultar `/health` en cada puerto.
+
+Si necesitas iniciar o recuperar el servicio manualmente, ejecuta desde la raíz del repo:
+
+```bash
+bash .devcontainer/scripts/start-kubernetes-apis.sh
 ```
 
 ## 5. ⚠️ Importante: revisa `src/types.ts`

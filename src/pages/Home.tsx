@@ -17,6 +17,7 @@ export const Home = () => {
   const { toggleFavorito, isFavorito, loading: loadingFavoritos } = useFavoritos(user);
 
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterOptionsSearch, setFilterOptionsSearch] = useState('');
   const [selectedGenero, setSelectedGenero] = useState<string | null>(null);
   const [filterDisponibilidad, setFilterDisponibilidad] = useState<string>('todos');
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
@@ -69,6 +70,25 @@ export const Home = () => {
         ...collapsedAutores,
         ...autores.slice(5).filter(autor => autor === selectedAutor),
       ];
+  const normalizedFilterOptionsSearch = filterOptionsSearch.trim().toLocaleLowerCase();
+  const matchingGeneros = generos.filter(g => g.nombre_genero.toLocaleLowerCase().includes(normalizedFilterOptionsSearch));
+  const matchingAutores = autores.filter(autor => autor.toLocaleLowerCase().includes(normalizedFilterOptionsSearch));
+  const statusOptions = [
+    { value: 'todos', label: 'Todos' },
+    { value: 'disponible', label: 'Disponibles' },
+    { value: 'reservado', label: 'Reservados' },
+  ];
+  const matchingStatuses = statusOptions.filter(opt => opt.label.toLocaleLowerCase().includes(normalizedFilterOptionsSearch));
+  const filterSearchActive = normalizedFilterOptionsSearch.length > 0;
+  const displayedGeneros = filterSearchActive
+    ? [...matchingGeneros, ...generos.filter(g => g.id_genero === selectedGenero && !matchingGeneros.includes(g))]
+    : visibleGeneros;
+  const displayedAutores = filterSearchActive
+    ? [...matchingAutores, ...autores.filter(autor => autor === selectedAutor && !matchingAutores.includes(autor))]
+    : visibleAutores;
+  const displayedStatuses = filterSearchActive
+    ? [...matchingStatuses, ...statusOptions.filter(opt => opt.value === filterDisponibilidad && !matchingStatuses.includes(opt))]
+    : matchingStatuses;
 
   const filteredLibros = libros.filter(libro => {
     const matchesSearch = libro.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -110,7 +130,7 @@ export const Home = () => {
 
   return (
     <div className="flex h-full flex-col animate-in fade-in duration-500 bg-bg-warm-strong dark:bg-surface-soft">
-      <header className="sticky top-0 z-30 flex w-full flex-col gap-4 border-b border-border bg-surface px-4 py-4 shadow-sm dark:border-border dark:bg-surface sm:flex-row sm:items-center sm:justify-between sm:gap-6 md:px-8">
+      <header className="md:sticky md:top-0 z-30 flex w-full flex-col gap-4 border-b border-border bg-surface px-4 py-4 shadow-sm dark:border-border dark:bg-surface sm:flex-row sm:items-center sm:justify-between sm:gap-6 md:px-8">
         <div className="relative w-full max-w-md">
           <span className="absolute inset-y-0 left-3 flex items-center text-text-muted">
             <Search className="w-5 h-5" />
@@ -175,6 +195,17 @@ export const Home = () => {
                   </Button>
                 )}
               </div>
+              <label className="relative mb-4 block">
+                <Search aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
+                <input
+                  type="search"
+                  aria-label="Buscar género, autor o estado"
+                  placeholder="Género, autor o estado..."
+                  value={filterOptionsSearch}
+                  onChange={event => setFilterOptionsSearch(event.target.value)}
+                  className="h-10 w-full rounded-lg border border-border bg-surface pl-9 pr-3 text-sm text-text-strong placeholder:text-text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary dark:bg-surface"
+                />
+              </label>
               <div className="space-y-5">
                 <div>
                   <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-muted">Géneros</h3>
@@ -187,7 +218,7 @@ export const Home = () => {
                     >
                       Todos
                     </button>
-                    {visibleGeneros.map(g => (
+                    {displayedGeneros.map(g => (
                       <button
                         key={g.id_genero}
                         type="button"
@@ -199,7 +230,10 @@ export const Home = () => {
                       </button>
                     ))}
                   </div>
-                  {generos.length > 5 && (
+                  {displayedGeneros.length === 0 && (
+                    <p className="mt-2 text-xs text-text-muted">No se encontraron géneros.</p>
+                  )}
+                  {!filterSearchActive && generos.length > 5 && (
                     <button
                       type="button"
                       aria-expanded={showAllGeneros}
@@ -226,7 +260,7 @@ export const Home = () => {
                     >
                       Todos
                     </button>
-                    {visibleAutores.map(autor => (
+                    {displayedAutores.map(autor => (
                       <button
                         key={autor}
                         type="button"
@@ -238,7 +272,10 @@ export const Home = () => {
                       </button>
                     ))}
                   </div>
-                  {autores.length > 5 && (
+                  {displayedAutores.length === 0 && (
+                    <p className="mt-2 text-xs text-text-muted">No se encontraron autores.</p>
+                  )}
+                  {!filterSearchActive && autores.length > 5 && (
                     <button
                       type="button"
                       aria-expanded={showAllAutores}
@@ -257,11 +294,7 @@ export const Home = () => {
                 <div>
                   <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-text-muted">Estado</h3>
                   <div className="flex flex-wrap gap-2">
-                    {[
-                      { value: 'todos', label: 'Todos' },
-                      { value: 'disponible', label: 'Disponibles' },
-                      { value: 'reservado', label: 'Reservados' },
-                    ].map(opt => (
+                    {displayedStatuses.map(opt => (
                       <button
                         key={opt.value}
                         type="button"
@@ -273,6 +306,9 @@ export const Home = () => {
                       </button>
                     ))}
                   </div>
+                  {displayedStatuses.length === 0 && (
+                    <p className="mt-2 text-xs text-text-muted">No se encontraron estados.</p>
+                  )}
                 </div>
               </div>
             </div>

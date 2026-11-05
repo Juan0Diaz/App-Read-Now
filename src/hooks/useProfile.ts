@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase';
 import { actualizarMiPerfil, cambiarMiRol, eliminarMiCuenta } from '../microservicios/Usuarios';
 import { getMisPublicaciones } from '../microservicios/Publicaciones';
 import { Role } from '../types';
+import { normalizeDateOnly } from '../lib/dateUtils';
 
 export function useProfile(
   user: any,
@@ -47,21 +48,26 @@ export function useProfile(
     fechaDate: string,
     countryCode: string,
     phoneNumber: string,
-  ) => {
-    if (!user) return;
+  ): Promise<boolean> => {
+    if (!user) return false;
     setProfileError('');
 
     if (nombre && nombre.length > 50) {
       setProfileError('Error: El nombre excede el límite máximo permitido de 50 caracteres.');
-      return;
+      return false;
     }
 
     if (fechaDate) {
-      const birthDate = new Date(fechaDate);
+      const birthDate = normalizeDateOnly(fechaDate);
+      if (!birthDate) {
+        setProfileError('Error: La fecha de nacimiento no es válida.');
+        return false;
+      }
+
       const today = new Date();
       if (birthDate > today) {
         setProfileError('Error: La fecha de nacimiento no puede ser una fecha futura.');
-        return;
+        return false;
       }
 
       let age = today.getFullYear() - birthDate.getFullYear();
@@ -72,7 +78,7 @@ export function useProfile(
 
       if (age < 18) {
         setProfileError('Error: Debes ser mayor de 18 años para registrarte.');
-        return;
+        return false;
       }
     }
 
@@ -84,8 +90,10 @@ export function useProfile(
         numero_tel: phoneNumber ? `${countryCode}${phoneNumber}` : undefined,
       });
       await fetchUserData(user.id_usuario, user.correo);
+      return true;
     } catch (err: any) {
       setProfileError('Error al actualizar: ' + err.message);
+      return false;
     } finally {
       setLoading(false);
     }
