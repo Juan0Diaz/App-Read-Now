@@ -102,7 +102,7 @@ export const Profile = () => {
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col bg-surface-soft text-text-strong animate-in fade-in duration-500">
-      <header className="page-header-surface sticky top-0 z-10 h-20 w-full shrink-0 px-8 shadow-sm">
+      <header className="page-header-surface md:sticky md:top-0 z-10 h-20 w-full shrink-0 px-8 shadow-sm">
         <h1 className="flex h-full items-center text-2xl font-bold tracking-tight text-text-strong dark:text-white">Perfil de Usuario</h1>
       </header>
 
