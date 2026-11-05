@@ -1,111 +1,50 @@
-# Arranque del microservicio Favoritos en Kubernetes desde la rama main
+# Arranque automático de las APIs en Kubernetes
 
-Esta guía sirve para arrancar el microservicio de Favoritos en Kubernetes cada vez que abras el Codespace desde la rama `main`, sin dejarlo caído ni sin que el frontend pueda consultar los favoritos.
+Al abrir o reanudar el Codespace, `postStartCommand` ejecuta
+`.devcontainer/scripts/start-kubernetes-apis.sh`. El script inicia Minikube, construye
+y carga las imágenes locales, actualiza los Secrets, aplica los manifiestos y conserva
+los port-forwards en segundo plano.
 
-Si no se ejecuta este proceso, el servicio de Favoritos no quedará activo y al iniciar la aplicación no aparecerán los favoritos.
+## Requisitos
 
-## 1. Preparar el Codespace
+Configura en GitHub Codespaces los secretos `VITE_SUPABASE_URL` y
+`SUPABASE_DB_CONNECTION_STRING`. El primero se reutiliza como `SUPABASE_URL` dentro de
+los servicios. No guardes las credenciales en los manifiestos ni en el repositorio.
 
-La rama `main` incluye el feature `kubectl-helm-minikube` en `.devcontainer/devcontainer.json`, pero hacer `git pull` o cambiar de rama no instala herramientas dentro de un contenedor ya creado. Después de traer esta configuración a un Codespace existente, reconstruye el contenedor desde VS Code:
+Al cambiar la configuración del devcontainer, reconstruye el Codespace una vez con
+**Dev Containers: Rebuild Container**. En aperturas posteriores, el arranque es
+automático.
 
-1. Abre la paleta con `Ctrl+Shift+P`.
-2. Ejecuta **Dev Containers: Rebuild Container** y espera a que termine.
-3. Abre una terminal nueva y verifica que las herramientas estén instaladas:
+## Puertos
 
-```bash
-command -v minikube
-command -v kubectl
-docker --version
-minikube version
-kubectl version --client
-```
+| Servicio | Puerto reenviado | Comprobación |
+| --- | ---: | --- |
+| Backend upstream | 5081 | Lo inicia su perfil de ASP.NET Core |
+| Géneros | 5082 | `curl http://localhost:5082/health` |
+| Libros | 5083 | `curl http://localhost:5083/health` |
+| Favoritos (reenvío interno) | 5084 | `curl http://localhost:5084/health` |
 
-`command -v minikube` debe mostrar una ruta, por ejemplo `/usr/local/bin/minikube`. Si indica que no se encuentra el comando, no ejecutes todavía el bloque de arranque: vuelve a reconstruir el Codespace y revisa **Dev Containers: Show Container Log** si el feature falla.
+Favoritos usa `5084` internamente porque `5081` ya pertenece al backend upstream. El
+frontend usa el gateway dinámico de Codespaces en `5080`; YARP reenvía Favoritos a
+`5084`, por lo que el navegador no depende de publicar ese puerto. Los PID y logs de
+los port-forwards Kubernetes se guardan en `~/.cache/app-read-now/`.
 
-## 2. Ejecutar el arranque completo del microservicio
+## Verificación y recuperación
 
-Abre una terminal en la raíz del proyecto y ejecuta este bloque:
-
-```bash
-cd /workspaces/App-Read-Now && \
-minikube start --driver=docker && \
-kubectl wait --for=condition=Ready nodes --all --timeout=120s && \
-docker build -f microservices/Favoritos.Api/Dockerfile -t favoritos-api:local . && \
-minikube image load favoritos-api:local && \
-kubectl apply -f microservices/Favoritos.Api/k8s/favoritos.yaml && \
-kubectl rollout status deployment/favoritos-api --timeout=180s && \
-kubectl wait --for=condition=Ready pod -l app=favoritos-api --timeout=120s
-```
-
-### Qué hace este comando
-
-- Arranca Minikube con Docker como driver.
-- Espera a que el nodo del clúster esté en estado `Ready`.
-- Construye la imagen de la API de Favoritos.
-- Carga la imagen dentro de Minikube.
-- Aplica el Deployment y el Service de Kubernetes.
-- Espera a que el pod quede `Running` y listo para atender tráfico.
-
-Si todo va bien, el microservicio queda levantado en Kubernetes.
-
-## 3. Mantener el puerto del servicio accesible
-
-En otra terminal, ejecuta esto para dejar expuesto el servicio en localhost:5081:
+Comprueba los servicios y la salud de las APIs:
 
 ```bash
-kubectl port-forward service/favoritos-api 5081:80
+kubectl --context=minikube get svc favoritos-api generos-api libros-api
+curl -fsS http://localhost:5084/health
+curl -fsS http://localhost:5082/health
+curl -fsS http://localhost:5083/health
 ```
 
-### Importante
-
-- Esta terminal debe permanecer abierta.
-- Si se cierra el `port-forward`, la app ya no podrá consultar al microservicio.
-- En ese caso, los favoritos no aparecerán en la aplicación.
-
-## 4. Verificación rápida
-
-Comprueba que el servicio responda:
+Para repetir manualmente el mismo flujo de recuperación:
 
 ```bash
-curl -i http://localhost:5081/health
+bash .devcontainer/scripts/start-kubernetes-apis.sh
 ```
 
-Debe devolver una respuesta como:
-
-```text
-HTTP/1.1 200 OK
-{"status":"ok"}
-```
-
-## 5. Variable del frontend
-
-Asegúrate de que el frontend tenga esta variable activa:
-
-```bash
-VITE_FAVORITOS_API_URL=http://localhost:5081
-```
-
-Si esta URL no está disponible porque el microservicio no arrancó o el port-forward no está activo, no se mostrarán los Favoritos en la aplicación.
-
-## 6. Sugerencia para arrancarlo en cada sesión
-
-Si quieres dejarlo preparado cada vez que abras el Codespace, puedes guardar este bloque en un script y ejecutarlo con una sola línea:
-
-```bash
-cd /workspaces/App-Read-Now && \
-minikube start --driver=docker && \
-kubectl wait --for=condition=Ready nodes --all --timeout=120s && \
-docker build -f microservices/Favoritos.Api/Dockerfile -t favoritos-api:local . && \
-minikube image load favoritos-api:local && \
-kubectl apply -f microservices/Favoritos.Api/k8s/favoritos.yaml && \
-kubectl rollout status deployment/favoritos-api --timeout=180s && \
-kubectl wait --for=condition=Ready pod -l app=favoritos-api --timeout=120s
-```
-
-Y luego mantener este puerto abierto en otra terminal:
-
-```bash
-kubectl port-forward service/favoritos-api 5081:80
-```
-
-Con esto, el microservicio de Favoritos queda listo para funcionar en la rama `main` sin problemas.
+Si el despliegue falla, revisa `~/.cache/app-read-now/<servicio>-port-forward.log` y
+los logs del pod, por ejemplo `kubectl --context=minikube logs deployment/favoritos-api`.

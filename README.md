@@ -48,6 +48,10 @@ Configuration → Redirect URLs**. En Google Cloud y GitHub OAuth conserva como 
 URL de Supabase (`https://<project-ref>.supabase.co/auth/v1/callback`); esos proveedores
 no deben usar la URL de Pages directamente.
 
+Para Pages, `VITE_FAVORITOS_API_URL` es opcional: si no se define como Actions variable,
+el workflow usa `VITE_API_URL`. El backend debe permitir el origen `https://juan0diaz.github.io`
+en CORS; al cambiar esa política, vuelve a desplegar el backend además del frontend.
+
 Antes de desplegar esta versión, ejecuta una vez
 [`backend/Migrations/20261102_RemoveUsuarioPassword.sql`](./backend/Migrations/20261102_RemoveUsuarioPassword.sql)
 en el SQL Editor de Supabase. El script elimina la columna heredada `contrasena` de
@@ -106,9 +110,9 @@ Ahora, `.devcontainer/scripts/generate-env.sh` corre automáticamente cada vez q
 Codespace arranca (`postCreateCommand` y `postStartCommand`), y:
 
 1. Lee `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` de los secretos del paso 2.
-2. Calcula `VITE_API_URL` y `VITE_LIBROS_API_URL` usando `$CODESPACE_NAME`. Ambas usan
-        el gateway del puerto 5080; YARP envía `/gateway/api/libros` al microservicio de
-        Kubernetes por el puerto local 5083.
+2. Calcula las URLs de las APIs usando `$CODESPACE_NAME`. Favoritos y Libros pasan por
+        el gateway del puerto 5080; YARP los envía a sus port-forwards locales en 5084 y
+        5083. El navegador no necesita acceder directamente a esos puertos.
 3. Escribe el `.env` real en la raíz del proyecto.
 
 Si alguien abre un Codespace y ve la app en "Modo Demostración", el 99% de las veces
@@ -123,8 +127,15 @@ mensaje del script se lo advierte en la terminal al arrancar.
 
 ## 4. Ejecutar el frontend y las APIs
 
-Abre cuatro terminales dentro del Codespace. El clúster Minikube y el despliegue de
-`libros-api` deben estar activos.
+Al abrir o reanudar el Codespace, `postStartCommand` inicia Minikube, construye y carga
+las imágenes de Favoritos, Géneros y Libros, actualiza sus Secrets de Kubernetes,
+despliega los servicios y deja activos los port-forwards en `localhost:5084`, `5082` y
+`5083`, respectivamente. Favoritos y Libros se consumen por el gateway del puerto 5080;
+Géneros conserva su URL directa en 5082. Para ello deben estar configurados los secretos
+`SUPABASE_DB_CONNECTION_STRING` y `VITE_SUPABASE_URL` (o `SUPABASE_URL`). Los logs y PID
+de los reenvíos quedan en `~/.cache/app-read-now/`.
+
+Abre tres terminales para iniciar el frontend y las APIs principales:
 
 ```bash
 # Terminal 1 — Frontend
@@ -138,24 +149,18 @@ dotnet run --launch-profile Backend.Api
 cd backend
 dotnet run --launch-profile Backend.Api.Upstream
 
-# Terminal 4 — Reenvío al microservicio Libros (puerto 5083) - UTILIZAR ESTE SIEMPRE Y CUANDO SE REINICIE EL CODESPACE
-# PRIMERA VEZ EJECUTADO EN LA TERMINAL, YA NO ES NECESARIO VOLVER A EJECUTARLO. QUEDA ACTIVO
-# ESTE COMANDO PERMITE VER SI EL SERVICIO ESTA OPERANDO curl http://localhost:5083/health -> DEBE MOSTRAR {"status":"ok"}
-kubectl port-forward service/libros-api 5083:80
-
-#Iniciar el Clúster:
-minikube start -p minikube
-kubectl get nodes
-
-#Cuando el nodo esté Ready, comprueba que el servicio exista y cuál es su puerto:
-kubectl get svc libros-api
-kubectl port-forward svc/libros-api 5083:80
 ```
 
-Codespaces reenvía los puertos 3000, 5080 y 5083. Mantén activo el terminal 4; el
-frontend llama a Libros por `VITE_LIBROS_API_URL` y el gateway lo dirige al servicio
-de Kubernetes. El script de generación configura las URLs automáticamente, no hace falta
-copiarlas manualmente al `.env`.
+Codespaces reenvía los puertos 3000, 5080, 5081, 5082, 5083 y 5084. El upstream del
+backend conserva el puerto 5081; Favoritos usa 5084 internamente para evitar el conflicto,
+Géneros usa 5082 y Libros 5083. Puedes comprobar el arranque con `kubectl --context=minikube
+get svc favoritos-api generos-api libros-api` y consultar `/health` en cada puerto.
+
+Si necesitas iniciar o recuperar el servicio manualmente, ejecuta desde la raíz del repo:
+
+```bash
+bash .devcontainer/scripts/start-kubernetes-apis.sh
+```
 
 ## 5. ⚠️ Importante: revisa `src/types.ts`
 

@@ -61,9 +61,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy("Frontend", policy =>
     {
         policy.SetIsOriginAllowed(origin =>
-                origin.Contains("localhost") ||
-                origin.Contains("127.0.0.1") ||
-                origin.EndsWith(".app.github.dev"))
+            Uri.TryCreate(origin, UriKind.Absolute, out var uri) &&
+            (uri.IsLoopback ||
+             uri.Host.EndsWith(".app.github.dev", StringComparison.OrdinalIgnoreCase) ||
+             uri.Host.Equals("juan0diaz.github.io", StringComparison.OrdinalIgnoreCase)))
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
