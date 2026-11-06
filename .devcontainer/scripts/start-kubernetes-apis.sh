@@ -105,9 +105,12 @@ deploy_api generos microservices/Generos.Api/Dockerfile \
   microservices/Generos.Api/k8s/generos.yaml generos-secrets
 deploy_api libros microservices/Libros.Api/Dockerfile \
   microservices/Libros.Api/k8s/libros.yaml libros-secrets
+deploy_api login microservices/Login.Api/Dockerfile \
+  microservices/Login.Api/k8s/login.yaml login-secrets
 
 ensure_port_forward favoritos 5084
 ensure_port_forward generos 5082
-ensure_port_forward libros 5083
+ensure_port_forward libros 5086
+ensure_port_forward login 5085
 
 echo "✅ Las APIs de Kubernetes están listas."

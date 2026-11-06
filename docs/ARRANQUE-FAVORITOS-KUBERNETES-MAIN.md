@@ -21,8 +21,10 @@ automático.
 | --- | ---: | --- |
 | Backend upstream | 5081 | Lo inicia su perfil de ASP.NET Core |
 | Géneros | 5082 | `curl http://localhost:5082/health` |
-| Libros | 5083 | `curl http://localhost:5083/health` |
+| Login local | 5083 | `dotnet run --project microservices/Login.Api/Login.Api.csproj` |
 | Favoritos (reenvío interno) | 5084 | `curl http://localhost:5084/health` |
+| Login (Kubernetes) | 5085 | `curl http://localhost:5085/health` |
+| Libros | 5086 | `curl http://localhost:5086/health` |
 
 Favoritos usa `5084` internamente porque `5081` ya pertenece al backend upstream. El
 frontend usa el gateway dinámico de Codespaces en `5080`; YARP reenvía Favoritos a
@@ -37,7 +39,8 @@ Comprueba los servicios y la salud de las APIs:
 kubectl --context=minikube get svc favoritos-api generos-api libros-api
 curl -fsS http://localhost:5084/health
 curl -fsS http://localhost:5082/health
-curl -fsS http://localhost:5083/health
+curl -fsS http://localhost:5085/health
+curl -fsS http://localhost:5086/health
 ```
 
 Para repetir manualmente el mismo flujo de recuperación:
