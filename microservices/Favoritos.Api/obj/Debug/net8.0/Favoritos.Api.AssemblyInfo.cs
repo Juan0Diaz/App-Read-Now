@@ -13,9 +13,10 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Favoritos.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3060f4d57a435de5afd81edeea33276246974389")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+96870b93030a8a6cf86a2a5655bd8b621e136ff0")]
 [assembly: System.Reflection.AssemblyProductAttribute("Favoritos.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Favoritos.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
 
 // Generado por la clase WriteCodeFragment de MSBuild.
+
