@@ -3,26 +3,34 @@ import { useAuth } from '../context/AuthContext';
 import { getFavoritos, quitarFavorito } from '../microservicios/favorites';
 import { Favorito } from '../types';
 import { Link } from 'react-router-dom';
-import { Heart, Search, BookOpen } from 'lucide-react';
+import { Heart, Search, BookOpen, RefreshCw } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 
 export const Favorites = () => {
   const { user } = useAuth();
   const [favoritos, setFavoritos] = useState<Favorito[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
     fetchFavorites();
   }, [user]);
 
   const fetchFavorites = async () => {
-    if (!user) return;
+    setFavoritos([]);
+    setLoadError(false);
+    if (!user) {
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
       const data = await getFavoritos();
       setFavoritos(data);
     } catch (err) {
       console.error('Error fetching favorites:', err);
+      setFavoritos([]);
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -43,7 +51,7 @@ export const Favorites = () => {
 
   return (
     <div className="flex h-full min-h-0 w-full flex-1 flex-col animate-in fade-in bg-bg-warm text-text-strong duration-500 dark:bg-surface-soft">
-      <header className="sticky top-0 z-10 flex h-20 w-full shrink-0 items-center gap-3 border-b border-border bg-bg-warm px-4 shadow-sm dark:border-border dark:bg-surface md:px-8">
+      <header className="md:sticky md:top-0 z-10 flex h-20 w-full shrink-0 items-center gap-3 border-b border-border bg-bg-warm px-4 shadow-sm dark:border-border dark:bg-surface md:px-8">
         <Heart className="h-7 w-7 text-error fill-error" />
         <h1 className="text-2xl font-bold tracking-tight text-text-strong">Mis Favoritos</h1>
       </header>
@@ -55,7 +63,15 @@ export const Favorites = () => {
           </div>
         </div>
 
-        {favoritos.length === 0 ? (
+        {loadError ? (
+          <div role="alert" className="rounded-2xl border border-error/30 bg-surface p-12 text-center shadow-sm">
+            <h3 className="mb-2 text-xl font-bold text-text-strong">No se pudieron cargar tus favoritos</h3>
+            <p className="mx-auto mb-6 max-w-md text-text-muted">Comprueba tu conexión e inténtalo de nuevo.</p>
+            <Button onClick={() => void fetchFavorites()}>
+              <RefreshCw className="mr-2 h-4 w-4" /> Reintentar
+            </Button>
+          </div>
+        ) : favoritos.length === 0 ? (
           <div className="rounded-2xl border border-border bg-surface p-12 text-center shadow-sm">
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-surface-soft text-text-muted">
               <Heart className="h-8 w-8" />

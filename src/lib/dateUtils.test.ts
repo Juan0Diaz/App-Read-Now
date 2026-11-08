@@ -1,7 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { getDisplayPublicationDate } from './dateUtils';
+import { formatDisplayDate, getDisplayPublicationDate } from './dateUtils';
+
+test('mantiene el día de una fecha de nacimiento sin desplazamiento de zona horaria', () => {
+  assert.equal(formatDisplayDate('2000-01-05'), '05/01/2000');
+});
 
 test('prioriza la fecha del libro sobre la fecha de la publicación', () => {
   const value = getDisplayPublicationDate({

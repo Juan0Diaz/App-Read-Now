@@ -8,12 +8,13 @@ export interface LoginProfile extends User {
 
 const emailPattern = /^[a-zA-Z0-9._%+-]+@(gmail\.com|outlook\.com)$/i;
 const passwordPattern = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[^a-zA-Z\d\s])[^\s]+$/;
+const LOGIN_API_URL = (import.meta.env.VITE_LOGIN_API_URL ?? 'http://localhost:5083').replace(/\/+$/, '');
 
 export async function getAuthenticatedProfile(): Promise<LoginProfile | null> {
 	if (isDemoMode) return null;
 
 	try {
-		return await request<LoginProfile>('/api/login/me');
+		return await request<LoginProfile>(`${LOGIN_API_URL}/api/login/me`);
 	} catch (error) {
 		if (error instanceof ApiError && error.status === 404) return null;
 		throw error;
@@ -137,15 +138,16 @@ export async function updatePassword(password: string): Promise<void> {
 	if (error) throw error;
 }
 
-export async function startOAuth(provider: 'google' | 'github'): Promise<string | null> {
-	const { data, error } = await supabase.auth.signInWithOAuth({
+export async function startOAuth(provider: 'google' | 'github'): Promise<void> {
+	const callbackBase = new URL(import.meta.env.BASE_URL, window.location.origin);
+	const redirectTo = new URL('auth/callback', callbackBase).toString();
+	const { error } = await supabase.auth.signInWithOAuth({
 		provider,
 		options: {
-			redirectTo: `${window.location.origin}/auth/callback`,
-			skipBrowserRedirect: true,
+			redirectTo,
+			...(provider === 'google' ? { queryParams: { prompt: 'select_account' } } : {}),
 		},
 	});
 
 	if (error) throw error;
-	return data.url;
 }

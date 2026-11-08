@@ -1,7 +1,7 @@
 import { supabase } from '../lib/supabase';
 import { Favorito } from '../types';
 
-const API_URL = (import.meta.env.VITE_API_URL ?? 'http://localhost:5080/gateway').replace(/\/+$/, '');
+const API_URL = (import.meta.env.VITE_FAVORITOS_API_URL ?? import.meta.env.VITE_API_URL)?.replace(/\/+$/, '');
 
 async function authHeader(): Promise<HeadersInit> {
   const { data: { session }, error } = await supabase.auth.getSession();
@@ -18,6 +18,10 @@ async function authHeader(): Promise<HeadersInit> {
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+  if (!API_URL) {
+    throw new Error('VITE_FAVORITOS_API_URL no está configurada; Favoritos requiere el microservicio activo.');
+  }
+
   const headers = {
     'Content-Type': 'application/json',
     ...(await authHeader()),

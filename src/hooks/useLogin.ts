@@ -64,57 +64,12 @@ export function useLogin() {
 
   const loginWithOAuth = async (
     provider: 'google' | 'github',
-    onLoginSuccess: () => void,
   ) => {
     setLoading(true);
     setError('');
 
     try {
-      const url = await startOAuth(provider);
-      if (!url) {
-        setLoading(false);
-        return;
-      }
-
-      const popupWidth = 500;
-      const popupHeight = 600;
-      const left = window.screen.width / 2 - popupWidth / 2;
-      const top = window.screen.height / 2 - popupHeight / 2;
-      const popup = window.open(
-        url,
-        'oauthPopup',
-        `width=${popupWidth},height=${popupHeight},left=${left},top=${top}`,
-      );
-
-      if (!popup) {
-        setError('Habilita las ventanas emergentes (popups) en tu navegador para continuar.');
-        setLoading(false);
-        return;
-      }
-
-      const handleMessage = (event: MessageEvent) => {
-        if (event.origin !== window.location.origin) return;
-
-        if (event.data?.type === 'OAUTH_AUTH_SUCCESS') {
-          window.removeEventListener('message', handleMessage);
-          window.clearInterval(popupTimer);
-          onLoginSuccess();
-        } else if (event.data?.type === 'OAUTH_AUTH_ERROR') {
-          window.removeEventListener('message', handleMessage);
-          window.clearInterval(popupTimer);
-          setError(event.data.payload || 'Ocurrió un error en la autenticación.');
-          setLoading(false);
-        }
-      };
-      window.addEventListener('message', handleMessage);
-
-      const popupTimer = window.setInterval(() => {
-        if (popup.closed) {
-          window.clearInterval(popupTimer);
-          window.removeEventListener('message', handleMessage);
-          setLoading(false);
-        }
-      }, 500);
+      await startOAuth(provider);
     } catch (oauthError) {
       setError(oauthError instanceof Error ? oauthError.message : `Error al conectar con ${provider}`);
       setLoading(false);

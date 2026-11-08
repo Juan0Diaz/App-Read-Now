@@ -38,8 +38,7 @@ export const Login = () => {
     );
   };
 
-  const handleOAuthLogin = (provider: 'google' | 'github') =>
-    loginWithOAuth(provider, () => navigate('/'));
+  const handleOAuthLogin = (provider: 'google' | 'github') => loginWithOAuth(provider);
 
   return (
     <div className="flex h-full w-full flex-col items-center justify-center py-10 animate-in fade-in duration-500 dark:bg-surface-soft">
@@ -162,7 +161,7 @@ export const Login = () => {
 
         <div className="mt-6 flex items-center justify-center">
           <div className="h-px flex-1 bg-border"></div>
-          <span className="px-3 text-sm font-medium text-text-muted">o continuar con</span>
+          <span className="px-3 text-sm font-medium text-text-muted">{isRegister ? 'o regístrate con' : 'o continuar con'}</span>
           <div className="h-px flex-1 bg-border"></div>
         </div>
 

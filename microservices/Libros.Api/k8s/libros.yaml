@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: libros-api
+  labels:
+    app: libros-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: libros-api
+  template:
+    metadata:
+      labels:
+        app: libros-api
+    spec:
+      containers:
+        - name: libros-api
+          image: libros-api:local
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: libros-secrets
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: libros-api
+spec:
+  type: ClusterIP
+  selector:
+    app: libros-api
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
