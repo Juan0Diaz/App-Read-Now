@@ -11,3 +11,15 @@ backend/bin/
 backend/obj/
 microservices/Libros.Api/bin/
 microservices/Libros.Api/obj/
+microservices/Favoritos.Api/bin/
+microservices/Favoritos.Api/obj/
+microservices/Generos.Api/bin/
+microservices/Generos.Api/obj/
+microservices/Login.Api/bin/
+microservices/Login.Api/obj/
+microservices/Prestamos.Api/bin/
+microservices/Prestamos.Api/obj/
+microservices/Publicaciones.Api/bin/
+microservices/Publicaciones.Api/obj/
+microservices/Usuarios.Api/bin/
+microservices/Usuarios.Api/obj/
