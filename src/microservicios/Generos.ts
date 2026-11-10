@@ -37,7 +37,14 @@ async function request<T>(path: string, options: RequestInit = {}, requiredAuth 
   });
 
   if (!response.ok) {
-    const message = await response.text().catch(() => response.statusText);
+    const body = await response.text().catch(() => '');
+    let message = body || response.statusText;
+    try {
+      const payload = JSON.parse(body) as { message?: string; title?: string };
+      message = payload.message ?? payload.title ?? message;
+    } catch {
+      // The API may return a plain-text validation message.
+    }
     throw new Error(`API ${response.status}: ${message}`);
   }
 
@@ -51,5 +58,7 @@ async function request<T>(path: string, options: RequestInit = {}, requiredAuth 
 export const getGeneros = () => request<Genero[]>('/api/generos', {}, false);
 export const crearGenero = (data: Partial<Genero>) =>
   request<Genero>('/api/generos', { method: 'POST', body: JSON.stringify(data) }, true);
+export const actualizarGenero = (id: string, data: Partial<Genero>) =>
+  request<Genero>(`/api/generos/${id}`, { method: 'PUT', body: JSON.stringify(data) }, true);
 export const eliminarGenero = (id: string) =>
   request<void>(`/api/generos/${id}`, { method: 'DELETE' }, true);
