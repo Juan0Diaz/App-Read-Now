@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Outlet, Link, useNavigate, useLocation, Navigate } from 'react-router-dom';
-import { Library, User, LogOut, Settings, LayoutDashboard, Search, UploadCloud, Users, Heart, BookOpen, Menu, ShieldAlert, Clock, ClipboardCheck } from 'lucide-react';
+import { Library, User, LogOut, LayoutDashboard, Users, Heart, BookOpen, ShieldAlert, Clock, ClipboardCheck, Tags } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { Button, buttonVariants } from './ui/Button';
 import { getSolicitudesRevision } from '../microservicios/Libros';
@@ -114,8 +114,8 @@ export const Layout = () => {
 
           {user && (
             <>
-              {role !== 'Desactivado' && <NavLink to="/favoritos" icon={<Heart className="w-5 h-5" />} label="Mis Favoritos" />}
-              {role !== 'Desactivado' && <NavLink to="/prestamos" icon={<Clock className="w-5 h-5" />} label="Mis Préstamos" />}
+              {role !== 'Desactivado' && role !== 'Administrador' && <NavLink to="/favoritos" icon={<Heart className="w-5 h-5" />} label="Mis Favoritos" />}
+              {role !== 'Desactivado' && role !== 'Administrador' && <NavLink to="/prestamos" icon={<Clock className="w-5 h-5" />} label="Mis Préstamos" />}
               <NavLink to="/perfil" icon={<User className="w-5 h-5" />} label="Mi Perfil" />
 
               {role === 'Publicador' && (
@@ -129,6 +129,7 @@ export const Layout = () => {
                 <>
                   <div className="px-4 pb-2 pt-8 text-xs font-semibold uppercase tracking-[0.2em] text-text-muted">ADMIN</div>
                   <NavLink to="/publicador/libros" icon={<BookOpen className="w-5 h-5" />} label="Gestión de Catálogo" />
+                  <NavLink to="/admin/generos" icon={<Tags className="w-5 h-5" />} label="Gestión de Géneros" />
                   <NavLink to="/admin/revision-libros" icon={<ClipboardCheck className="w-5 h-5" />} label="Revisión de libros" badge={pendingReviews} />
                   <NavLink to="/admin" icon={<Users className="w-5 h-5" />} label="Gestión de Usuarios" />
                 </>
@@ -195,13 +196,13 @@ export const Layout = () => {
                     Catálogo de libros
                   </Link>
                 )}
-                {role !== 'Desactivado' && (
+                {role !== 'Desactivado' && role !== 'Administrador' && (
                   <Link to="/favoritos" className="flex w-fit items-center gap-2 text-text-body transition-colors hover:text-primary">
                     <Heart className="h-4 w-4" aria-hidden="true" />
                     Mis favoritos
                   </Link>
                 )}
-                {role !== 'Desactivado' && (
+                {role !== 'Desactivado' && role !== 'Administrador' && (
                   <Link to="/prestamos" className="flex w-fit items-center gap-2 text-text-body transition-colors hover:text-primary">
                     <Clock className="h-4 w-4" aria-hidden="true" />
                     Mis préstamos
@@ -225,6 +226,12 @@ export const Layout = () => {
                   <Link to="/admin" className="flex w-fit items-center gap-2 text-text-body transition-colors hover:text-primary">
                     <Users className="h-4 w-4" aria-hidden="true" />
                     Gestión de usuarios
+                  </Link>
+                )}
+                {role === 'Administrador' && (
+                  <Link to="/admin/generos" className="flex w-fit items-center gap-2 text-text-body transition-colors hover:text-primary">
+                    <Tags className="h-4 w-4" aria-hidden="true" />
+                    Gestión de géneros
                   </Link>
                 )}
                 <span className="mt-1 inline-flex w-fit items-center rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">Sesión: {role}</span>
@@ -263,14 +270,14 @@ export const Layout = () => {
           </>
         )}
 
-        {user && role !== 'Desactivado' && (
+        {user && role !== 'Desactivado' && role !== 'Administrador' && (
           <Link to="/favoritos" aria-current={isRouteActive('/favoritos') ? 'page' : undefined} className={mobileNavItemClasses(isRouteActive('/favoritos'))}>
             <Heart className="h-5 w-5 shrink-0" />
             <span className="max-w-full truncate text-[10px] font-bold sm:text-xs">Favoritos</span>
           </Link>
         )}
 
-        {user && role !== 'Desactivado' && (
+        {user && role !== 'Desactivado' && role !== 'Administrador' && (
           <Link to="/prestamos" aria-current={isRouteActive('/prestamos') ? 'page' : undefined} className={mobileNavItemClasses(isRouteActive('/prestamos'))}>
             <Clock className="h-5 w-5 shrink-0" />
             <span className="max-w-full truncate text-[10px] font-bold sm:text-xs">Préstamos</span>

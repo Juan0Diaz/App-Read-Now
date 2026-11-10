@@ -138,7 +138,7 @@ export const Home = () => {
           <input
             type="text"
             aria-label="Buscar libros"
-            placeholder="Buscar por título, autor o género..."
+            placeholder="Buscar por título o autor"
             className="w-full rounded-xl border border-transparent bg-surface-soft pl-10 pr-4 py-2.5 text-sm text-text-strong outline-none transition-all focus:border-primary focus:bg-surface"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
