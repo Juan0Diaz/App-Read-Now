@@ -1,6 +1,7 @@
 {
   "name": "App-Read-Now (React + ASP.NET Core + Supabase)",
   "image": "mcr.microsoft.com/devcontainers/base:bookworm",
+  "privileged": true,
 
   "features": {
     "ghcr.io/devcontainers/features/node:1": {
@@ -22,8 +23,7 @@
     }
   },
 
-  "privileged": true,
-  "forwardPorts": [3000, 5080, 5081, 5082, 5083, 5084, 5085, 5086, 5087, 5088],
+  "forwardPorts": [3000, 5003, 5080, 5081, 5082, 5083, 5084, 5085, 5086, 5087, 5088],
   "portsAttributes": {
     "3000": {
       "label": "Frontend (Vite)",
@@ -38,6 +38,10 @@
       "label": "Backend upstream (ASP.NET Core)",
       "onAutoForward": "notify",
       "visibility": "public"
+    },
+    "5003": {
+      "label": "Préstamos API (Kubernetes)",
+      "onAutoForward": "notify"
     },
     "5082": {
       "label": "Géneros API (Kubernetes)",
@@ -76,7 +80,7 @@
     }
   },
 
-  "postCreateCommand": "chmod +x .devcontainer/scripts/generate-env.sh && npm install && dotnet restore backend/Backend.Api.csproj && dotnet restore microservices/Favoritos.Api/Favoritos.Api.csproj && dotnet restore microservices/Generos.Api/Generos.Api.csproj && dotnet restore microservices/Publicaciones.Api/Publicaciones.Api.csproj && dotnet restore microservices/Login.Api/Login.Api.csproj && dotnet restore microservices/Usuarios.Api/Usuarios.Api.csproj && bash .devcontainer/scripts/generate-env.sh",
+  "postCreateCommand": "chmod +x .devcontainer/scripts/generate-env.sh && npm install && dotnet restore backend/Backend.Api.csproj && dotnet restore microservices/Prestamos.Api/Prestamos.Api.csproj && dotnet restore microservices/Favoritos.Api/Favoritos.Api.csproj && dotnet restore microservices/Generos.Api/Generos.Api.csproj && dotnet restore microservices/Publicaciones.Api/Publicaciones.Api.csproj && dotnet restore microservices/Login.Api/Login.Api.csproj && dotnet restore microservices/Usuarios.Api/Usuarios.Api.csproj && bash .devcontainer/scripts/generate-env.sh",
   "postStartCommand": "bash .devcontainer/scripts/generate-env.sh && bash .devcontainer/scripts/start-kubernetes-apis.sh",
 
   "customizations": {

@@ -8,6 +8,7 @@ public interface IGenerosServices
 {
 	Task<IReadOnlyList<Genero>> ObtenerTodosAsync();
 	Task<Genero> CrearAsync(Genero genero);
+	Task<Genero?> ActualizarAsync(Guid idGenero, string nombreGenero);
 	Task<bool> EliminarAsync(Guid idGenero);
 }
 
@@ -50,6 +51,19 @@ public sealed class GenerosServices : IGenerosServices
 	{
 		genero.IdGenero = Guid.NewGuid();
 		_db.Generos.Add(genero);
+		await _db.SaveChangesAsync();
+		return genero;
+	}
+
+	public async Task<Genero?> ActualizarAsync(Guid idGenero, string nombreGenero)
+	{
+		var genero = await _db.Generos.FindAsync(idGenero);
+		if (genero is null)
+		{
+			return null;
+		}
+
+		genero.NombreGenero = nombreGenero;
 		await _db.SaveChangesAsync();
 		return genero;
 	}

@@ -16,7 +16,7 @@ En Codespaces, el puerto `5082` se reenvía automáticamente. Para probar salud,
 
 En un entorno local, configura `VITE_GENEROS_API_URL=http://localhost:5082` en `.env.local` y reinicia Vite. El devcontainer genera esta URL automáticamente y Géneros usa el port-forward de Kubernetes en `5082`. Si no defines esta variable, el frontend conserva el gateway actual configurado en `VITE_API_URL`.
 
-La lectura de géneros es pública. Crear y eliminar requieren un JWT de Supabase cuyo usuario tenga el rol de negocio `Administrador`.
+La lectura de géneros es pública. Crear, editar y eliminar requieren un JWT de Supabase cuyo usuario tenga el rol de negocio `Administrador`. El nombre debe tener entre 1 y 50 caracteres no blancos y no puede contener sintaxis SQL; las entradas inválidas se rechazan con HTTP 400 y un mensaje.
 
 ## Desplegar en Kubernetes local
 
@@ -43,6 +43,7 @@ Aplica los recursos y espera el rollout:
 
 ```bash
 kubectl apply -f microservices/Generos.Api/k8s/generos.yaml
+kubectl rollout restart deployment/generos-api
 kubectl rollout status deployment/generos-api
 kubectl port-forward service/generos-api 5082:80
 ```
