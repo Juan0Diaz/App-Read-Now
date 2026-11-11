@@ -159,6 +159,8 @@ deploy_api login microservices/Login.Api/Dockerfile \
   microservices/Login.Api/k8s/login.yaml login-secrets
 deploy_api usuarios microservices/Usuarios.Api/Dockerfile \
   microservices/Usuarios.Api/k8s/usuarios.yaml usuarios-secrets
+deploy_api prestamos microservices/Prestamos.Api/Dockerfile \
+  microservices/Prestamos.Api/k8s/prestamos.yaml prestamos-secrets
 
 ensure_port_forward favoritos 5084
 ensure_port_forward generos 5082
@@ -166,5 +168,6 @@ ensure_port_forward publicaciones 5085
 ensure_port_forward libros 5086
 ensure_port_forward login 5087
 ensure_port_forward usuarios 5088
+ensure_port_forward prestamos 5003
 
 echo "Las APIs de Kubernetes están listas."
