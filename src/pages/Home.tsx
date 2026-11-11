@@ -12,11 +12,12 @@ import { Badge } from '../components/ui/Badge';
 
 export const Home = () => {
   const { user, role } = useAuth();
-  const { libros, loading } = useLibros();
+  const { libros, loading, error: errorLibros, reload: reloadLibros } = useLibros();
   const { generos, loading: loadingGeneros } = useGeneros();
   const { toggleFavorito, isFavorito, loading: loadingFavoritos } = useFavoritos(user);
 
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   const [filterOptionsSearch, setFilterOptionsSearch] = useState('');
   const [selectedGenero, setSelectedGenero] = useState<string | null>(null);
   const [filterDisponibilidad, setFilterDisponibilidad] = useState<string>('todos');
@@ -49,6 +50,10 @@ export const Home = () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
   }, [isFiltersOpen]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedGenero, selectedAutor, filterDisponibilidad]);
 
   const handleToggleFavorito = (e: React.MouseEvent, idLibro: string) => {
     e.preventDefault();
@@ -103,6 +108,14 @@ export const Home = () => {
 
     return matchesSearch && matchesGenero && matchesAutor && matchesDisp;
   });
+
+  const librosPorPagina = 10;
+  const totalPaginas = Math.ceil(filteredLibros.length / librosPorPagina);
+  const paginaActual = Math.min(currentPage, Math.max(totalPaginas, 1));
+  const librosPagina = filteredLibros.slice(
+    (paginaActual - 1) * librosPorPagina,
+    paginaActual * librosPorPagina,
+  );
 
   const chipClasses = (selected: boolean) =>
     selected
@@ -315,7 +328,13 @@ export const Home = () => {
           )}
         </div>
 
-        {filteredLibros.length === 0 ? (
+        {errorLibros ? (
+          <Card role="alert" className="border-error/30 bg-surface py-12 text-center">
+            <h3 className="mb-2 text-lg font-medium text-text-strong">No se pudo cargar el catálogo</h3>
+            <p className="mb-4 text-text-muted">{errorLibros}</p>
+            <Button onClick={() => void reloadLibros()}>Reintentar</Button>
+          </Card>
+        ) : filteredLibros.length === 0 ? (
           <Card className="border-dashed border-border bg-surface py-20 text-center">
             <Book className="mx-auto mb-3 h-10 w-10 text-text-muted" />
             <h3 className="text-lg font-medium text-text-strong">No se encontraron libros</h3>
@@ -325,10 +344,11 @@ export const Home = () => {
             </Button>
           </Card>
         ) : (
-          <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
-            {filteredLibros.map((libro, index) => (
-              <Link to={`/libro/${libro.id_libro}`} key={libro.id_libro} className="group flex flex-col rounded-xl border border-border bg-surface p-2.5 shadow-sm transition-shadow hover:shadow-md sm:p-4">
-                <div className="relative mb-2 overflow-hidden rounded-xl bg-surface-soft sm:mb-4">
+          <>
+          <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4 xl:grid-cols-5 landscape-phone:grid-cols-3 landscape-phone:gap-3">
+            {librosPagina.map((libro, index) => (
+              <Link to={`/libro/${libro.id_libro}`} key={libro.id_libro} className="group flex flex-col rounded-xl border border-border bg-surface p-2.5 shadow-sm transition-shadow hover:shadow-md sm:p-4 landscape-phone:p-2">
+                <div className="relative mb-2 overflow-hidden rounded-xl bg-surface-soft sm:mb-4 landscape-phone:mb-2">
                   <div className="absolute right-2 top-2 z-10">
                     <button
                       type="button"
@@ -348,10 +368,10 @@ export const Home = () => {
                         alt={libro.titulo}
                         loading={index < 4 ? 'eager' : 'lazy'}
                         fetchPriority={index < 4 ? 'high' : undefined}
-                        className="w-full transition-transform duration-500 group-hover:scale-105"
+                        className="w-full transition-transform duration-500 group-hover:scale-105 landscape-phone:aspect-[4/3]"
                       />
                     ) : (
-                      <div className="flex aspect-[2/3] w-full items-center justify-center bg-gradient-to-br from-primary/10 to-surface-soft p-6 text-center transition-transform duration-500 group-hover:scale-105">
+                      <div className="flex aspect-[2/3] w-full items-center justify-center bg-gradient-to-br from-primary/10 to-surface-soft p-6 text-center transition-transform duration-500 group-hover:scale-105 landscape-phone:aspect-[4/3] landscape-phone:p-3">
                         <div>
                           <div className="mb-1 text-xs font-bold uppercase tracking-[0.2em] text-primary">
                             {generos.find(g => g.id_genero === libro.id_genero)?.nombre_genero || 'GÉNERO'}
@@ -363,10 +383,10 @@ export const Home = () => {
                   </div>
                 </div>
 
-                <h3 className="mb-1 truncate text-sm font-bold text-text-strong sm:text-base">{libro.titulo}</h3>
-                <p className="truncate text-xs text-text-muted sm:text-sm">{libro.autor}</p>
-                <div className="mt-auto flex flex-col items-start justify-between gap-2 pt-3 sm:flex-row sm:items-center">
-                  <span className="max-w-full truncate text-xs font-semibold text-primary sm:text-sm">Libro {libro.estado}</span>
+                <h3 className="mb-1 truncate text-sm font-bold text-text-strong sm:text-base landscape-phone:text-sm">{libro.titulo}</h3>
+                <p className="truncate text-xs text-text-muted sm:text-sm landscape-phone:text-xs">{libro.autor}</p>
+                <div className="mt-auto flex flex-col items-start justify-between gap-2 pt-3 sm:flex-row sm:items-center landscape-phone:gap-1 landscape-phone:pt-1">
+                  <span className="max-w-full truncate text-xs font-semibold text-primary sm:text-sm landscape-phone:text-xs">Libro {libro.estado}</span>
                   <Badge variant={libro.disponible ? 'success' : 'secondary'}>
                     {libro.disponible ? 'Disponible' : 'Reservado'}
                   </Badge>
@@ -374,6 +394,30 @@ export const Home = () => {
               </Link>
             ))}
           </div>
+          {totalPaginas > 1 && (
+            <nav className="mt-6 flex items-center justify-center gap-3" aria-label="Paginación del catálogo">
+              <button
+                type="button"
+                disabled={paginaActual === 1}
+                onClick={() => setCurrentPage(paginaActual - 1)}
+                className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text-body disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Anterior
+              </button>
+              <span className="text-sm text-text-muted" aria-live="polite">
+                Página {paginaActual} de {totalPaginas}
+              </span>
+              <button
+                type="button"
+                disabled={paginaActual === totalPaginas}
+                onClick={() => setCurrentPage(paginaActual + 1)}
+                className="rounded-lg border border-border bg-surface px-4 py-2 text-sm font-medium text-text-body disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Siguiente
+              </button>
+            </nav>
+          )}
+          </>
         )}
       </section>
     </div>
