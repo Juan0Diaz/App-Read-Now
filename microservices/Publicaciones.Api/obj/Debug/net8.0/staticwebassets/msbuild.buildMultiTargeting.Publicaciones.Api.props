@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="../build/Publicaciones.Api.props" />
-</Project>
