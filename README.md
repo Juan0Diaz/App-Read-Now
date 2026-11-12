@@ -110,9 +110,9 @@ Ahora, `.devcontainer/scripts/generate-env.sh` corre automáticamente cada vez q
 Codespace arranca (`postCreateCommand` y `postStartCommand`), y:
 
 1. Lee `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` de los secretos del paso 2.
-2. Calcula las URLs de las APIs usando `$CODESPACE_NAME`. Favoritos y Libros pasan por
-        el gateway del puerto 5080; YARP los envía a sus port-forwards locales en 5084 y
-        5083. El navegador no necesita acceder directamente a esos puertos.
+2. Calcula las URLs de las APIs usando `$CODESPACE_NAME`. Favoritos, Libros y Préstamos
+   pasan por el gateway del puerto 5080; YARP los envía a sus port-forwards locales en
+   5084, 5086 y 5003. El navegador no necesita acceder directamente a esos puertos.
 3. Escribe el `.env` real en la raíz del proyecto.
 
 Si alguien abre un Codespace y ve la app en "Modo Demostración", el 99% de las veces
@@ -127,13 +127,18 @@ mensaje del script se lo advierte en la terminal al arrancar.
 
 ## 4. Ejecutar el frontend y las APIs
 
+### Paso previo: APIs de Kubernetes
+
 Al abrir o reanudar el Codespace, `postStartCommand` inicia Minikube, construye y carga
-las imágenes de Favoritos, Géneros y Libros, actualiza sus Secrets de Kubernetes,
-despliega los servicios y deja activos los port-forwards en `localhost:5084`, `5082` y
-`5083`, respectivamente. Favoritos y Libros se consumen por el gateway del puerto 5080;
-Géneros conserva su URL directa en 5082. Para ello deben estar configurados los secretos
+las imágenes de Favoritos, Géneros, Libros, Publicaciones, Login, Usuarios y Préstamos,
+actualiza sus Secrets de Kubernetes, despliega los servicios y deja activos los
+port-forwards: Favoritos en `localhost:5084`, Géneros en `5082`, Publicaciones en `5085`,
+Libros en `5086`, Login en `5087`, Usuarios en `5088` y Préstamos en `5003`. Favoritos,
+Libros y Préstamos se consumen por el gateway del puerto 5080; Géneros conserva su URL
+directa en 5082. Para ello deben estar configurados los secretos
 `SUPABASE_DB_CONNECTION_STRING` y `VITE_SUPABASE_URL` (o `SUPABASE_URL`). Los logs y PID
-de los reenvíos quedan en `~/.cache/app-read-now/`.
+de los reenvíos quedan en `~/.cache/app-read-now/`. Espera a que termine esta preparación
+antes de continuar con las tres terminales.
 
 Abre tres terminales para iniciar el frontend y las APIs principales:
 
@@ -151,12 +156,14 @@ dotnet run --launch-profile Backend.Api.Upstream
 
 ```
 
-Codespaces reenvía los puertos 3000, 5080, 5081, 5082, 5083 y 5084. El upstream del
-backend conserva el puerto 5081; Favoritos usa 5084 internamente para evitar el conflicto,
-Géneros usa 5082 y Libros 5083. Puedes comprobar el arranque con `kubectl --context=minikube
+Codespaces reenvía los puertos 3000, 5003, 5080, 5081, 5082, 5083, 5084, 5085, 5086,
+5087 y 5088. El upstream del backend conserva el puerto 5081; Favoritos usa 5084
+internamente para evitar el conflicto, Géneros usa 5082 y Libros 5086. Puedes comprobar
+el arranque con `kubectl --context=minikube
 get svc favoritos-api generos-api libros-api` y consultar `/health` en cada puerto.
 
-Si necesitas iniciar o recuperar el servicio manualmente, ejecuta desde la raíz del repo:
+**Solución si el catálogo aparece vacío o hay errores 502:** desde la raíz del repo,
+ejecuta el script para volver a preparar las APIs de Kubernetes:
 
 ```bash
 bash .devcontainer/scripts/start-kubernetes-apis.sh
