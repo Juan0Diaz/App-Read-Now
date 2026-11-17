@@ -36,6 +36,7 @@ builder.Services.AddScoped<IUsuariosServices, UsuariosServices>();
 builder.Services.AddScoped<ILoginServices, LoginServices>();
 
 builder.Services.AddScoped<IClaimsTransformation, RoleClaimsTransformation>();
+builder.Services.AddHttpClient<ISupabaseJwtTokenValidator, SupabaseJwtTokenValidator>();
 
 builder.Services
     .AddAuthentication(options =>
