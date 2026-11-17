@@ -2,11 +2,11 @@ import { useEffect, useState } from 'react';
 import { isDemoMode, MOCK_LIBROS } from '../lib/supabase';
 import { getLibro } from '../microservicios/Libros';
 import { getPublicaciones } from '../microservicios/Publicaciones';
-import { Libro, User } from '../types';
+import { Libro, PublicadorPublico } from '../types';
 
 export function useLibroDetalle(id?: string) {
   const [libro, setLibro] = useState<Libro | null>(null);
-  const [publisher, setPublisher] = useState<User | null>(null);
+  const [publisher, setPublisher] = useState<PublicadorPublico | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

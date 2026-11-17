@@ -3,7 +3,7 @@ import { User } from '../types';
 
 const API_URL = (import.meta.env.VITE_USUARIOS_API_URL ?? 'http://localhost:5088').replace(/\/+$/, '');
 
-async function authHeader(): Promise<HeadersInit> {
+async function authHeader(requiredAuth = true): Promise<HeadersInit> {
   const { data: { session }, error } = await supabase.auth.getSession();
 
   if (error) {
@@ -11,16 +11,19 @@ async function authHeader(): Promise<HeadersInit> {
   }
 
   if (!session?.access_token) {
-    throw new Error('Debes iniciar sesión para acceder a esta información.');
+    if (requiredAuth) {
+      throw new Error('Debes iniciar sesión para acceder a esta información.');
+    }
+    return {};
   }
 
   return { Authorization: `Bearer ${session.access_token}` };
 }
 
-async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+async function request<T>(path: string, options: RequestInit = {}, requiredAuth = true): Promise<T> {
   const headers = {
     'Content-Type': 'application/json',
-    ...(await authHeader()),
+    ...(await authHeader(requiredAuth)),
     ...options.headers,
   };
 
@@ -43,6 +46,13 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
 export const getMiPerfil = () =>
   request<User>('/api/usuarios/me');
+
+export const getPerfilPublico = (idUsuario: string) =>
+  request<{ id_usuario: string; nombre: string }>(
+    `/api/usuarios/${encodeURIComponent(idUsuario)}/publico`,
+    {},
+    false,
+  );
 
 export const actualizarMiPerfil = (
   data: { nombre?: string; fecha_date?: string; numero_tel?: string }

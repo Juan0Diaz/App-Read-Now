@@ -2,38 +2,66 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { Mail, Phone, Book, ArrowLeft } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { getPerfilPublico } from '../microservicios/Usuarios';
+import { getPublicacionesPublicador } from '../microservicios/Publicaciones';
+import { Libro, Publicacion } from '../types';
+
+interface PublicProfilePublisher {
+  id_usuario: string;
+  nombre?: string;
+  correo?: string;
+  numero_tel?: string;
+}
+
+type PublicProfilePublication = Publicacion & {
+  Libro?: Libro | null;
+};
 
 export const PublicProfile = () => {
   const { id } = useParams();
-  const [publisher, setPublisher] = useState<any | null>(null);
-  const [publications, setPublications] = useState<any[]>([]);
+  const { user } = useAuth();
+  const [publisher, setPublisher] = useState<PublicProfilePublisher | null>(null);
+  const [publications, setPublications] = useState<PublicProfilePublication[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchProfile = async () => {
+      if (!id) return;
       setLoading(true);
       try {
-        const { data: userData } = await supabase
-          .from('Usuario')
-          .select('*')
-          .eq('id_usuario', id)
-          .single();
-          
-        if (userData) {
-          setPublisher(userData);
-          
-          const { data: pubData } = await supabase
-            .from('Publicacion')
-            .select(`
-              id_publicacion,
-              fecha_publicacion,
-              Libro (*)
-            `)
-            .eq('id_usuario', id);
-            
-          if (pubData) {
-            setPublications(pubData.filter(p => p.Libro && p.Libro.disponible !== false));
+        if (user) {
+          const { data: userData } = await supabase
+            .from('Usuario')
+            .select('*')
+            .eq('id_usuario', id)
+            .single();
+
+          if (userData) {
+            setPublisher(userData);
+
+            const { data: pubData } = await supabase
+              .from('Publicacion')
+              .select(`
+                id_publicacion,
+                fecha_publicacion,
+                Libro (*)
+              `)
+              .eq('id_usuario', id);
+
+            if (pubData) {
+              setPublications(pubData.filter(p => p.Libro && p.Libro.disponible !== false));
+            }
           }
+        } else {
+          const [publicProfile, publicPublications] = await Promise.all([
+            getPerfilPublico(id),
+            getPublicacionesPublicador(id),
+          ]);
+          setPublisher(publicProfile);
+          setPublications(publicPublications.filter(publication =>
+            publication.libro && publication.libro.disponible !== false,
+          ));
         }
       } catch(err) {
         console.error('Error fetching profile', err);
@@ -43,7 +71,7 @@ export const PublicProfile = () => {
     };
     
     if (id) fetchProfile();
-  }, [id]);
+  }, [id, user]);
 
   if (loading) {
     return <div className="p-8 text-center text-slate-500 font-semibold">Cargando perfil...</div>;
@@ -75,28 +103,32 @@ export const PublicProfile = () => {
             <div className="-mt-16 mb-4">
               <div className="inline-block h-32 w-32 rounded-full bg-surface p-2 shadow-lg">
                 <div className="flex h-full w-full items-center justify-center rounded-full bg-primary/10 text-4xl font-bold text-primary">
-                  {publisher.correo.charAt(0).toUpperCase()}
+                  {(publisher.nombre || (user ? publisher.correo : 'Publicador') || 'P').charAt(0).toUpperCase()}
                 </div>
               </div>
             </div>
 
             <h1 className="mb-6 text-3xl font-extrabold text-text-strong">
-              {publisher.nombre || publisher.correo.split('@')[0]}
+              {publisher.nombre || (user ? publisher.correo?.split('@')[0] : 'Publicador')}
             </h1>
             
-            <h3 className="mb-4 text-sm font-bold uppercase tracking-tight text-text-strong">Información de Contacto</h3>
-            <div className="mb-8 grid grid-cols-1 gap-4 text-text-body font-medium md:grid-cols-2">
-              <div className="flex items-center gap-3 rounded-xl border border-border bg-surface-soft p-4">
-                <Mail className="h-5 w-5 text-primary" />
-                <a href={`mailto:${publisher.correo}`} className="hover:text-primary hover:underline">{publisher.correo}</a>
-              </div>
-              {publisher.numero_tel && (
-                <div className="flex items-center gap-3 rounded-xl border border-border bg-surface-soft p-4">
-                  <Phone className="h-5 w-5 text-primary" />
-                  <a href={`tel:${publisher.numero_tel}`} className="hover:text-primary hover:underline">{publisher.numero_tel}</a>
+            {user && (
+              <>
+                <h3 className="mb-4 text-sm font-bold uppercase tracking-tight text-text-strong">Información de Contacto</h3>
+                <div className="mb-8 grid grid-cols-1 gap-4 text-text-body font-medium md:grid-cols-2">
+                  <div className="flex items-center gap-3 rounded-xl border border-border bg-surface-soft p-4">
+                    <Mail className="h-5 w-5 text-primary" />
+                    <a href={`mailto:${publisher.correo}`} className="hover:text-primary hover:underline">{publisher.correo}</a>
+                  </div>
+                  {publisher.numero_tel && (
+                    <div className="flex items-center gap-3 rounded-xl border border-border bg-surface-soft p-4">
+                      <Phone className="h-5 w-5 text-primary" />
+                      <a href={`tel:${publisher.numero_tel}`} className="hover:text-primary hover:underline">{publisher.numero_tel}</a>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+              </>
+            )}
           </div>
         </div>
 
@@ -111,7 +143,8 @@ export const PublicProfile = () => {
         ) : (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {publications.map((pub: any) => {
-              const libro = pub.Libro;
+              const libro = pub.Libro ?? pub.libro;
+              if (!libro) return null;
               return (
                 <div key={libro.id_libro} className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-surface transition-all duration-300 hover:shadow-lg">
                   <div className="flex aspect-[4/3] items-center justify-center border-b border-border bg-surface-soft p-6">

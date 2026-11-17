@@ -12,6 +12,10 @@ export class ApiError extends Error {
 }
 
 async function authHeader(): Promise<HeadersInit> {
+  if (!supabase) {
+    return {};
+  }
+
   const { data: { session }, error } = await supabase.auth.getSession();
 
   if (error) {
@@ -19,7 +23,7 @@ async function authHeader(): Promise<HeadersInit> {
   }
 
   if (!session?.access_token) {
-    throw new Error('Debes iniciar sesión para acceder a esta información.');
+    return {};
   }
 
   return { Authorization: `Bearer ${session.access_token}` };

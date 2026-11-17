@@ -30,6 +30,14 @@ public class UsuariosController : ControllerBase
         return Ok(usuario);
     }
 
+    [HttpGet("{id:guid}/publico")]
+    [AllowAnonymous]
+    public async Task<ActionResult<PublicadorPublicoDto>> GetPublicProfile(Guid id)
+    {
+        var usuario = await _usuariosServices.ObtenerPerfilPublicoAsync(id);
+        return usuario is null ? NotFound() : Ok(usuario);
+    }
+
     [HttpPut("me")]
     public async Task<IActionResult> UpdateMe([FromBody] UsuarioUpdateDto dto)
     {
