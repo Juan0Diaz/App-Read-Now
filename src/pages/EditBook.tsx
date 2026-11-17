@@ -41,6 +41,7 @@ export const EditBook = () => {
           autor: data.autor || '',
           editorial: data.editorial || '',
           fecha_publicacion: data.fecha_publicacion ? data.fecha_publicacion.substring(0, 10) : '',
+          precio: '',
           estado: data.estado || 'Nuevo',
           disponible: data.disponible,
           descripcion: data.descripcion || '',

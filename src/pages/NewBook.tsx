@@ -36,6 +36,7 @@ export const NewBook = () => {
     try {
       await submitBook({
         userId: user.id_usuario,
+        requirePrice: true,
         onCreate: async (payload) => await crearLibroConPublicacion(payload),
         onUpdate: async () => undefined,
       });
@@ -145,6 +146,25 @@ export const NewBook = () => {
                     className="theme-input"
                   />
                 </div>
+                <div>
+                  <label className="mb-2 flex items-center gap-2 text-sm font-bold text-text-body">
+                    <Tag className="h-4 w-4 text-primary" /> Precio
+                  </label>
+                  <input
+                    type="number"
+                    name="precio"
+                    required
+                    min="0"
+                    step="0.01"
+                    value={formData.precio}
+                    onChange={handleChange}
+                    className="theme-input"
+                    placeholder="Ej: 25.50"
+                  />
+                </div>
+              </div>
+
+              <div>
                 <div>
                   <label className="mb-2 flex items-center gap-2 text-sm font-bold text-text-body">
                     <Tag className="h-4 w-4 text-primary" /> Género(s)
