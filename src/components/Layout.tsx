@@ -56,12 +56,12 @@ export const Layout = () => {
           isActive 
             ? 'bg-primary/10 text-blue-700 dark:text-blue-300'
             : 'text-text-body hover:bg-surface-soft dark:text-text-body dark:hover:bg-surface-muted'
-        } ${mobileHide ? 'hidden md:flex' : ''}`}
+        } ${mobileHide ? 'hidden md:flex' : ''} landscape-phone:gap-2 landscape-phone:px-2 landscape-phone:py-1 landscape-phone:text-sm`}
       >
         {icon}
         <span className="hidden md:inline">{label}</span>
         {locked && <Lock aria-hidden="true" className="ml-auto h-3.5 w-3.5" />}
-        {badge ? <span className="ml-auto rounded-full bg-warning px-2 py-0.5 text-[10px] font-bold text-slate-950">{badge}</span> : null}
+        {badge ? <span className="ml-auto rounded-full bg-warning px-2 py-0.5 text-[10px] font-bold text-slate-950 landscape-phone:px-1 landscape-phone:text-[9px]">{badge}</span> : null}
       </Link>
     );
   };
@@ -86,30 +86,30 @@ export const Layout = () => {
       </header>
 
       {/* Sidebar Navigation */}
-      <aside className="layout-divider-right sticky top-0 hidden h-screen w-64 shrink-0 flex-col bg-surface md:flex">
-        <div className="flex items-center gap-3 p-6">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-white shadow-lg shadow-primary/20">
-            <Library className="h-6 w-6" />
+      <aside className="layout-divider-right sticky top-0 hidden h-screen w-64 shrink-0 flex-col bg-surface md:flex landscape-phone:min-h-0 landscape-phone:overflow-y-auto landscape-phone:overscroll-contain">
+        <div className="flex shrink-0 items-center gap-3 p-6 landscape-phone:gap-2 landscape-phone:p-2">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary text-white shadow-lg shadow-primary/20 landscape-phone:h-8 landscape-phone:w-8">
+            <Library className="h-6 w-6 landscape-phone:h-5 landscape-phone:w-5" />
           </div>
-          <span className="truncate text-xl font-bold tracking-tight text-text-strong">READNOW</span>
+          <span className="truncate text-xl font-bold tracking-tight text-text-strong landscape-phone:text-base">READNOW</span>
         </div>
 
         {user && (
-          <div className="shrink-0 px-4 pb-2">
-            <div className="profile-card-glow flex items-center gap-3 rounded-xl border border-border bg-surface-soft p-2 shadow-sm dark:border-border dark:bg-surface-muted dark:shadow-none">
-              <div className="profile-avatar-glow flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-border bg-primary/10 text-sm font-bold text-primary dark:border-border dark:bg-primary/20 dark:text-text-strong">
+          <div className="shrink-0 px-4 pb-2 landscape-phone:px-2 landscape-phone:pb-1">
+            <div className="profile-card-glow flex items-center gap-3 rounded-xl border border-border bg-surface-soft p-2 shadow-sm dark:border-border dark:bg-surface-muted dark:shadow-none landscape-phone:gap-2 landscape-phone:p-1">
+              <div className="profile-avatar-glow flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-border bg-primary/10 text-sm font-bold text-primary dark:border-border dark:bg-primary/20 dark:text-text-strong landscape-phone:h-7 landscape-phone:w-7 landscape-phone:text-xs">
                 {profileInitial}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-bold text-text-strong dark:text-text-strong">{user.nombre || user.correo}</p>
-                <p className="truncate text-xs font-medium text-text-muted dark:text-text-body">{role}</p>
+                <p className="truncate text-sm font-bold text-text-strong dark:text-text-strong landscape-phone:text-xs">{user.nombre || user.correo}</p>
+                <p className="truncate text-xs font-medium text-text-muted dark:text-text-body landscape-phone:text-[10px]">{role}</p>
               </div>
             </div>
           </div>
         )}
 
-        <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto px-4 pt-2">
-          {role !== 'Desactivado' && <NavLink to="/" icon={<LayoutDashboard className="w-5 h-5" />} label="Catálogo" />}
+        <nav className="min-h-0 flex-1 space-y-1 overflow-y-auto px-4 pt-2 landscape-phone:flex-none landscape-phone:space-y-0.5 landscape-phone:overflow-visible landscape-phone:px-2 landscape-phone:pt-1">
+          {role !== 'Desactivado' && <NavLink to="/" icon={<LayoutDashboard className="h-5 w-5 landscape-phone:h-4 landscape-phone:w-4" />} label="Catálogo" />}
 
           {!user && (
             <>
@@ -120,24 +120,24 @@ export const Layout = () => {
 
           {user && (
             <>
-              {role !== 'Desactivado' && role !== 'Administrador' && <NavLink to="/favoritos" icon={<Heart className="w-5 h-5" />} label="Mis Favoritos" />}
-              {role !== 'Desactivado' && role !== 'Administrador' && <NavLink to="/prestamos" icon={<Clock className="w-5 h-5" />} label="Mis Préstamos" />}
-              <NavLink to="/perfil" icon={<User className="w-5 h-5" />} label="Mi Perfil" />
+              {role !== 'Desactivado' && role !== 'Administrador' && <NavLink to="/favoritos" icon={<Heart className="h-5 w-5 landscape-phone:h-4 landscape-phone:w-4" />} label="Mis Favoritos" />}
+              {role !== 'Desactivado' && role !== 'Administrador' && <NavLink to="/prestamos" icon={<Clock className="h-5 w-5 landscape-phone:h-4 landscape-phone:w-4" />} label="Mis Préstamos" />}
+              <NavLink to="/perfil" icon={<User className="h-5 w-5 landscape-phone:h-4 landscape-phone:w-4" />} label="Mi Perfil" />
 
               {role === 'Publicador' && (
                 <>
-                  <div className="px-4 pb-2 pt-8 text-xs font-semibold uppercase tracking-[0.2em] text-text-muted">PUBLICADOR</div>
-                  <NavLink to="/publicador/libros" icon={<BookOpen className="w-5 h-5" />} label="Mis Publicaciones" />
+                  <div className="px-4 pb-2 pt-8 text-xs font-semibold uppercase tracking-[0.2em] text-text-muted landscape-phone:px-2 landscape-phone:pb-1 landscape-phone:pt-2 landscape-phone:text-[10px] landscape-phone:tracking-wider">PUBLICADOR</div>
+                  <NavLink to="/publicador/libros" icon={<BookOpen className="h-5 w-5 landscape-phone:h-4 landscape-phone:w-4" />} label="Mis Publicaciones" />
                 </>
               )}
 
               {role === 'Administrador' && (
                 <>
-                  <div className="px-4 pb-2 pt-8 text-xs font-semibold uppercase tracking-[0.2em] text-text-muted">ADMIN</div>
-                  <NavLink to="/publicador/libros" icon={<BookOpen className="w-5 h-5" />} label="Gestión de Catálogo" />
-                  <NavLink to="/admin/generos" icon={<Tags className="w-5 h-5" />} label="Gestión de Géneros" />
-                  <NavLink to="/admin/revision-libros" icon={<ClipboardCheck className="w-5 h-5" />} label="Revisión de libros" badge={pendingReviews} />
-                  <NavLink to="/admin" icon={<Users className="w-5 h-5" />} label="Gestión de Usuarios" />
+                  <div className="px-4 pb-2 pt-8 text-xs font-semibold uppercase tracking-[0.2em] text-text-muted landscape-phone:px-2 landscape-phone:pb-1 landscape-phone:pt-2 landscape-phone:text-[10px] landscape-phone:tracking-wider">ADMIN</div>
+                  <NavLink to="/publicador/libros" icon={<BookOpen className="h-5 w-5 landscape-phone:h-4 landscape-phone:w-4" />} label="Gestión de Catálogo" />
+                  <NavLink to="/admin/generos" icon={<Tags className="h-5 w-5 landscape-phone:h-4 landscape-phone:w-4" />} label="Gestión de Géneros" />
+                  <NavLink to="/admin/revision-libros" icon={<ClipboardCheck className="h-5 w-5 landscape-phone:h-4 landscape-phone:w-4" />} label="Revisión de libros" badge={pendingReviews} />
+                  <NavLink to="/admin" icon={<Users className="h-5 w-5 landscape-phone:h-4 landscape-phone:w-4" />} label="Gestión de Usuarios" />
                 </>
               )}
             </>
@@ -145,13 +145,13 @@ export const Layout = () => {
         </nav>
 
         {user ? (
-          <div className="mt-auto shrink-0 border-t border-border p-4">
+          <div className="mt-auto shrink-0 border-t border-border p-4 landscape-phone:p-2">
             <button
               onClick={handleLogout}
               aria-label="Cerrar sesión"
-              className="flex w-full items-center justify-center gap-2 rounded-lg border border-red-700 bg-red-700 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-red-900/20 transition-colors hover:border-red-800 hover:bg-red-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error focus-visible:ring-offset-2 dark:border-red-600 dark:bg-red-700 dark:hover:border-red-500 dark:hover:bg-red-600"
+              className="flex w-full items-center justify-center gap-2 rounded-lg border border-red-700 bg-red-700 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-red-900/20 transition-colors hover:border-red-800 hover:bg-red-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error focus-visible:ring-offset-2 dark:border-red-600 dark:bg-red-700 dark:hover:border-red-500 dark:hover:bg-red-600 landscape-phone:gap-1 landscape-phone:px-2 landscape-phone:py-1 landscape-phone:text-xs"
             >
-              <LogOut className="h-4 w-4" />
+              <LogOut className="h-4 w-4 landscape-phone:h-3 landscape-phone:w-3" />
               Cerrar Sesión
             </button>
           </div>

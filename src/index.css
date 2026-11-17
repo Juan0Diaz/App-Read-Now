@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Lora:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
+@custom-variant landscape-phone (@media (orientation: landscape) and (max-height: 500px));
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* @theme define el tema claro base; useDarkMode activa .dark. Edita solo la variable del color: Tailwind las consume desde tailwind.config.js. */
