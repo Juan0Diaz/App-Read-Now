@@ -23,8 +23,21 @@ public class PublicacionesController : ControllerBase
 
     [HttpGet]
     [AllowAnonymous]
-    public async Task<ActionResult<IEnumerable<Publicacion>>> GetAll()
-        => Ok(await _publicacionesServices.ObtenerTodasAsync());
+    public async Task<IActionResult> GetAll()
+    {
+        var publicaciones = await _publicacionesServices.ObtenerTodasAsync();
+        return User.Identity?.IsAuthenticated == true
+            ? Ok(publicaciones)
+            : Ok(publicaciones.Select(ToPublicacionPublica));
+    }
+
+    [HttpGet("publicador/{id:guid}")]
+    [AllowAnonymous]
+    public async Task<ActionResult<IEnumerable<PublicacionPublicaDto>>> GetPublicadorPublicaciones(Guid id)
+    {
+        var publicaciones = await _publicacionesServices.ObtenerPublicasPorUsuarioAsync(id);
+        return Ok(publicaciones.Select(ToPublicacionPublica));
+    }
 
     [HttpGet("mias")]
     [Authorize(Policy = "Publicador")]
@@ -88,4 +101,19 @@ public class PublicacionesController : ControllerBase
             _ => NoContent()
         };
     }
+
+    private static PublicacionPublicaDto ToPublicacionPublica(Publicacion publicacion)
+        => new(
+            publicacion.IdPublicacion,
+            publicacion.IdUsuario,
+            publicacion.IdLibro,
+            publicacion.Precio,
+            publicacion.Descripcion,
+            publicacion.FechaPublicacion,
+            publicacion.Libro,
+            publicacion.Usuario is null
+                ? null
+                : new PublicadorPublicoDto(
+                    publicacion.Usuario.IdUsuario,
+                    publicacion.Usuario.Nombre ?? "Publicador"));
 }

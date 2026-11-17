@@ -3,15 +3,18 @@ import { Link } from 'react-router-dom';
 import { useLibros } from '../hooks/useLibros';
 import { useGeneros } from '../hooks/useGeneros';
 import { useFavoritos } from '../hooks/useFavoritos';
+import { useRequireAuth } from '../hooks/useRequireAuth';
 import { useAuth } from '../context/AuthContext';
 import { Search, Book, Heart, SlidersHorizontal, Plus, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { BookCover } from '../components/ui/BookCover';
 import { Badge } from '../components/ui/Badge';
+import { normalizeSearchText } from '../lib/searchUtils';
 
 export const Home = () => {
   const { user, role } = useAuth();
+  const requireAuth = useRequireAuth();
   const { libros, loading } = useLibros();
   const { generos, loading: loadingGeneros } = useGeneros();
   const { toggleFavorito, isFavorito, loading: loadingFavoritos } = useFavoritos(user);
@@ -52,6 +55,7 @@ export const Home = () => {
 
   const handleToggleFavorito = (e: React.MouseEvent, idLibro: string) => {
     e.preventDefault();
+    if (!requireAuth()) return;
     toggleFavorito(idLibro);
   };
 
@@ -70,15 +74,15 @@ export const Home = () => {
         ...collapsedAutores,
         ...autores.slice(5).filter(autor => autor === selectedAutor),
       ];
-  const normalizedFilterOptionsSearch = filterOptionsSearch.trim().toLocaleLowerCase();
-  const matchingGeneros = generos.filter(g => g.nombre_genero.toLocaleLowerCase().includes(normalizedFilterOptionsSearch));
-  const matchingAutores = autores.filter(autor => autor.toLocaleLowerCase().includes(normalizedFilterOptionsSearch));
+  const normalizedFilterOptionsSearch = normalizeSearchText(filterOptionsSearch.trim());
+  const matchingGeneros = generos.filter(g => normalizeSearchText(g.nombre_genero).includes(normalizedFilterOptionsSearch));
+  const matchingAutores = autores.filter(autor => normalizeSearchText(autor).includes(normalizedFilterOptionsSearch));
   const statusOptions = [
     { value: 'todos', label: 'Todos' },
     { value: 'disponible', label: 'Disponibles' },
     { value: 'reservado', label: 'Reservados' },
   ];
-  const matchingStatuses = statusOptions.filter(opt => opt.label.toLocaleLowerCase().includes(normalizedFilterOptionsSearch));
+  const matchingStatuses = statusOptions.filter(opt => normalizeSearchText(opt.label).includes(normalizedFilterOptionsSearch));
   const filterSearchActive = normalizedFilterOptionsSearch.length > 0;
   const displayedGeneros = filterSearchActive
     ? [...matchingGeneros, ...generos.filter(g => g.id_genero === selectedGenero && !matchingGeneros.includes(g))]

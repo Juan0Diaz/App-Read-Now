@@ -5,6 +5,7 @@ import { Genero } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { useFavoritos } from '../hooks/useFavoritos';
 import { useLibroDetalle } from '../hooks/useLibroDetalle';
+import { useRequireAuth } from '../hooks/useRequireAuth';
 import { ArrowLeft, Heart, Calendar, Bookmark, User as UserIcon, Tag } from 'lucide-react';
 import { Button, buttonVariants } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
@@ -13,6 +14,7 @@ import { BookCover } from '../components/ui/BookCover';
 export const BookDetail = () => {
   const { id } = useParams();
   const { user } = useAuth();
+  const requireAuth = useRequireAuth();
   const { isFavorito, toggleFavorito } = useFavoritos(user);
   const { libro, publisher, loading, setLibro } = useLibroDetalle(id);
   const [requestingLoan, setRequestingLoan] = useState(false);
@@ -22,8 +24,8 @@ export const BookDetail = () => {
     : [];
 
   const handleRequestLoan = async () => {
+    if (!requireAuth()) return;
     if (!user || !id || !libro) {
-      alert('Debes iniciar sesión para solicitar un préstamo.');
       return;
     }
 
@@ -96,7 +98,9 @@ export const BookDetail = () => {
               <h1 className="text-2xl font-extrabold tracking-tight text-text-strong md:text-3xl">{libro.titulo}</h1>
               <Button
                 aria-label={favorito ? 'Quitar de favoritos' : 'Agregar a favoritos'}
-                onClick={() => toggleFavorito(libro.id_libro)}
+                onClick={() => {
+                  if (requireAuth()) void toggleFavorito(libro.id_libro);
+                }}
                 variant="outline"
                 size="icon"
                 className={`shrink-0 rounded-full ${favorito ? 'border-error/20 bg-error/10 text-error' : 'border-border text-text-muted hover:border-error/20 hover:bg-error/10 hover:text-error'}`}
@@ -114,7 +118,7 @@ export const BookDetail = () => {
               <div className="mb-6">
                 <span className="mr-2 text-sm text-text-muted">Publicado por:</span>
                 <Link to={`/publicador/perfil/${publisher.id_usuario}`} className="inline-flex flex-col">
-                  <span className="font-bold text-primary hover:underline">{publisher.nombre || publisher.correo.split('@')[0]}</span>
+                  <span className="font-bold text-primary hover:underline">{publisher.nombre || publisher.correo?.split('@')[0] || 'Publicador'}</span>
                 </Link>
               </div>
             )}
@@ -169,9 +173,9 @@ export const BookDetail = () => {
                 variant="primary"
                 size="lg"
                 className="w-full sm:w-auto"
-                disabled={!libro.disponible || requestingLoan}
+                disabled={user ? !libro.disponible || requestingLoan : !libro.disponible}
               >
-                {requestingLoan ? 'Procesando...' : (libro.disponible ? 'Solicitar Préstamo' : 'No Disponible')}
+                {requestingLoan ? 'Procesando...' : !user ? 'Inicia sesión para solicitar' : (libro.disponible ? 'Solicitar Préstamo' : 'No Disponible')}
               </Button>
               <p className="text-center text-xs text-text-muted sm:text-left">
                 Si solicitas este libro, tendrás un plazo de 14 días para leerlo.

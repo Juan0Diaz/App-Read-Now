@@ -8,6 +8,7 @@ namespace Backend.Api.Services;
 public interface IPublicacionesServices
 {
     Task<IReadOnlyList<Publicacion>> ObtenerTodasAsync();
+    Task<IReadOnlyList<Publicacion>> ObtenerPublicasPorUsuarioAsync(Guid idUsuario);
     Task<IReadOnlyList<Publicacion>> ObtenerMiasAsync(Guid idUsuario);
     Task<PublicacionCreacionResultado> CrearAsync(Guid idUsuario, bool esAdmin, PublicacionCreateDto dto);
     Task<PublicacionOperacionResultado> ActualizarAsync(Guid idPublicacion, Guid idUsuario, bool esAdmin, PublicacionUpdateDto dto);
@@ -40,6 +41,19 @@ public sealed class PublicacionesServices : IPublicacionesServices
             .Include(publicacion => publicacion.Libro)
             .Include(publicacion => publicacion.Usuario)
             .Where(publicacion => publicacion.Libro != null && publicacion.Libro.EstadoRevision == Libro.RevisionAprobado)
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public async Task<IReadOnlyList<Publicacion>> ObtenerPublicasPorUsuarioAsync(Guid idUsuario)
+    {
+        return await _db.Publicaciones
+            .Include(publicacion => publicacion.Libro)
+            .Include(publicacion => publicacion.Usuario)
+            .Where(publicacion =>
+                publicacion.IdUsuario == idUsuario &&
+                publicacion.Libro != null &&
+                publicacion.Libro.EstadoRevision == Libro.RevisionAprobado)
             .AsNoTracking()
             .ToListAsync();
     }

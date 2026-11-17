@@ -6,11 +6,13 @@ import { Input } from '../components/ui/Input';
 import { isDemoMode } from '../lib/supabase';
 import { useLogin } from '../hooks/useLogin';
 import { ShieldAlert, BookOpen, Eye, EyeOff } from 'lucide-react';
+import { getLoginReturnPath } from '../lib/authRedirect';
 
 export const Login = () => {
   const { user, simulateLogin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const returnPath = getLoginReturnPath(location.state);
   const [isRegister, setIsRegister] = useState(new URLSearchParams(location.search).get('register') === 'true');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,7 +23,7 @@ export const Login = () => {
   const { loading, error, resetMessage, submit, resetPassword, loginWithOAuth } = useLogin();
 
   if (user) {
-    return <Navigate to="/" />;
+    return <Navigate to={returnPath ?? '/'} replace />;
   }
 
   const handleResetPassword = () => resetPassword(email);
@@ -30,15 +32,26 @@ export const Login = () => {
     event.preventDefault();
     void submit(
       { isRegister, email, password, birthDate, acceptedTerms: acceptTerms },
-      () => navigate('/'),
+      () => navigate(returnPath ?? '/', { replace: true }),
       () => {
-        alert('Registro exitoso. Revisa tu correo o inicia sesión.');
-        setIsRegister(false);
+        if (returnPath) {
+          navigate(returnPath, { replace: true });
+        } else {
+          alert('Registro exitoso. Revisa tu correo o inicia sesión.');
+          setIsRegister(false);
+        }
       },
     );
   };
 
-  const handleOAuthLogin = (provider: 'google' | 'github') => loginWithOAuth(provider);
+  const handleOAuthLogin = (provider: 'google' | 'github') => {
+    if (returnPath) {
+      sessionStorage.setItem('readnow-auth-return-path', returnPath);
+    } else {
+      sessionStorage.removeItem('readnow-auth-return-path');
+    }
+    return loginWithOAuth(provider);
+  };
 
   return (
     <div className="flex h-full w-full flex-col items-center justify-center py-10 animate-in fade-in duration-500 dark:bg-surface-soft">

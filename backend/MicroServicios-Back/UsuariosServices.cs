@@ -8,6 +8,7 @@ namespace Backend.Api.Services;
 public interface IUsuariosServices
 {
     Task<Usuario?> ObtenerPorIdAsync(Guid idUsuario);
+    Task<PublicadorPublicoDto?> ObtenerPerfilPublicoAsync(Guid idUsuario);
     Task<IReadOnlyList<Usuario>> ObtenerTodosAsync();
     Task<bool> ActualizarPerfilAsync(Guid idUsuario, UsuarioUpdateDto dto);
     Task<bool> CambiarMiRolAsync(Guid idUsuario, string nombreRol);
@@ -29,6 +30,17 @@ public sealed class UsuariosServices : IUsuariosServices
         return await _db.Usuarios
             .AsNoTracking()
             .FirstOrDefaultAsync(u => u.IdUsuario == idUsuario);
+    }
+
+    public async Task<PublicadorPublicoDto?> ObtenerPerfilPublicoAsync(Guid idUsuario)
+    {
+        return await _db.Usuarios
+            .AsNoTracking()
+            .Where(usuario => usuario.IdUsuario == idUsuario)
+            .Select(usuario => new PublicadorPublicoDto(
+                usuario.IdUsuario,
+                usuario.Nombre ?? "Publicador"))
+            .FirstOrDefaultAsync();
     }
 
     public async Task<IReadOnlyList<Usuario>> ObtenerTodosAsync()
