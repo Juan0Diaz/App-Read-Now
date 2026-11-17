@@ -9,6 +9,11 @@ export interface User {
   roles?: UserRole[]; // solo viene poblado en GET /api/usuarios (panel de Administrador)
 }
 
+export interface PublicadorPublico extends Pick<User, 'id_usuario' | 'nombre'> {
+  correo?: string;
+  numero_tel?: string;
+}
+
 export interface UserRole {
   id_usuario: string;
   id_rol: string;
@@ -58,7 +63,7 @@ export interface Publicacion {
   descripcion?: string;
   fecha_publicacion?: string;
   libro?: Libro;
-  usuario?: User;
+  usuario?: PublicadorPublico;
 }
 
 export interface Favorito {

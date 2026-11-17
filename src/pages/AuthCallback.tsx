@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
+import { getSafeReturnPath } from '../lib/authRedirect';
 
 export const AuthCallback = () => {
   const navigate = useNavigate();
@@ -9,8 +10,13 @@ export const AuthCallback = () => {
 
   useEffect(() => {
     let active = true;
+    let completed = false;
     const finishSignIn = () => {
-      if (active) navigate('/', { replace: true });
+      if (!active || completed) return;
+      completed = true;
+      const returnPath = getSafeReturnPath(sessionStorage.getItem('readnow-auth-return-path'));
+      sessionStorage.removeItem('readnow-auth-return-path');
+      navigate(returnPath ?? '/', { replace: true });
     };
 
     const hashParams = new URLSearchParams(window.location.hash.substring(1));

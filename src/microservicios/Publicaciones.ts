@@ -49,6 +49,8 @@ async function request<T>(path: string, options: RequestInit = {}, requiredAuth 
 }
 
 export const getPublicaciones = () => request<Publicacion[]>('/api/publicaciones', {}, false);
+export const getPublicacionesPublicador = (idUsuario: string) =>
+  request<Publicacion[]>(`/api/publicaciones/publicador/${encodeURIComponent(idUsuario)}`, {}, false);
 export const getMisPublicaciones = () => request<Publicacion[]>('/api/publicaciones/mias', {}, true);
 export const crearPublicacion = (data: Partial<Publicacion>) =>
   request<Publicacion>('/api/publicaciones', { method: 'POST', body: JSON.stringify(data) }, true);
