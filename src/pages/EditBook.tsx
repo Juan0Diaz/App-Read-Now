@@ -41,6 +41,9 @@ export const EditBook = () => {
           autor: data.autor || '',
           editorial: data.editorial || '',
           fecha_publicacion: data.fecha_publicacion ? data.fecha_publicacion.substring(0, 10) : '',
+          precio: data.precio !== undefined && data.precio !== null
+            ? new Intl.NumberFormat('es-CO', { maximumFractionDigits: 0 }).format(Number(data.precio)).replace(/\s/g, '.')
+            : '',
           estado: data.estado || 'Nuevo',
           disponible: data.disponible,
           descripcion: data.descripcion || '',
@@ -184,6 +187,26 @@ export const EditBook = () => {
                     onChange={handleChange}
                     className="h-12 w-full rounded-xl border border-border bg-surface-soft px-4 text-text-strong transition-colors focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/20 dark:border-border dark:bg-surface-muted dark:text-text-strong dark:focus:bg-surface-muted"
                   />
+                </div>
+                <div>
+                  <label className="mb-2 flex items-center gap-2 text-sm font-bold text-text-body dark:text-text-body">
+                    <Tag className="h-4 w-4 text-primary" /> Precio (COP)
+                  </label>
+                  <div className="relative">
+                    <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-sm font-bold text-text-muted">$</span>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      name="precio"
+                      required
+                      value={formData.precio}
+                      onChange={handleChange}
+                      className="h-12 w-full rounded-xl border border-border bg-surface-soft pl-8 pr-16 text-text-strong transition-colors focus:border-primary focus:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/20 dark:border-border dark:bg-surface-muted dark:text-text-strong dark:focus:bg-surface-muted"
+                      placeholder="Ej: 137.000"
+                      aria-label="Precio en pesos colombianos"
+                    />
+                    <span className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-xs font-bold text-text-muted">COP</span>
+                  </div>
                 </div>
                 <div>
                   <label className="mb-2 flex items-center gap-2 text-sm font-bold text-text-body dark:text-text-body">

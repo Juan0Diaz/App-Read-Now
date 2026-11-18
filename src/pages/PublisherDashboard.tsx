@@ -162,6 +162,9 @@ export const PublisherDashboard = () => {
                       <div className="rounded-xl border border-border bg-surface-soft px-3 py-2 text-sm text-gray-800 dark:border-border dark:bg-surface-muted dark:text-slate-300">
                         {selectedLibro.fecha_publicacion ? formatDisplayDate(selectedLibro.fecha_publicacion) : 'Sin fecha'}
                       </div>
+                      <div className="rounded-xl border border-border bg-surface-soft px-3 py-2 text-sm font-bold text-primary dark:border-border dark:bg-surface-muted">
+                        Precio: ${new Intl.NumberFormat('es-CO', { maximumFractionDigits: 0 }).format(selectedPublication.precio ?? 0)} COP
+                      </div>
 
                       <p className="line-clamp-5 text-sm leading-relaxed text-gray-800 dark:text-slate-300">
                         {selectedLibro.descripcion || 'Sin descripción disponible para este libro.'}

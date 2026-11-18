@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { Libro } from '../types';
+import { formatPrecioCOP, normalizePrecio, validatePrecio } from '../lib/priceValidation';
 
 export type LibroFormData = {
   titulo: string;
   autor: string;
   editorial: string;
   fecha_publicacion: string;
+  precio: string;
   descripcion: string;
   estado: string;
   disponible: boolean;
@@ -18,13 +20,14 @@ export const createEmptyLibroForm = (): LibroFormData => ({
   autor: '',
   editorial: '',
   fecha_publicacion: '',
+  precio: '',
   descripcion: '',
   estado: 'Nuevo',
   disponible: true,
   portada_url: '',
 });
 
-export function validateLibroForm(formData: Partial<LibroFormData>) {
+export function validateLibroForm(formData: Partial<LibroFormData>, requirePrice = false) {
   const tituloRegex = /^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s\.,!?"¿?:()]+$/;
   if (!tituloRegex.test(formData.titulo ?? '')) {
     throw new Error('El título solo puede contener letras, números y signos de puntuación básicos, no caracteres especiales');
@@ -60,6 +63,10 @@ export function validateLibroForm(formData: Partial<LibroFormData>) {
     }
   }
 
+  if (requirePrice || formData.precio?.trim()) {
+    validatePrecio(formData.precio);
+  }
+
   return descripcion;
 }
 
@@ -81,6 +88,7 @@ export function buildLibroPayload(
     id_genero_1: secondaryGenero,
     id_genero_2: tertiaryGenero,
     descripcion: (formData.descripcion ?? '').trim(),
+    precio: formData.precio?.trim() ? normalizePrecio(formData.precio) : undefined,
     estado: formData.estado,
     disponible: formData.disponible,
     portada_url: portadaUrl || formData.portada_url || undefined,
@@ -103,7 +111,8 @@ export function useLibroForm() {
       return;
     }
 
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const normalizedValue = name === 'precio' ? formatPrecioCOP(value) : value;
+    setFormData((prev) => ({ ...prev, [name]: normalizedValue }));
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -152,17 +161,19 @@ export function useLibroForm() {
     onCreate,
     onUpdate,
     bookId,
+    requirePrice = false,
   }: {
     userId: string;
     onCreate: (payload: Partial<Libro>) => Promise<unknown>;
     onUpdate: (id: string, payload: Partial<Libro>) => Promise<unknown>;
     bookId?: string;
+    requirePrice?: boolean;
   }) => {
     setLoading(true);
     setError('');
 
     try {
-      validateLibroForm(formData);
+      validateLibroForm(formData, requirePrice);
       const portadaUrl = await uploadImageIfNeeded(userId);
       const payload = buildLibroPayload(formData, selectedGeneros, portadaUrl);
 

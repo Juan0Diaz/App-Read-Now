@@ -43,6 +43,7 @@ export interface Libro {
   id_genero_2?: string;
   descripcion?: string;
   portada_url?: string;
+  precio?: number;
   estado_revision?: 'Pendiente' | 'Aprobado' | 'Corrección';
   comentario_revision?: string;
   genero?: Genero;
