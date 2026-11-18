@@ -29,10 +29,9 @@ export function useLibroDetalle(id?: string) {
 
       try {
         const bookData = await getLibro(bookId);
-        setLibro(bookData);
-
         const publicaciones = await getPublicaciones();
         const propia = publicaciones.find((p) => p.id_libro === bookId);
+        setLibro({ ...bookData, precio: propia?.precio });
         setPublisher(propia?.usuario ?? null);
       } catch (err) {
         console.error('Error al cargar el detalle del libro', err);

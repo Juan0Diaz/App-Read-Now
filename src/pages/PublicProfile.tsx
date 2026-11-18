@@ -96,10 +96,10 @@ export const PublicProfile = () => {
         </button>
       </header>
 
-      <div className="mx-auto flex w-full max-w-5xl flex-1 overflow-y-auto p-8">
-        <div className="mb-8 w-full overflow-hidden rounded-3xl border border-border bg-surface shadow-sm">
-          <div className="h-32 w-full bg-gradient-to-r from-primary to-secondary"></div>
-          <div className="relative p-8 pt-0">
+      <div className="mx-auto grid w-full max-w-6xl flex-1 grid-cols-1 content-start gap-8 overflow-y-auto p-4 md:p-8 xl:grid-cols-[320px_minmax(0,1fr)]">
+        <section className="w-full overflow-hidden rounded-3xl border border-border bg-surface shadow-sm">
+          <div className="h-32 w-full bg-gradient-to-r from-primary to-secondary" />
+          <div className="relative p-6 pt-0 sm:p-8 sm:pt-0">
             <div className="-mt-16 mb-4">
               <div className="inline-block h-32 w-32 rounded-full bg-surface p-2 shadow-lg">
                 <div className="flex h-full w-full items-center justify-center rounded-full bg-primary/10 text-4xl font-bold text-primary">
@@ -108,68 +108,70 @@ export const PublicProfile = () => {
               </div>
             </div>
 
-            <h1 className="mb-6 text-3xl font-extrabold text-text-strong">
+            <h1 className="mb-6 break-words text-3xl font-extrabold text-text-strong">
               {publisher.nombre || (user ? publisher.correo?.split('@')[0] : 'Publicador')}
             </h1>
             
             {user && (
               <>
                 <h3 className="mb-4 text-sm font-bold uppercase tracking-tight text-text-strong">Información de Contacto</h3>
-                <div className="mb-8 grid grid-cols-1 gap-4 text-text-body font-medium md:grid-cols-2">
-                  <div className="flex items-center gap-3 rounded-xl border border-border bg-surface-soft p-4">
+                <div className="grid grid-cols-1 gap-3 font-medium text-text-body">
+                  <div className="flex min-w-0 items-center gap-3 rounded-xl border border-border bg-surface-soft p-4">
                     <Mail className="h-5 w-5 text-primary" />
-                    <a href={`mailto:${publisher.correo}`} className="hover:text-primary hover:underline">{publisher.correo}</a>
+                    <a href={`mailto:${publisher.correo}`} className="min-w-0 break-all hover:text-primary hover:underline">{publisher.correo}</a>
                   </div>
                   {publisher.numero_tel && (
-                    <div className="flex items-center gap-3 rounded-xl border border-border bg-surface-soft p-4">
+                    <div className="flex min-w-0 items-center gap-3 rounded-xl border border-border bg-surface-soft p-4">
                       <Phone className="h-5 w-5 text-primary" />
-                      <a href={`tel:${publisher.numero_tel}`} className="hover:text-primary hover:underline">{publisher.numero_tel}</a>
+                      <a href={`tel:${publisher.numero_tel}`} className="min-w-0 break-all hover:text-primary hover:underline">{publisher.numero_tel}</a>
                     </div>
                   )}
                 </div>
               </>
             )}
           </div>
-        </div>
+        </section>
 
-        <h2 className="mb-6 flex items-center gap-2 text-2xl font-bold text-text-strong">
-          <Book className="h-6 w-6 text-primary" /> Libros Publicados
-        </h2>
+        <section className="min-w-0">
+          <h2 className="mb-6 flex items-center gap-2 text-2xl font-bold text-text-strong">
+            <Book className="h-6 w-6 shrink-0 text-primary" /> Libros Publicados
+          </h2>
         
-        {publications.length === 0 ? (
-          <div className="rounded-2xl border border-border bg-surface p-10 text-center text-text-muted">
-            Este usuario no ha publicado libros aún.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {publications.map((pub: any) => {
-              const libro = pub.Libro ?? pub.libro;
-              if (!libro) return null;
-              return (
-                <div key={libro.id_libro} className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-surface transition-all duration-300 hover:shadow-lg">
-                  <div className="flex aspect-[4/3] items-center justify-center border-b border-border bg-surface-soft p-6">
-                    {libro.portada_url ? (
-                      <img src={libro.portada_url} alt={libro.titulo} width={400} height={600} loading="lazy" decoding="async" className="h-full object-contain drop-shadow-md transition-transform duration-300 group-hover:scale-105" />
-                    ) : (
-                      <div className="flex h-36 w-24 items-center justify-center rounded border border-border bg-surface text-indigo-200 shadow-sm dark:border-slate-700 dark:bg-slate-900">
-                        <Book className="h-8 w-8" />
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex flex-1 flex-col p-5">
-                    <h3 className="mb-1 truncate font-bold text-text-strong dark:text-white" title={libro.titulo}>{libro.titulo}</h3>
-                    <p className="mb-4 truncate text-sm text-text-muted dark:text-slate-400">{libro.autor}</p>
-                    <div className="mt-auto flex gap-2">
-                      <Link to={`/libro/${libro.id_libro}`} className="w-full rounded-lg bg-surface-soft px-4 py-2 text-center text-sm font-semibold text-text-strong transition-colors hover:bg-surface-muted dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
-                        Ver Detalles
-                      </Link>
+          {publications.length === 0 ? (
+            <div className="rounded-2xl border border-border bg-surface p-10 text-center text-text-muted">
+              Este usuario no ha publicado libros aún.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 2xl:grid-cols-3">
+              {publications.map((pub) => {
+                const libro = pub.Libro ?? pub.libro;
+                if (!libro) return null;
+                return (
+                  <article key={libro.id_libro} className="group flex h-full min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-surface transition-all duration-300 hover:shadow-lg">
+                    <div className="flex aspect-[4/3] items-center justify-center overflow-hidden border-b border-border bg-surface-soft p-6">
+                      {libro.portada_url ? (
+                        <img src={libro.portada_url} alt={libro.titulo} width={400} height={600} loading="lazy" decoding="async" className="max-h-full max-w-full object-contain drop-shadow-md transition-transform duration-300 group-hover:scale-105" />
+                      ) : (
+                        <div className="flex h-36 w-24 items-center justify-center rounded border border-border bg-surface text-indigo-200 shadow-sm dark:border-slate-700 dark:bg-slate-900">
+                          <Book className="h-8 w-8" />
+                        </div>
+                      )}
                     </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+                    <div className="flex flex-1 flex-col p-5">
+                      <h3 className="mb-1 truncate font-bold text-text-strong dark:text-white" title={libro.titulo}>{libro.titulo}</h3>
+                      <p className="mb-4 truncate text-sm text-text-muted dark:text-slate-400">{libro.autor}</p>
+                      <div className="mt-auto flex gap-2">
+                        <Link to={`/libro/${libro.id_libro}`} className="w-full rounded-lg bg-surface-soft px-4 py-2 text-center text-sm font-semibold text-text-strong transition-colors hover:bg-surface-muted dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700">
+                          Ver Detalles
+                        </Link>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
+        </section>
       </div>
     </div>
   );

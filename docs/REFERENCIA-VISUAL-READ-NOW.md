@@ -195,7 +195,7 @@ Formulario:
 1. Título grande extrabold; corazón outline circular a la derecha. Favorito activo con fondo y texto error, corazón relleno; clic alterna.
 2. Autor precedido por User azul.
 3. Si se reconoce publicador: **Publicado por:** y nombre/correo enlazado a `/publicador/perfil/:id`.
-4. Badges en línea: Tag y nombres de género (o **Sin género**); Bookmark y estado editorial; Calendar y año si hay fecha.
+4. Badges en línea: un badge Tag por cada género (o **Sin género**); Bookmark y estado editorial; Calendar y año si hay fecha.
 5. Si hay descripción: encabezado **Sinopsis** y caja surface-soft con el texto conservando saltos de línea.
 6. **Detalles**, lista con separadores: **Editorial** y valor; **Disponibilidad** con **Disponible ahora** verde o **Reservado** muted.
 7. Pie con botón azul **Solicitar Préstamo**, que pasa a **Procesando...** y se deshabilita mientras opera; si no disponible dice **No Disponible** y se deshabilita. Al lado texto “Si solicitas este libro, tendrás un plazo de 14 días para leerlo.”
@@ -300,9 +300,9 @@ Pie separado por línea: botones **Cancelar** (outline) y **Publicar Libro** (pr
 
 **Carga/no encontrado:** texto **Cargando perfil...** centrado. Si no hay perfil, bloque centrado sobre fondo suave con **Perfil no encontrado** y enlace ArrowLeft **Volver al catálogo**.
 
-**Con datos:** encabezado sticky de 80 px con botón ArrowLeft **Volver** (historial del navegador). Cuerpo scrolleable, ancho máximo 80 rem. Tarjeta ancha de perfil con banner degradado azul→verde de 128 px, avatar de 128 px superpuesto con inicial del correo; nombre o identificador derivado del email como titular extrabold de 30 px. Sección **Información de Contacto** en uppercase: tarjetas de superficie suave con Mail + correo como enlace `mailto:` y Phone + número como enlace `tel:` cuando hay teléfono.
+**Con datos:** encabezado sticky de 80 px con botón ArrowLeft **Volver** (historial del navegador). Cuerpo scrolleable de ancho máximo 96 rem, con perfil y publicaciones en columnas en escritorio y apilados en móvil. La tarjeta de perfil ocupa 20 rem e incluye banner degradado azul→verde de 128 px, avatar de 128 px superpuesto con inicial del correo, nombre o identificador derivado del email como titular extrabold de 30 px, y sección **Información de Contacto**. Correo y teléfono se muestran en tarjetas individuales de superficie suave con Mail/Phone y enlaces `mailto:`/`tel:`; el texto se ajusta al ancho disponible.
 
-Después aparecen el encabezado **Libros Publicados** con Book, y el panel vacío **Este usuario no ha publicado libros aún.** o la grilla de cards disponibles: contenedor de portada 4:3; imagen `object-contain` o icono Book en un lomo genérico vertical; título y autor truncados; botón surface **Ver Detalles** a `/libro/:id`. Solo se listan publicaciones cuyo libro no está marcado no disponible. **Detalle de implementación importante para la fidelidad:** el contenedor del cuerpo declara `flex` pero no `flex-col`; la tarjeta de perfil, el encabezado de libros y la grilla/panel vacío son hermanos directos. Por tanto, en escritorio se disponen horizontalmente y pueden comprimirse en vez de formar una columna ordenada; no introducir una columna idealizada si se busca copiar el render actual. No hay mensaje visible para error de consulta, más allá del log de consola.
+La sección **Libros Publicados** muestra el panel vacío **Este usuario no ha publicado libros aún.** o una grilla de cards disponibles: contenedor de portada 4:3; imagen `object-contain` o icono Book en un lomo genérico vertical; título y autor truncados; botón surface **Ver Detalles** a `/libro/:id`. Solo se listan publicaciones cuyo libro no está marcado no disponible. La grilla presenta una o dos columnas, y tres en pantallas muy anchas. No hay mensaje visible para error de consulta, más allá del log de consola.
 
 ## Panel de Administrador
 

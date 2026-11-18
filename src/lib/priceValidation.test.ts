@@ -3,19 +3,23 @@ import assert from 'node:assert/strict';
 
 import { formatPrecioCOP, normalizePrecio, validatePrecio } from './priceValidation';
 
-test('rechaza un precio vacío o negativo', () => {
+test('rechaza precios vacíos o fuera del límite permitido', () => {
   assert.throws(() => validatePrecio(''), {
-    message: 'El precio debe ser un número mayor o igual a cero.',
+    message: 'El precio debe estar entre $10.000 y $5.000.000 COP.',
   });
-  assert.throws(() => validatePrecio('-1'), {
-    message: 'El precio debe ser un número mayor o igual a cero.',
+  assert.throws(() => validatePrecio('9.999'), {
+    message: 'El precio debe estar entre $10.000 y $5.000.000 COP.',
+  });
+  assert.throws(() => validatePrecio('5.000.001'), {
+    message: 'El precio debe estar entre $10.000 y $5.000.000 COP.',
   });
 });
 
-test('permite un precio válido', () => {
+test('permite precios en los límites mínimo y máximo', () => {
+  assert.equal(validatePrecio('10.000'), 10000);
   assert.equal(validatePrecio('25.500'), 25500);
+  assert.equal(validatePrecio('5.000.000'), 5000000);
   assert.equal(normalizePrecio('137.000'), 137000);
-  assert.equal(validatePrecio('1.234.567.890'), 1234567890);
 });
 
 test('formatea precios colombianos con separador de miles', () => {
