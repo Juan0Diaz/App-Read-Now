@@ -72,5 +72,6 @@ public record PublicadorResumenDto(
 
 public record LibroRevisionSolicitudDto(
     [property: JsonPropertyName("libro")] Libro Libro,
-    [property: JsonPropertyName("publicador")] PublicadorResumenDto? Publicador
+    [property: JsonPropertyName("publicador")] PublicadorResumenDto? Publicador,
+    [property: JsonPropertyName("precio")] decimal? Precio
 );

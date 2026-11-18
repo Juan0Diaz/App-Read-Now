@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { BookPlus, List, Edit, Trash2 } from 'lucide-react';
+import { AlertCircle, BookPlus, List, Edit, Trash2 } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 import { getMisPublicaciones, getPublicaciones, eliminarPublicacionConLibro } from '../microservicios/Publicaciones';
 import { formatDisplayDate, getDisplayPublicationDate } from '../lib/dateUtils';
@@ -98,6 +98,9 @@ export const PublisherDashboard = () => {
   }
 
   const profileInitial = (user?.nombre || user?.correo || 'U').charAt(0).toUpperCase();
+  const correctionPublications = role === 'Publicador'
+    ? publicaciones.filter(pub => pub.libro?.estado_revision === 'Corrección')
+    : [];
 
   return (
     <div className="flex h-full flex-col animate-in fade-in bg-bg-warm text-text-strong duration-500 dark:bg-surface-soft dark:text-text-strong">
@@ -114,6 +117,41 @@ export const PublisherDashboard = () => {
           <div className="mb-8 w-full">
             <p className="page-subtitle">{role === 'Administrador' ? 'Gestiona todo el catálogo de la plataforma.' : 'Gestiona los libros que has agregado al catálogo.'}</p>
           </div>
+
+          {correctionPublications.length > 0 && (
+            <section
+              aria-live="polite"
+              className="mb-6 rounded-2xl border border-warning/30 bg-warning/10 p-4"
+            >
+              <div className="flex items-center gap-2 font-bold text-warning">
+                <AlertCircle className="h-5 w-5 shrink-0" />
+                <h2>
+                  {correctionPublications.length === 1
+                    ? 'Tienes una publicación que requiere corrección'
+                    : `Tienes ${correctionPublications.length} publicaciones que requieren corrección`}
+                </h2>
+              </div>
+              <ul className="mt-3 space-y-3">
+                {correctionPublications.map(pub => (
+                  <li key={pub.id_publicacion} className="flex flex-col justify-between gap-2 rounded-xl bg-surface p-3 sm:flex-row sm:items-center">
+                    <div>
+                      <p className="font-semibold text-text-strong">{pub.libro?.titulo}</p>
+                      {pub.libro?.comentario_revision && (
+                        <p className="mt-1 whitespace-pre-wrap text-sm text-text-body">{pub.libro.comentario_revision}</p>
+                      )}
+                    </div>
+                    <Button
+                      type="button"
+                      className="shrink-0"
+                      onClick={() => navigate(`/publicador/libros/editar/${pub.id_libro}`)}
+                    >
+                      Corregir publicación
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           <div className="grid w-full gap-6 xl:grid-cols-[340px_minmax(0,1fr)]">
             <aside className="w-full overflow-hidden rounded-2xl border border-border bg-surface shadow-sm dark:border-border dark:bg-surface">

@@ -52,8 +52,11 @@ public sealed class LibrosServices : ILibrosServices
 	{
 		return await (
 			from libro in _db.Libros
+				.Include(libro => libro.Genero)
+				.Include(libro => libro.Genero1)
+				.Include(libro => libro.Genero2)
 			where libro.EstadoRevision == Libro.RevisionPendiente
-			join publicacion in _db.Publicaciones on libro.IdLibro equals publicacion.IdLibro into publicaciones
+			join publicacion in _db.Publicaciones on (Guid?)libro.IdLibro equals publicacion.IdLibro into publicaciones
 			from publicacion in publicaciones.DefaultIfEmpty()
 			join usuario in _db.Usuarios on publicacion.IdUsuario equals usuario.IdUsuario into usuarios
 			from usuario in usuarios.DefaultIfEmpty()
@@ -62,7 +65,8 @@ public sealed class LibrosServices : ILibrosServices
 				libro,
 				usuario == null
 					? null
-					: new PublicadorResumenDto(usuario.IdUsuario, usuario.Nombre, usuario.Correo, usuario.NumeroTel)
+					: new PublicadorResumenDto(usuario.IdUsuario, usuario.Nombre, usuario.Correo, usuario.NumeroTel),
+				publicacion == null ? null : publicacion.Precio
 			))
 			.AsNoTracking()
 			.ToListAsync();

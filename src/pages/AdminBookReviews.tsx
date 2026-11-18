@@ -4,7 +4,9 @@ import { AlertCircle, Check, Edit2, MessageSquareText, RotateCcw } from 'lucide-
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/Button';
 import { actualizarLibro, getSolicitudesRevision, revisarLibro } from '../microservicios/Libros';
-import { Libro, SolicitudRevision } from '../types';
+import { Genero, Libro, SolicitudRevision } from '../types';
+import { formatPrecioCOP } from '../lib/priceValidation';
+import { Badge } from '../components/ui/Badge';
 
 const revisionLabel: Record<string, string> = {
   Pendiente: 'Pendiente de revisión',
@@ -26,6 +28,9 @@ export const AdminBookReviews = () => {
     () => libros.find((libro) => libro.id_libro === selectedId) ?? null,
     [libros, selectedId],
   );
+  const selectedGeneros: Genero[] = selected
+    ? [selected.genero, selected.genero_1, selected.genero_2].filter((genero): genero is Genero => !!genero)
+    : [];
 
   const fetchSolicitudes = async () => {
     try {
@@ -203,6 +208,26 @@ export const AdminBookReviews = () => {
                   />
                 </label>
               ))}
+
+              <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
+                <span className="text-sm font-semibold text-text-body">Precio indicado por el publicador</span>
+                <p className="mt-2 text-lg font-bold text-primary" aria-live="polite">
+                  {selected.precio == null
+                    ? 'Sin precio asociado a la publicación'
+                    : `$${formatPrecioCOP(selected.precio)} COP`}
+                </p>
+              </div>
+
+              <div className="md:col-span-2">
+                <span className="text-sm font-semibold text-text-body">Géneros</span>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {selectedGeneros.length > 0 ? selectedGeneros.map((genero) => (
+                    <Badge key={genero.id_genero} variant="primary">{genero.nombre_genero}</Badge>
+                  )) : (
+                    <span className="text-sm text-text-muted">Sin géneros asignados</span>
+                  )}
+                </div>
+              </div>
 
               <div className="md:col-span-2">
                 <span className="text-sm font-semibold text-text-body">Portada del libro</span>

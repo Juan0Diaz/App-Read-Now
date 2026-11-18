@@ -159,11 +159,12 @@ export const NewBook = () => {
                       value={formData.precio}
                       onChange={handleChange}
                       className="theme-input pl-8 pr-16"
-                      placeholder="Ej: 137.000"
+                      placeholder="Entre 10.000 y 5.000.000"
                       aria-label="Precio en pesos colombianos"
                     />
                     <span className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-xs font-bold text-text-muted">COP</span>
                   </div>
+                  <p className="mt-1 text-xs text-text-muted">Mínimo $10.000 y máximo $5.000.000 COP.</p>
                 </div>
               </div>
 

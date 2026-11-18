@@ -54,6 +54,7 @@ export interface Libro {
 
 export interface SolicitudRevision extends Libro {
   publicador?: User;
+  precio?: number;
 }
 
 export interface Publicacion {

@@ -11,6 +11,12 @@ import { Button, buttonVariants } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { BookCover } from '../components/ui/BookCover';
 
+const copFormatter = new Intl.NumberFormat('es-CO', {
+  style: 'currency',
+  currency: 'COP',
+  maximumFractionDigits: 0,
+});
+
 export const BookDetail = () => {
   const { id } = useParams();
   const { user, role } = useAuth();
@@ -125,11 +131,18 @@ export const BookDetail = () => {
               </div>
             )}
 
-            <div className="mb-8 flex flex-wrap gap-4">
-              <Badge variant="primary" className="gap-1.5">
-                <Tag className="h-3.5 w-3.5" />
-                {generosList.length > 0 ? generosList.map(g => g.nombre_genero).join(', ') : 'Sin género'}
-              </Badge>
+            <div className="mb-8 flex flex-wrap gap-2">
+              {generosList.length > 0 ? generosList.map(genero => (
+                <Badge key={genero.id_genero} variant="primary" className="gap-1.5">
+                  <Tag className="h-3.5 w-3.5" />
+                  {genero.nombre_genero}
+                </Badge>
+              )) : (
+                <Badge variant="primary" className="gap-1.5">
+                  <Tag className="h-3.5 w-3.5" />
+                  Sin género
+                </Badge>
+              )}
               <Badge variant="secondary" className="gap-1.5">
                 <Bookmark className="h-3.5 w-3.5" />
                 {libro.estado}
@@ -166,6 +179,12 @@ export const BookDetail = () => {
                     {libro.disponible ? 'Disponible ahora' : 'Reservado'}
                   </span>
                 </li>
+                {libro.precio != null && (
+                  <li className="flex items-center justify-between border-b border-border pb-2">
+                    <span className="text-text-muted">Precio</span>
+                    <span className="font-bold text-primary">{copFormatter.format(libro.precio)}</span>
+                  </li>
+                )}
               </ul>
             </div>
 

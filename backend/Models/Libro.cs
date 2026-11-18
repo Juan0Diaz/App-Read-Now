@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace Backend.Api.Models;
 
 // Coincide con la tabla public."Libro"
@@ -14,10 +16,14 @@ public class Libro
     public Guid? IdGenero { get; set; }
     public Genero? Genero { get; set; }
 
+    [JsonPropertyName("id_genero_1")]
     public Guid? IdGenero1 { get; set; }
+    [JsonPropertyName("genero_1")]
     public Genero? Genero1 { get; set; }
 
+    [JsonPropertyName("id_genero_2")]
     public Guid? IdGenero2 { get; set; }
+    [JsonPropertyName("genero_2")]
     public Genero? Genero2 { get; set; }
 
     public string? Descripcion { get; set; }
