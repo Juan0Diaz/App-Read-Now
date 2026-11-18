@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { Libro } from '../types';
-import { validatePrecio } from '../lib/priceValidation';
+import { formatPrecioCOP, normalizePrecio, validatePrecio } from '../lib/priceValidation';
 
 export type LibroFormData = {
   titulo: string;
@@ -88,7 +88,7 @@ export function buildLibroPayload(
     id_genero_1: secondaryGenero,
     id_genero_2: tertiaryGenero,
     descripcion: (formData.descripcion ?? '').trim(),
-    precio: formData.precio?.trim() ? Number(formData.precio) : undefined,
+    precio: formData.precio?.trim() ? normalizePrecio(formData.precio) : undefined,
     estado: formData.estado,
     disponible: formData.disponible,
     portada_url: portadaUrl || formData.portada_url || undefined,
@@ -111,7 +111,8 @@ export function useLibroForm() {
       return;
     }
 
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const normalizedValue = name === 'precio' ? formatPrecioCOP(value) : value;
+    setFormData((prev) => ({ ...prev, [name]: normalizedValue }));
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {

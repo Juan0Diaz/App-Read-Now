@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import { validatePrecio } from './priceValidation';
+import { formatPrecioCOP, normalizePrecio, validatePrecio } from './priceValidation';
 
 test('rechaza un precio vacío o negativo', () => {
   assert.throws(() => validatePrecio(''), {
@@ -13,5 +13,11 @@ test('rechaza un precio vacío o negativo', () => {
 });
 
 test('permite un precio válido', () => {
-  assert.equal(validatePrecio('25.50'), 25.5);
+  assert.equal(validatePrecio('25.500'), 25500);
+  assert.equal(normalizePrecio('137.000'), 137000);
+});
+
+test('formatea precios colombianos con separador de miles', () => {
+  assert.equal(formatPrecioCOP('137000'), '137.000');
+  assert.equal(formatPrecioCOP('137'), '137');
 });
