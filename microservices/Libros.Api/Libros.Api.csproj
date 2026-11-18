@@ -13,7 +13,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="../../backend/Auth/ISupabaseJwtTokenValidator.cs" Link="Auth/ISupabaseJwtTokenValidator.cs" />
     <Compile Include="../../backend/Auth/SupabaseJwtAuthHandler.cs" Link="Auth/SupabaseJwtAuthHandler.cs" />
+    <Compile Include="../../backend/Auth/SupabaseJwtTokenValidator.cs" Link="Auth/SupabaseJwtTokenValidator.cs" />
     <Compile Include="../../backend/Auth/RoleClaimsTransformation.cs" Link="Auth/RoleClaimsTransformation.cs" />
     <Compile Include="../../backend/Controllers/LibrosController.cs" Link="Controllers/LibrosController.cs" />
     <Compile Include="../../backend/Data/AppDbContext.cs" Link="Data/AppDbContext.cs" />
