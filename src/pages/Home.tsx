@@ -105,9 +105,10 @@ export const Home = () => {
     ? [...matchingStatuses, ...statusOptions.filter(opt => opt.value === filterDisponibilidad && !matchingStatuses.includes(opt))]
     : matchingStatuses;
 
+  const normalizedSearchTerm = normalizeSearchText(searchTerm);
   const filteredLibros = libros.filter(libro => {
-    const matchesSearch = libro.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      libro.autor.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = normalizeSearchText(libro.titulo).includes(normalizedSearchTerm) ||
+      normalizeSearchText(libro.autor).includes(normalizedSearchTerm);
     const matchesGenero = selectedGenero
       ? (libro.id_genero === selectedGenero || libro.id_genero_1 === selectedGenero || libro.id_genero_2 === selectedGenero)
       : true;
