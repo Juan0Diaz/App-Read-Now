@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Outlet, Link, useNavigate, useLocation, Navigate } from 'react-router-dom';
-import { Library, User, LogOut, LayoutDashboard, Users, Heart, BookOpen, ShieldAlert, Clock, ClipboardCheck, Tags, Lock } from 'lucide-react';
+import { Library, User, UserPlus, LogOut, LayoutDashboard, Users, Heart, BookOpen, ShieldAlert, Clock, ClipboardCheck, Tags, Lock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { buttonVariants } from './ui/Button';
 import { getSolicitudesRevision } from '../microservicios/Libros';
@@ -323,10 +323,16 @@ export const Layout = () => {
             <span className="max-w-full truncate text-[10px] font-bold sm:text-xs">Perfil</span>
           </Link>
         ) : (
-          <Link to="/login" aria-current={location.pathname === '/login' ? 'page' : undefined} className={mobileNavItemClasses(location.pathname === '/login')}>
-            <User className="h-5 w-5 shrink-0" />
-            <span className="max-w-full truncate text-[10px] font-bold sm:text-xs">Entrar</span>
-          </Link>
+          <>
+            <Link to="/login" aria-current={location.pathname === '/login' ? 'page' : undefined} className={mobileNavItemClasses(location.pathname === '/login')}>
+              <User className="h-5 w-5 shrink-0" />
+              <span className="max-w-full truncate text-[10px] font-bold sm:text-xs">Entrar</span>
+            </Link>
+            <Link to="/login?register=true" className={mobileNavItemClasses(false)}>
+              <UserPlus className="h-5 w-5 shrink-0" />
+              <span className="max-w-full truncate text-[10px] font-bold sm:text-xs">Registrarse</span>
+            </Link>
+          </>
         )}
       </nav>
     </div>

@@ -175,10 +175,19 @@ export const BookDetail = () => {
                 className="w-full sm:w-auto"
                 disabled={user ? !libro.disponible || requestingLoan : !libro.disponible}
               >
-                {requestingLoan ? 'Procesando...' : !user ? 'Inicia sesión para solicitar' : (libro.disponible ? 'Solicitar Préstamo' : 'No Disponible')}
+                {requestingLoan ? 'Procesando...' : !libro.disponible ? 'No Disponible' : !user ? 'Inicia sesión para solicitar' : 'Solicitar Préstamo'}
               </Button>
               <p className="text-center text-xs text-text-muted sm:text-left">
-                Si solicitas este libro, tendrás un plazo de 14 días para leerlo.
+                {!user ? (
+                  <>
+                    <Link to="/login" className="font-semibold text-primary hover:underline">Inicia sesión</Link>
+                    {' o '}
+                    <Link to="/login?register=true" className="font-semibold text-primary hover:underline">regístrate</Link>
+                    {' para pedir este préstamo.'}
+                  </>
+                ) : (
+                  'Si solicitas este libro, tendrás un plazo de 14 días para leerlo.'
+                )}
               </p>
             </div>
           </div>
