@@ -19,6 +19,7 @@ Environment.SetEnvironmentVariable("SUPABASE_URL", supabaseUrl);
 builder.Services.AddDbContext<PrestamosDbContext>(options => options.UseNpgsql(connectionString));
 builder.Services.AddScoped<IPrestamosServices, PrestamosServices>();
 builder.Services.AddScoped<IClaimsTransformation, RoleClaimsTransformation>();
+builder.Services.AddHttpClient<ISupabaseJwtTokenValidator, SupabaseJwtTokenValidator>();
 
 builder.Services
     .AddAuthentication(options =>

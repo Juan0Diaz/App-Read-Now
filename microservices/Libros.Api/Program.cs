@@ -18,6 +18,7 @@ Environment.SetEnvironmentVariable("SUPABASE_URL", supabaseUrl);
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
 builder.Services.AddScoped<ILibrosServices, LibrosServices>();
 builder.Services.AddScoped<IClaimsTransformation, RoleClaimsTransformation>();
+builder.Services.AddHttpClient<ISupabaseJwtTokenValidator, SupabaseJwtTokenValidator>();
 
 builder.Services
     .AddAuthentication(options =>

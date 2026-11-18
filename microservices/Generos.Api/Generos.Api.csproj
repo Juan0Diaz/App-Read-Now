@@ -13,6 +13,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="../../backend/Auth/ISupabaseJwtTokenValidator.cs" Link="Auth/ISupabaseJwtTokenValidator.cs" />
     <Compile Include="../../backend/Auth/SupabaseJwtAuthHandler.cs" Link="Auth/SupabaseJwtAuthHandler.cs" />
+    <Compile Include="../../backend/Auth/SupabaseJwtTokenValidator.cs" Link="Auth/SupabaseJwtTokenValidator.cs" />
   </ItemGroup>
 </Project>
