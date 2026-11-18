@@ -67,7 +67,7 @@ export const Profile = () => {
 
   const handleLogout = async () => {
     await signOut();
-    navigate('/login');
+    navigate('/');
   };
 
   const handleDeleteAccount = async () => {
