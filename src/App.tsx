@@ -4,8 +4,8 @@
  */
 
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { Layout } from './components/Layout';
 import { useDarkMode } from './hooks/useDarkMode';
 
@@ -36,6 +36,11 @@ const withPageLoading = (page: React.ReactNode) => (
   <React.Suspense fallback={<PageLoading />}>{page}</React.Suspense>
 );
 
+const AdminRestrictedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { role } = useAuth();
+  return role === 'Administrador' ? <Navigate to="/" replace /> : <>{children}</>;
+};
+
 export default function App() {
   useDarkMode(); // Initialize dark mode
   
@@ -50,8 +55,8 @@ export default function App() {
           <Route path="/" element={<Layout />}>
             <Route index element={withPageLoading(<Home />)} />
             <Route path="perfil" element={withPageLoading(<Profile />)} />
-            <Route path="favoritos" element={withPageLoading(<Favorites />)} />
-            <Route path="prestamos" element={withPageLoading(<Loans />)} />
+            <Route path="favoritos" element={<AdminRestrictedRoute>{withPageLoading(<Favorites />)}</AdminRestrictedRoute>} />
+            <Route path="prestamos" element={<AdminRestrictedRoute>{withPageLoading(<Loans />)}</AdminRestrictedRoute>} />
             <Route path="libro/:id" element={withPageLoading(<BookDetail />)} />
             <Route path="publicador/libros" element={withPageLoading(<PublisherDashboard />)} />
             <Route path="publicador/libros/nuevo" element={withPageLoading(<NewBook />)} />

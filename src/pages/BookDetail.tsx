@@ -13,7 +13,7 @@ import { BookCover } from '../components/ui/BookCover';
 
 export const BookDetail = () => {
   const { id } = useParams();
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const requireAuth = useRequireAuth();
   const { isFavorito, toggleFavorito } = useFavoritos(user);
   const { libro, publisher, loading, setLibro } = useLibroDetalle(id);
@@ -96,17 +96,19 @@ export const BookDetail = () => {
           <div className="flex w-full flex-col p-6 md:w-3/5 md:p-8 lg:w-2/3">
             <div className="mb-2 flex items-start justify-between gap-4">
               <h1 className="text-2xl font-extrabold tracking-tight text-text-strong md:text-3xl">{libro.titulo}</h1>
-              <Button
-                aria-label={favorito ? 'Quitar de favoritos' : 'Agregar a favoritos'}
-                onClick={() => {
-                  if (requireAuth()) void toggleFavorito(libro.id_libro);
-                }}
-                variant="outline"
-                size="icon"
-                className={`shrink-0 rounded-full ${favorito ? 'border-error/20 bg-error/10 text-error' : 'border-border text-text-muted hover:border-error/20 hover:bg-error/10 hover:text-error'}`}
-              >
-                <Heart className={`h-5 w-5 ${favorito ? 'fill-current' : ''}`} />
-              </Button>
+              {role !== 'Administrador' && (
+                <Button
+                  aria-label={favorito ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+                  onClick={() => {
+                    if (requireAuth()) void toggleFavorito(libro.id_libro);
+                  }}
+                  variant="outline"
+                  size="icon"
+                  className={`shrink-0 rounded-full ${favorito ? 'border-error/20 bg-error/10 text-error' : 'border-border text-text-muted hover:border-error/20 hover:bg-error/10 hover:text-error'}`}
+                >
+                  <Heart className={`h-5 w-5 ${favorito ? 'fill-current' : ''}`} />
+                </Button>
+              )}
             </div>
 
             <div className="mb-4 flex items-center gap-2 text-lg font-medium text-text-body">
@@ -167,29 +169,35 @@ export const BookDetail = () => {
               </ul>
             </div>
 
-            <div className="mt-auto flex flex-col items-center gap-4 border-t border-border pt-6 sm:flex-row">
-              <Button
-                onClick={handleRequestLoan}
-                variant="primary"
-                size="lg"
-                className="w-full sm:w-auto"
-                disabled={user ? !libro.disponible || requestingLoan : !libro.disponible}
-              >
-                {requestingLoan ? 'Procesando...' : !libro.disponible ? 'No Disponible' : !user ? 'Inicia sesión para solicitar' : 'Solicitar Préstamo'}
-              </Button>
-              <p className="text-center text-xs text-text-muted sm:text-left">
-                {!user ? (
-                  <>
-                    <Link to="/login" className="font-semibold text-primary hover:underline">Inicia sesión</Link>
-                    {' o '}
-                    <Link to="/login?register=true" className="font-semibold text-primary hover:underline">regístrate</Link>
-                    {' para pedir este préstamo.'}
-                  </>
-                ) : (
-                  'Si solicitas este libro, tendrás un plazo de 14 días para leerlo.'
-                )}
+            {role === 'Administrador' ? (
+              <p className="mt-auto border-t border-border pt-6 text-center text-sm text-text-muted">
+                Los préstamos no aplican para administradores.
               </p>
-            </div>
+            ) : (
+              <div className="mt-auto flex flex-col items-center gap-4 border-t border-border pt-6 sm:flex-row">
+                <Button
+                  onClick={handleRequestLoan}
+                  variant="primary"
+                  size="lg"
+                  className="w-full sm:w-auto"
+                  disabled={user ? !libro.disponible || requestingLoan : !libro.disponible}
+                >
+                  {requestingLoan ? 'Procesando...' : !libro.disponible ? 'No Disponible' : !user ? 'Inicia sesión para solicitar' : 'Solicitar Préstamo'}
+                </Button>
+                <p className="text-center text-xs text-text-muted sm:text-left">
+                  {!user ? (
+                    <>
+                      <Link to="/login" className="font-semibold text-primary hover:underline">Inicia sesión</Link>
+                      {' o '}
+                      <Link to="/login?register=true" className="font-semibold text-primary hover:underline">regístrate</Link>
+                      {' para pedir este préstamo.'}
+                    </>
+                  ) : (
+                    'Si solicitas este libro, tendrás un plazo de 14 días para leerlo.'
+                  )}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
