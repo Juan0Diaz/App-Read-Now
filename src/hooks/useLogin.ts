@@ -24,10 +24,20 @@ export function useLogin() {
     onLoginSuccess: () => void,
     onRegisterSuccess: () => void,
   ) => {
-    setLoading(true);
     setError('');
     setResetMessage('');
 
+    if (
+      values.isRegister &&
+      !/^(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9\s]).{8,}$/.test(values.password)
+    ) {
+      setError(
+        'La contraseña no cumple con los parámetros de seguridad mínimos. Recuerda que debe ser de mínimo 8 caracteres, e incluir mayúsculas, números y caracteres/símbolos especiales.',
+      );
+      return;
+    }
+
+    setLoading(true);
     try {
       if (values.isRegister) {
         await signUp(values.email, values.password, values.birthDate, values.acceptedTerms);
