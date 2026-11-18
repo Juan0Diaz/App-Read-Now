@@ -44,7 +44,7 @@ export const Layout = () => {
 
   const handleLogout = async () => {
     await signOut();
-    navigate('/login');
+    navigate('/');
   };
 
   const NavLink = ({ to, icon, label, mobileHide = false, badge, locked = false }: { to: string, icon: React.ReactNode, label: string, mobileHide?: boolean, badge?: number, locked?: boolean }) => {

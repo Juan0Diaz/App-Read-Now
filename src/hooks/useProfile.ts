@@ -34,7 +34,7 @@ export function useProfile(
     try {
       await eliminarMiCuenta();
       await signOut();
-      navigate('/login');
+      navigate('/');
     } catch (err: any) {
       alert('Error eliminando la cuenta: ' + err.message);
       setShowDeleteConfirm(false);
