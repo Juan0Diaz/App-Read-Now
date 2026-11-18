@@ -40,9 +40,7 @@ public record LibroConPublicacionCreateDto(
     [property: JsonPropertyName("autor")] string Autor,
     [property: JsonPropertyName("editorial")] string? Editorial,
     [property: JsonPropertyName("fecha_publicacion")] DateOnly? FechaPublicacion,
-    [property: JsonPropertyName("precio")]
-    [Range(typeof(decimal), "0", "79228162514264337593543950335")]
-    decimal? Precio,
+    [property: JsonPropertyName("precio")] decimal Precio,
     [property: JsonPropertyName("id_genero")] Guid? IdGenero,
     [property: JsonPropertyName("id_genero_1")] Guid? IdGenero1,
     [property: JsonPropertyName("id_genero_2")] Guid? IdGenero2,

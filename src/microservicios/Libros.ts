@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase';
-import { Libro, SolicitudRevision, User } from '../types';
+import { Libro, LibroConPublicacionCreateInput, SolicitudRevision, User } from '../types';
 
 const API_URL = (import.meta.env.VITE_LIBROS_API_URL ?? import.meta.env.VITE_API_URL ?? 'http://localhost:5080/gateway').replace(/\/+$/, '');
 
@@ -71,7 +71,7 @@ export const resubmitirLibro = (id: string, comentario?: string) =>
   }, true);
 export const crearLibro = (data: Partial<Libro>) =>
   request<Libro>('/api/libros', { method: 'POST', body: JSON.stringify(data) }, true);
-export const crearLibroConPublicacion = (data: Partial<Libro>) =>
+export const crearLibroConPublicacion = (data: LibroConPublicacionCreateInput) =>
   request<Libro>('/api/libros/publicar', { method: 'POST', body: JSON.stringify(data) }, true);
 export const actualizarLibro = (id: string, data: Partial<Libro>) =>
   request<void>(`/api/libros/${id}`, { method: 'PUT', body: JSON.stringify(data) }, true);

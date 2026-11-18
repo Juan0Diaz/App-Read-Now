@@ -2,7 +2,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 COPY microservices/Generos.Api/Generos.Api.csproj microservices/Generos.Api/
-COPY backend/Auth/SupabaseJwtAuthHandler.cs backend/Auth/
+COPY backend/Auth/ backend/Auth/
 RUN dotnet restore microservices/Generos.Api/Generos.Api.csproj
 
 COPY microservices/Generos.Api/ microservices/Generos.Api/

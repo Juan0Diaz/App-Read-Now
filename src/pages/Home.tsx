@@ -12,6 +12,12 @@ import { BookCover } from '../components/ui/BookCover';
 import { Badge } from '../components/ui/Badge';
 import { normalizeSearchText } from '../lib/searchUtils';
 
+const copFormatter = new Intl.NumberFormat('es-CO', {
+  style: 'currency',
+  currency: 'COP',
+  maximumFractionDigits: 0,
+});
+
 export const Home = () => {
   const { user, role } = useAuth();
   const requireAuth = useRequireAuth();
@@ -417,6 +423,11 @@ export const Home = () => {
                     {libro.disponible ? 'Disponible' : 'Reservado'}
                   </Badge>
                 </div>
+                {libro.publicacion?.precio != null && (
+                  <p className="mt-2 text-sm font-bold text-black dark:text-white sm:text-base">
+                    {copFormatter.format(libro.publicacion.precio)}
+                  </p>
+                )}
               </Link>
             ))}
           </div>

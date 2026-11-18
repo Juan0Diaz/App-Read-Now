@@ -90,3 +90,7 @@ export interface UsuarioPrestamo {
 export interface LibroWithDetails extends Libro {
   publicacion?: Publicacion;
 }
+
+export interface LibroConPublicacionCreateInput extends Partial<Libro> {
+  precio: number;
+}

@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getLibroGestion, actualizarLibro } from '../microservicios/Libros';
+import { getMisPublicaciones, getPublicaciones, actualizarPublicacion } from '../microservicios/Publicaciones';
 import { useGeneros } from '../hooks/useGeneros';
 import { useAuth } from '../context/AuthContext';
 import { useLibroForm, createEmptyLibroForm } from '../hooks/useLibroForm';
 import { Button } from '../components/ui/Button';
 import { ArrowLeft, Book, AlignLeft, Calendar, Tag, Building2, AlertCircle, BookOpen, Plus, X, Upload, ImagePlus } from 'lucide-react';
+import { Libro, Publicacion } from '../types';
+import { formatPrecioCOP } from '../lib/priceValidation';
 
 export const EditBook = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const { generos } = useGeneros();
   const {
     formData,
@@ -27,6 +30,8 @@ export const EditBook = () => {
     submitBook,
   } = useLibroForm();
   const [fetching, setFetching] = useState(true);
+  const [publicacion, setPublicacion] = useState<Publicacion | null>(null);
+  const [libroOriginal, setLibroOriginal] = useState<Libro | null>(null);
 
   useEffect(() => {
     if (!id) {
@@ -34,16 +39,21 @@ export const EditBook = () => {
       return;
     }
 
-    getLibroGestion(id)
-      .then((data) => {
+    Promise.all([
+      getLibroGestion(id),
+      role === 'Administrador' ? getPublicaciones() : getMisPublicaciones(),
+    ])
+      .then(([data, publicaciones]) => {
+        const publicacionLibro = publicaciones.find(item => item.id_libro === id) ?? null;
+        setLibroOriginal(data);
+        setPublicacion(publicacionLibro);
         setFormData({
+          ...createEmptyLibroForm(),
           titulo: data.titulo || '',
           autor: data.autor || '',
           editorial: data.editorial || '',
           fecha_publicacion: data.fecha_publicacion ? data.fecha_publicacion.substring(0, 10) : '',
-          precio: data.precio !== undefined && data.precio !== null
-            ? new Intl.NumberFormat('es-CO', { maximumFractionDigits: 0 }).format(Number(data.precio)).replace(/\s/g, '.')
-            : '',
+          precio: formatPrecioCOP(publicacionLibro?.precio),
           estado: data.estado || 'Nuevo',
           disponible: data.disponible,
           descripcion: data.descripcion || '',
@@ -57,9 +67,9 @@ export const EditBook = () => {
 
         setSelectedGeneros(fetchedGeneros.length > 0 ? fetchedGeneros : ['']);
       })
-      .catch(() => setError('Error cargando los detalles del libro.'))
+      .catch((err: Error) => setError(err.message || 'Error cargando los detalles del libro.'))
       .finally(() => setFetching(false));
-  }, [id, setFormData, setSelectedGeneros, setError]);
+  }, [id, role, setFormData, setSelectedGeneros, setError]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,7 +89,23 @@ export const EditBook = () => {
         userId: user.id_usuario,
         bookId: id,
         onCreate: async () => undefined,
-        onUpdate: async (bookId, payload) => await actualizarLibro(bookId, payload),
+        onUpdate: async (bookId, payload, precio) => {
+          if (!publicacion) {
+            throw new Error('No se encontró la publicación asociada a este libro para actualizar su precio.');
+          }
+
+          const libroCambio = !libroOriginal || (
+            Object.keys(payload) as Array<keyof Libro>
+          ).some(key => String(payload[key] ?? '') !== String(libroOriginal[key] ?? ''));
+
+          if (libroCambio) {
+            await actualizarLibro(bookId, payload);
+          }
+
+          if (Number(publicacion.precio ?? 0) !== precio) {
+            await actualizarPublicacion(publicacion.id_publicacion, { precio });
+          }
+        },
       });
       alert('¡Libro actualizado con éxito!');
       navigate('/publicador/libros');

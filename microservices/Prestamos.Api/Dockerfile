@@ -2,7 +2,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 COPY microservices/Prestamos.Api/Prestamos.Api.csproj microservices/Prestamos.Api/
-COPY backend/Auth/SupabaseJwtAuthHandler.cs backend/Auth/
+COPY backend/Auth/ backend/Auth/
 RUN dotnet restore microservices/Prestamos.Api/Prestamos.Api.csproj
 
 COPY microservices/Prestamos.Api/ microservices/Prestamos.Api/

@@ -3,7 +3,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 COPY microservices/Favoritos.Api/Favoritos.Api.csproj microservices/Favoritos.Api/
-COPY backend/Auth/SupabaseJwtAuthHandler.cs backend/Auth/
+COPY backend/Auth/ backend/Auth/
 COPY backend/Data/AppDbContext.cs backend/Data/
 COPY backend/Models/ backend/Models/
 RUN dotnet restore microservices/Favoritos.Api/Favoritos.Api.csproj

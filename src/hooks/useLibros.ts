@@ -1,7 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import { isDemoMode, MOCK_LIBROS } from '../lib/supabase';
 import { getLibros } from '../microservicios/Libros';
-import { Libro } from '../types';
+import { getPublicaciones } from '../microservicios/Publicaciones';
+import { LibroWithDetails } from '../types';
 
 /**
  * Hook centralizado para obtener el catálogo de libros desde el backend en C#.
@@ -9,7 +10,7 @@ import { Libro } from '../types';
  * páginas); ahora vive en un solo lugar.
  */
 export function useLibros() {
-  const [libros, setLibros] = useState<Libro[]>([]);
+  const [libros, setLibros] = useState<LibroWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -18,14 +19,22 @@ export function useLibros() {
     setError(null);
 
     if (isDemoMode) {
-      setLibros(MOCK_LIBROS as unknown as Libro[]);
+      setLibros(MOCK_LIBROS as unknown as LibroWithDetails[]);
       setLoading(false);
       return;
     }
 
     try {
-      const data = await getLibros();
-      setLibros(data);
+      const [data, publicaciones] = await Promise.all([getLibros(), getPublicaciones()]);
+      const publicacionesPorLibro = new Map(
+        publicaciones
+          .filter(publicacion => publicacion.id_libro)
+          .map(publicacion => [publicacion.id_libro!, publicacion]),
+      );
+      setLibros(data.map(libro => ({
+        ...libro,
+        publicacion: publicacionesPorLibro.get(libro.id_libro),
+      })));
     } catch (err: any) {
       console.error('Error al cargar libros', err);
       setError(err.message ?? 'Error al cargar libros');
