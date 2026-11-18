@@ -5,7 +5,7 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { isDemoMode } from '../lib/supabase';
 import { useLogin } from '../hooks/useLogin';
-import { ShieldAlert, BookOpen, Eye, EyeOff } from 'lucide-react';
+import { ShieldAlert, BookOpen, Eye, EyeOff, Info } from 'lucide-react';
 import { getLoginReturnPath } from '../lib/authRedirect';
 
 export const Login = () => {
@@ -101,7 +101,28 @@ export const Login = () => {
           </div>
           <div>
             <div className="mb-1.5 flex items-center justify-between">
-              <label className="block text-sm font-bold text-text-body">Contraseña</label>
+              <span className="flex items-center gap-1.5">
+                <label className="block text-sm font-bold text-text-body">Contraseña</label>
+                {isRegister && (
+                  <span className="group relative inline-flex">
+                    <button
+                      type="button"
+                      aria-label="Información sobre los requisitos de contraseña"
+                      aria-describedby="password-requirements-tooltip"
+                      className="text-text-muted hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    >
+                      <Info className="h-4 w-4" aria-hidden="true" />
+                    </button>
+                    <span
+                      id="password-requirements-tooltip"
+                      role="tooltip"
+                      className="invisible absolute left-1/2 top-full z-10 mt-2 w-64 -translate-x-1/2 rounded-lg bg-slate-900 px-3 py-2 text-xs font-medium text-white opacity-0 shadow-lg transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
+                    >
+                      La contraseña debe tener mínimo 8 caracteres, e incluir mayúsculas, números y caracteres especiales.
+                    </span>
+                  </span>
+                )}
+              </span>
               {!isRegister && !isDemoMode && (
                 <button 
                   type="button" 
