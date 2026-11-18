@@ -424,7 +424,7 @@ export const Home = () => {
                   </Badge>
                 </div>
                 {libro.publicacion?.precio != null && (
-                  <p className="mt-2 rounded-lg bg-primary px-3 py-2 text-base font-bold text-white sm:text-lg">
+                  <p className="mt-2 text-sm font-bold text-white sm:text-base">
                     {copFormatter.format(libro.publicacion.precio)}
                   </p>
                 )}
