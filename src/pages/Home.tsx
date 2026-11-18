@@ -374,18 +374,20 @@ export const Home = () => {
             {librosPagina.map((libro, index) => (
               <Link to={`/libro/${libro.id_libro}`} key={libro.id_libro} className="group flex flex-col rounded-xl border border-border bg-surface p-2.5 shadow-sm transition-shadow hover:shadow-md sm:p-4 landscape-phone:p-2">
                 <div className="relative mb-2 overflow-hidden rounded-xl bg-surface-soft sm:mb-4 landscape-phone:mb-2">
-                  <div className="absolute right-2 top-2 z-10">
-                    <button
-                      type="button"
-                      aria-label={!user ? 'Inicia sesión para guardar en favoritos' : (isFavorito(libro.id_libro) ? 'Quitar de favoritos' : 'Agregar a favoritos')}
-                      title={!user ? 'Inicia sesión para guardar en favoritos' : undefined}
-                      aria-pressed={isFavorito(libro.id_libro)}
-                      className={`flex h-10 w-10 items-center justify-center rounded-full shadow-sm transition-colors ${isFavorito(libro.id_libro) ? 'bg-error text-white' : 'bg-surface/90 text-text-muted hover:text-error'}`}
-                      onClick={(e) => handleToggleFavorito(e, libro.id_libro)}
-                    >
-                      <Heart className={`h-4 w-4 ${isFavorito(libro.id_libro) ? 'fill-current' : ''}`} />
-                    </button>
-                  </div>
+                  {role !== 'Administrador' && (
+                    <div className="absolute right-2 top-2 z-10">
+                      <button
+                        type="button"
+                        aria-label={!user ? 'Inicia sesión para guardar en favoritos' : (isFavorito(libro.id_libro) ? 'Quitar de favoritos' : 'Agregar a favoritos')}
+                        title={!user ? 'Inicia sesión para guardar en favoritos' : undefined}
+                        aria-pressed={isFavorito(libro.id_libro)}
+                        className={`flex h-10 w-10 items-center justify-center rounded-full shadow-sm transition-colors ${isFavorito(libro.id_libro) ? 'bg-error text-white' : 'bg-surface/90 text-text-muted hover:text-error'}`}
+                        onClick={(e) => handleToggleFavorito(e, libro.id_libro)}
+                      >
+                        <Heart className={`h-4 w-4 ${isFavorito(libro.id_libro) ? 'fill-current' : ''}`} />
+                      </button>
+                    </div>
+                  )}
 
                   <div className="overflow-hidden rounded-xl">
                     {libro.portada_url ? (
