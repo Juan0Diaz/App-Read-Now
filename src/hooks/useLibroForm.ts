@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { Libro } from '../types';
-import { formatPrecioCOP, normalizePrecio, validatePrecio } from '../lib/priceValidation';
+import { Libro, LibroConPublicacionCreateInput } from '../types';
+import { formatPrecioCOP, validatePrecio } from '../lib/priceValidation';
 
 export type LibroFormData = {
   titulo: string;
@@ -88,7 +88,6 @@ export function buildLibroPayload(
     id_genero_1: secondaryGenero,
     id_genero_2: tertiaryGenero,
     descripcion: (formData.descripcion ?? '').trim(),
-    precio: formData.precio?.trim() ? normalizePrecio(formData.precio) : undefined,
     estado: formData.estado,
     disponible: formData.disponible,
     portada_url: portadaUrl || formData.portada_url || undefined,
@@ -161,28 +160,27 @@ export function useLibroForm() {
     onCreate,
     onUpdate,
     bookId,
-    requirePrice = false,
   }: {
     userId: string;
-    onCreate: (payload: Partial<Libro>) => Promise<unknown>;
-    onUpdate: (id: string, payload: Partial<Libro>) => Promise<unknown>;
+    onCreate: (payload: LibroConPublicacionCreateInput) => Promise<unknown>;
+    onUpdate: (id: string, payload: Partial<Libro>, precio: number) => Promise<unknown>;
     bookId?: string;
-    requirePrice?: boolean;
   }) => {
     setLoading(true);
     setError('');
 
     try {
-      validateLibroForm(formData, requirePrice);
+      validateLibroForm(formData, true);
+      const precio = validatePrecio(formData.precio);
       const portadaUrl = await uploadImageIfNeeded(userId);
       const payload = buildLibroPayload(formData, selectedGeneros, portadaUrl);
 
       if (bookId) {
-        await onUpdate(bookId, payload);
+        await onUpdate(bookId, payload, precio);
         return;
       }
 
-      await onCreate(payload);
+      await onCreate({ ...payload, precio });
     } catch (err: any) {
       setError(err.message || 'Ocurrió un error con el libro.');
       throw err;

@@ -15,6 +15,7 @@ test('rechaza un precio vacío o negativo', () => {
 test('permite un precio válido', () => {
   assert.equal(validatePrecio('25.500'), 25500);
   assert.equal(normalizePrecio('137.000'), 137000);
+  assert.equal(validatePrecio('1.234.567.890'), 1234567890);
 });
 
 test('formatea precios colombianos con separador de miles', () => {

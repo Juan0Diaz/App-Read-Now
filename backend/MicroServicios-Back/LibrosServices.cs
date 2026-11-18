@@ -154,7 +154,7 @@ public sealed class LibrosServices : ILibrosServices
 				IdPublicacion = Guid.NewGuid(),
 				IdUsuario = idUsuario,
 				IdLibro = libro.IdLibro,
-				Precio = dto.Precio ?? 0,
+				Precio = dto.Precio,
 				Descripcion = "Agregado al catálogo",
 				FechaPublicacion = DateOnly.FromDateTime(DateTime.UtcNow)
 			});
