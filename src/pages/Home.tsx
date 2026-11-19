@@ -34,14 +34,18 @@ export const Home = () => {
   const [selectedAutor, setSelectedAutor] = useState<string | null>(null);
   const [showAllGeneros, setShowAllGeneros] = useState(false);
   const [showAllAutores, setShowAllAutores] = useState(false);
-  const filtersRef = useRef<HTMLDivElement>(null);
   const filtersButtonRef = useRef<HTMLButtonElement>(null);
+  const filtersPanelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!isFiltersOpen) return;
 
     const handlePointerDown = (event: PointerEvent) => {
-      if (event.target instanceof Node && !filtersRef.current?.contains(event.target)) {
+      if (
+        event.target instanceof Node &&
+        !filtersButtonRef.current?.contains(event.target) &&
+        !filtersPanelRef.current?.contains(event.target)
+      ) {
         setIsFiltersOpen(false);
       }
     };
@@ -202,7 +206,7 @@ export const Home = () => {
             </div>
           </div>
         )}
-        <div className="relative z-20 mb-6" ref={filtersRef}>
+        <div className="relative z-20 mb-6">
           <Button
             ref={filtersButtonRef}
             type="button"
@@ -222,6 +226,7 @@ export const Home = () => {
           </Button>
           {isFiltersOpen && (
             <div
+              ref={filtersPanelRef}
               id="catalog-filters-panel"
               className="absolute left-0 top-full z-20 mt-2 max-h-[min(70vh,36rem)] w-[min(24rem,calc(100vw-2rem))] overflow-y-auto rounded-xl border border-border bg-surface p-4 shadow-sm dark:border-border dark:bg-surface"
             >
