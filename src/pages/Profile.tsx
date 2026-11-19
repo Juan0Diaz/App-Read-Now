@@ -354,11 +354,11 @@ export const Profile = () => {
                         />
                       </div>
                     </div>
-                    <div className="flex justify-end gap-3 pt-4">
-                      <Button onClick={() => { setIsEditingPassword(false); setCurrentPassword(''); setNewPassword(''); }} disabled={loading} variant="outline">
+                    <div className="flex flex-col-reverse gap-3 pt-4 sm:flex-row sm:justify-end">
+                      <Button onClick={() => { setIsEditingPassword(false); setCurrentPassword(''); setNewPassword(''); }} disabled={loading} variant="outline" className="w-full sm:w-auto">
                         Cancelar
                       </Button>
-                      <Button onClick={savePassword} aria-label="Guardar nueva contraseña" disabled={loading || !currentPassword || !newPassword} variant="accent">
+                      <Button onClick={savePassword} aria-label="Guardar nueva contraseña" disabled={loading || !currentPassword || !newPassword} variant="accent" className="w-full sm:w-auto">
                         {loading ? 'Guardando...' : 'Cambiar Contraseña'}
                       </Button>
                     </div>
