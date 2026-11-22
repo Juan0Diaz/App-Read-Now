@@ -38,7 +38,7 @@ export const Layout = () => {
     ? location.pathname === '/' || location.pathname.startsWith('/libro/')
     : location.pathname === to || location.pathname.startsWith(`${to}/`);
   const mobileNavItemClasses = (active: boolean) =>
-    `flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 py-1 transition-colors ${
+    `control-feedback flex min-h-12 min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-xl px-1 py-1 ${
       active ? 'bg-primary/10 text-primary' : 'text-text-muted hover:bg-surface-soft'
     }`;
 
@@ -52,7 +52,7 @@ export const Layout = () => {
     return (
       <Link 
         to={to} 
-        className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-colors ${
+        className={`control-feedback flex items-center gap-3 px-4 py-3 rounded-lg font-medium ${
           isActive 
             ? 'bg-primary/10 text-blue-700 dark:text-blue-300'
             : 'text-text-body hover:bg-surface-soft dark:text-text-body dark:hover:bg-surface-muted'
