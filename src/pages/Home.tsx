@@ -134,8 +134,8 @@ export const Home = () => {
 
   const chipClasses = (selected: boolean) =>
     selected
-      ? 'bg-primary text-white shadow-md shadow-primary/20'
-      : 'bg-surface border border-border text-text-body hover:bg-surface-soft dark:bg-surface dark:text-text-body dark:hover:bg-surface-soft';
+      ? 'control-feedback bg-primary text-white shadow-md shadow-primary/20'
+      : 'control-feedback bg-surface border border-border text-text-body hover:bg-surface-soft dark:bg-surface dark:text-text-body dark:hover:bg-surface-soft';
   const activeFilterCount = Number(selectedGenero !== null) +
     Number(selectedAutor !== null) +
     Number(filterDisponibilidad !== 'todos');
@@ -146,15 +146,6 @@ export const Home = () => {
     setSelectedAutor(null);
     setFilterDisponibilidad('todos');
   };
-
-  if (loading || loadingGeneros || loadingFavoritos) {
-    return (
-      <div className="flex min-h-[40vh] flex-1 items-center justify-center gap-2 p-8 text-text-muted" role="status" aria-live="polite">
-        <span aria-hidden="true" className="h-4 w-4 animate-spin rounded-full border-2 border-current border-r-transparent motion-reduce:animate-none" />
-        <span>Cargando catálogo...</span>
-      </div>
-    );
-  }
 
   return (
     <div className="flex h-full flex-col animate-in fade-in duration-500 bg-bg-warm-strong dark:bg-surface-soft">
@@ -193,13 +184,13 @@ export const Home = () => {
             <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
               <Link
                 to="/login"
-                className="rounded-lg bg-primary px-4 py-2 text-center text-sm font-semibold text-white hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                className="control-feedback rounded-lg bg-primary px-4 py-2 text-center text-sm font-semibold text-white hover:bg-primary-hover"
               >
                 Iniciar sesión
               </Link>
               <Link
                 to="/login?register=true"
-                className="rounded-lg border border-border bg-surface px-4 py-2 text-center text-sm font-semibold text-text-body hover:bg-surface-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                className="control-feedback rounded-lg border border-border bg-surface px-4 py-2 text-center text-sm font-semibold text-text-body hover:bg-surface-soft"
               >
                 Registrarse
               </Link>
@@ -264,7 +255,7 @@ export const Home = () => {
                       type="button"
                       aria-pressed={selectedGenero === null}
                       onClick={() => setSelectedGenero(null)}
-                      className={`rounded-full px-4 py-1.5 text-xs font-medium whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${chipClasses(selectedGenero === null)}`}
+                      className={`rounded-full px-4 py-1.5 text-xs font-medium whitespace-nowrap ${chipClasses(selectedGenero === null)}`}
                     >
                       Todos
                     </button>
@@ -274,7 +265,7 @@ export const Home = () => {
                         type="button"
                         aria-pressed={selectedGenero === g.id_genero}
                         onClick={() => setSelectedGenero(g.id_genero)}
-                        className={`rounded-full px-4 py-1.5 text-xs font-medium whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${chipClasses(selectedGenero === g.id_genero)}`}
+                        className={`rounded-full px-4 py-1.5 text-xs font-medium whitespace-nowrap ${chipClasses(selectedGenero === g.id_genero)}`}
                       >
                         {g.nombre_genero}
                       </button>
@@ -306,7 +297,7 @@ export const Home = () => {
                       type="button"
                       aria-pressed={selectedAutor === null}
                       onClick={() => setSelectedAutor(null)}
-                      className={`rounded-full px-4 py-1.5 text-xs font-medium whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${chipClasses(selectedAutor === null)}`}
+                      className={`rounded-full px-4 py-1.5 text-xs font-medium whitespace-nowrap ${chipClasses(selectedAutor === null)}`}
                     >
                       Todos
                     </button>
@@ -316,7 +307,7 @@ export const Home = () => {
                         type="button"
                         aria-pressed={selectedAutor === autor}
                         onClick={() => setSelectedAutor(autor)}
-                        className={`rounded-full px-4 py-1.5 text-xs font-medium whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${chipClasses(selectedAutor === autor)}`}
+                        className={`rounded-full px-4 py-1.5 text-xs font-medium whitespace-nowrap ${chipClasses(selectedAutor === autor)}`}
                       >
                         {autor}
                       </button>
@@ -350,7 +341,7 @@ export const Home = () => {
                         type="button"
                         aria-pressed={filterDisponibilidad === opt.value}
                         onClick={() => setFilterDisponibilidad(opt.value)}
-                        className={`rounded-full px-4 py-1.5 text-xs font-medium whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${chipClasses(filterDisponibilidad === opt.value)}`}
+                        className={`rounded-full px-4 py-1.5 text-xs font-medium whitespace-nowrap ${chipClasses(filterDisponibilidad === opt.value)}`}
                       >
                         {opt.label}
                       </button>
@@ -365,7 +356,30 @@ export const Home = () => {
           )}
         </div>
 
-        {errorLibros ? (
+        {loading || loadingGeneros || loadingFavoritos ? (
+          <div
+            className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4 xl:grid-cols-5 landscape-phone:grid-cols-3 landscape-phone:gap-3"
+            role="status"
+            aria-label="Cargando catálogo"
+            aria-busy="true"
+          >
+            {Array.from({ length: librosPorPagina }, (_, skeletonIndex) => (
+              <div
+                key={skeletonIndex}
+                aria-hidden="true"
+                className="flex flex-col rounded-xl border border-border bg-surface p-2.5 shadow-sm sm:p-4 landscape-phone:p-2"
+              >
+                <div className="mb-2 aspect-[2/3] w-full rounded-xl bg-surface-muted sm:mb-4 landscape-phone:aspect-[4/3] landscape-phone:mb-2" />
+                <div className="mb-2 h-4 w-4/5 rounded bg-surface-muted sm:h-5" />
+                <div className="h-3 w-3/5 rounded bg-surface-muted sm:h-4" />
+                <div className="mt-auto flex flex-col gap-2 pt-3 sm:flex-row sm:items-center sm:justify-between landscape-phone:gap-1 landscape-phone:pt-1">
+                  <div className="h-3 w-20 rounded bg-surface-muted sm:h-4" />
+                  <div className="h-6 w-24 rounded-full bg-surface-muted" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : errorLibros ? (
           <Card role="alert" className="border-error/30 bg-surface py-12 text-center">
             <h3 className="mb-2 text-lg font-medium text-text-strong">No se pudo cargar el catálogo</h3>
             <p className="mb-4 text-text-muted">{errorLibros}</p>

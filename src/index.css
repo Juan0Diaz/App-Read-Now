@@ -155,6 +155,32 @@
     @apply h-12 w-full rounded-xl border border-border bg-surface-soft px-4 text-text-strong placeholder:text-text-muted transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20;
   }
 
+  .book-cover-placeholder {
+    background-color: var(--color-surface-muted);
+    background-image:
+      linear-gradient(color-mix(in srgb, var(--color-border-strong) 40%, transparent), color-mix(in srgb, var(--color-border-strong) 40%, transparent)),
+      linear-gradient(color-mix(in srgb, var(--color-border-strong) 40%, transparent), color-mix(in srgb, var(--color-border-strong) 40%, transparent)),
+      linear-gradient(color-mix(in srgb, var(--color-border-strong) 40%, transparent), color-mix(in srgb, var(--color-border-strong) 40%, transparent));
+    background-position: center 42%, center 52%, center 58%;
+    background-repeat: no-repeat;
+    background-size: 50% 12px, 72% 6px, 48% 6px;
+  }
+
+  .control-feedback {
+    transition-property: color, background-color, border-color, box-shadow, transform;
+    transition-duration: 150ms;
+    transition-timing-function: ease-out;
+  }
+
+  .control-feedback:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  .control-feedback:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+
   .button-shimmer {
     position: relative;
     isolation: isolate;
@@ -285,6 +311,14 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .control-feedback {
+      transition-duration: 0.01ms;
+    }
+
+    .control-feedback:active:not(:disabled) {
+      transform: none;
+    }
+
     .login-card-glow::before,
     .profile-card-glow::before {
       animation: none;
@@ -321,5 +355,10 @@
   *::before,
   *::after {
     border-color: var(--color-border);
+  }
+
+  :where(a, button):focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
   }
 }

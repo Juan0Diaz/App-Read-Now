@@ -26,7 +26,7 @@ const BookCover = React.forwardRef<HTMLImageElement, BookCoverProps>(
         loading="lazy"
         decoding="async"
         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 20vw"
-        className={cn('aspect-[2/3] h-auto object-cover', sizeClasses[size], className)}
+        className={cn('book-cover-placeholder aspect-[2/3] h-auto object-cover', sizeClasses[size], className)}
         {...props}
       />
     );
