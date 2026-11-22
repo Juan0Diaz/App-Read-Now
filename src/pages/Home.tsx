@@ -22,8 +22,8 @@ export const Home = () => {
   const { user, role } = useAuth();
   const requireAuth = useRequireAuth();
   const { libros, loading, error: errorLibros, reload: reloadLibros } = useLibros();
-  const { generos, loading: loadingGeneros } = useGeneros();
-  const { toggleFavorito, isFavorito, loading: loadingFavoritos } = useFavoritos(user);
+  const { generos } = useGeneros();
+  const { toggleFavorito, isFavorito } = useFavoritos(user);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -356,7 +356,7 @@ export const Home = () => {
           )}
         </div>
 
-        {loading || loadingGeneros || loadingFavoritos ? (
+        {loading ? (
           <div
             className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4 xl:grid-cols-5 landscape-phone:grid-cols-3 landscape-phone:gap-3"
             role="status"

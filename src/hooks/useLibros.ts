@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { isDemoMode, MOCK_LIBROS } from '../lib/supabase';
 import { getLibros } from '../microservicios/Libros';
 import { getPublicaciones } from '../microservicios/Publicaciones';
-import { LibroWithDetails } from '../types';
+import { LibroWithDetails, Publicacion } from '../types';
 
 /**
  * Hook centralizado para obtener el catálogo de libros desde el backend en C#.
@@ -25,11 +25,21 @@ export function useLibros() {
     }
 
     try {
-      const [data, publicaciones] = await Promise.all([getLibros(), getPublicaciones()]);
-      const publicacionesPorLibro = new Map(
+      const publicacionesPromise = getPublicaciones().catch(err => {
+        console.error('Error al cargar publicaciones', err);
+        return null;
+      });
+      const data = await getLibros();
+      setLibros(data);
+      setLoading(false);
+
+      const publicaciones = await publicacionesPromise;
+      if (!publicaciones) return;
+
+      const publicacionesPorLibro = new Map<string, Publicacion>(
         publicaciones
           .filter(publicacion => publicacion.id_libro)
-          .map(publicacion => [publicacion.id_libro!, publicacion]),
+          .map(publicacion => [publicacion.id_libro!, publicacion] as const),
       );
       setLibros(data.map(libro => ({
         ...libro,
